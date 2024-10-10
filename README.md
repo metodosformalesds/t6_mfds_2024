@@ -9,3 +9,5 @@ MFDS 2024 T6
 ### Figma: https://www.figma.com/design/smBK8QGkxlNppNjF7HFYH4/LlamasCoin?node-id=303-1097&t=LRc9OpK4ar8y2Ert-1
 
 ### ClickUp: https://app.clickup.com/9011398265/home
+
+### Minutas: https://docs.google.com/document/d/13yRGalP3TeQNiGMlYaZxj-WLsSbTONxrnYJfXdHe9ik/edit?usp=sharing
