@@ -36,9 +36,9 @@ class CreditHistory(models.Model):
     salary = models.DecimalField(max_digits=10, decimal_places=2)  # Salario
 
 
-class Request(models.Model):
+class UserRequest(models.Model):
     id_request = models.AutoField(primary_key=True) #llave unica de la entidad
-    check = models.ForeignKey(CreditHistory, on_delete=models.CASCADE) # llave foranea de la entidad CreditHistory,
+    Usercheck = models.ForeignKey(CreditHistory, on_delete=models.CASCADE) # llave foranea de la entidad CreditHistory,
 
     #estos atributos aun no estan creados
     
