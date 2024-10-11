@@ -34,3 +34,14 @@ class CreditHistory(models.Model):
     code_score = models.FloatField()              # Score crediticio
     place_of_work = models.CharField(max_length=100)  # Lugar de trabajo
     salary = models.DecimalField(max_digits=10, decimal_places=2)  # Salario
+
+
+class Request(models.Model):
+    id_request = models.AutoField(primary_key=True) #llave unica de la entidad
+    check = models.ForeignKey(CreditHistory, on_delete=models.CASCADE) # llave foranea de la entidad CreditHistory,
+
+    #estos atributos aun no estan creados
+    
+    #loan = models.ForeignKey(Loans, on_delete=models.CASCADE)  #relacion con la entidad loan
+    #borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE)  # Relación con el prestatario
+    #moneylender = models.ForeignKey(moneylender, on_delate=models.CASCADE) #relacion con el prestamista
