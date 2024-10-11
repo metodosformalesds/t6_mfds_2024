@@ -11,10 +11,17 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Carga el archivo .env
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+#Ejemplo de extraer el valor SECRET_KEY del .env en backend/.env
+SECRET_KEY = os.getenv('SECRET_KEY', 'Default_Secret')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -27,6 +34,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+#Dominios que permitira la aplicacion 
+CORS_ALLOWED_ORIGINS = [
+    # "https://example.com",
+    # "https://sub.example.com",
+    #El siguiente es el del frontend en local host
+    "http://localhost:5173",
+    "http://localhost:8080",
+    "http://127.0.0.1:9000",
+]
 
 # Application definition
 
@@ -37,9 +53,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'database',
+    'corsheaders',
+    
+    #Spectacular para una documentacion y pruebas de la API
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
+    #Cors como middleware para permitir peticiones
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -48,6 +71,22 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+    #Configuracion de REST y el Esquema para Spectacular
+
+
+REST_FRAMEWORK = {
+  
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+ 
+}
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LlamasCoin API',
+    'DESCRIPTION': 'La api de LlamasCoin, plataforma para conectar prestamistas con prestatarios',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+ 
+}
 
 ROOT_URLCONF = 'llamascoin.urls'
 
