@@ -68,20 +68,20 @@ class CreditHistory(models.Model):
 
 #Invoice Model
 class InvoiceHistory(models.Model):
-    ID_invoice = models.AutoField(primary_key=True)
-    UUID = models.CharField()
-    Download_date = models.DateField()
-    CFDI_date = models.DateField()
-    Timbre_date = models.DateField()
-    Cancellation_date = models.DateField()
-    Status_date = models.DateField()
-    Issuing_party = models.CharField()
-    Receiving_party = models.CharField()
-    Type = models.CharField()
-    Status = models.CharField()
-    Total = models.IntegerField()
-    Acuse = models.BooleanField()
-    Invoice_pay = models.BooleanField()
+    ID_invoice = models.AutoField(primary_key=True) #Clave unica del historial de facturas
+    UUID = models.CharField() #UUID (Universally Unique Identifier), identificador asignado por el SAT a la factura
+    Download_date = models.DateField() #Fecha de descarga de la factura
+    CFDI_date = models.DateField() #Fecha de creacion de la factura
+    Timbre_date = models.DateField() #Fecha del timbre del SAT que certifica la factura
+    Cancellation_date = models.DateField() #Fecha de cancelacion de la factura en dado caso de haber sido cancelada
+    Status_date = models.DateField() #Fecha de la ultima actualizacion del estatus
+    Issuing_party = models.CharField() #Emisor de la factura
+    Receiving_party = models.CharField() #Receptopr de la factura
+    Type = models.CharField() #Tipo de factura
+    Status = models.CharField() #Estatus de factura
+    Total = models.IntegerField() #Monto total de la factura
+    Acuse = models.BooleanField() #Indicativo de la existencia de un acuse
+    Invoice_pay = models.BooleanField() #Indicativo de si ya se pago la factura
 
 #Request model
 class UserRequest(models.Model):
