@@ -23,31 +23,20 @@ import {
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, PhoneIcon, PlayCircleIcon } from '@heroicons/react/20/solid'
 
-const products = [
-  { name: 'Analytics', description: 'Get a better understanding of your traffic', href: '#', icon: ChartPieIcon },
-  { name: 'Engagement', description: 'Speak directly to your customers', href: '#', icon: CursorArrowRaysIcon },
-  { name: 'Security', description: 'Your customers’ data will be safe and secure', href: '#', icon: FingerPrintIcon },
-  { name: 'Integrations', description: 'Connect with third-party tools', href: '#', icon: SquaresPlusIcon },
-  { name: 'Automations', description: 'Build strategic funnels that will convert', href: '#', icon: ArrowPathIcon },
-]
-const callsToAction = [
-  { name: 'Watch demo', href: '#', icon: PlayCircleIcon },
-  { name: 'Contact sales', href: '#', icon: PhoneIcon },
-]
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="bg-white">
+    <header className="bg-[#1468E7]">
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
           <a href="#" className="-m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
             <img
               alt=""
-              src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-              className="h-8 w-auto"
+              src="/images/Logo_l.png"
+              className="h-10 w-auto"
             />
           </a>
         </div>
@@ -55,7 +44,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
+            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-white"
           >
             <span className="sr-only">Open main menu</span>
             <Bars3Icon aria-hidden="true" className="h-6 w-6" />
@@ -64,19 +53,19 @@ export default function Navbar() {
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
          
 
-          <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
+          <a href="#" className="text-sm font-semibold leading-8 text-white">
             Inicio
           </a>
-          <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
-            Prestamista
+          <a href="#" className="text-sm font-semibold leading-8 text-white">
+            ¿Necesitas un prestamo?
           </a>
-          <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
-            Prestatatario
+          <a href="#" className="text-sm font-semibold leading-8 text-white">
+            ¿Quieres prestar dinero?
           </a>
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
-            Log in <span aria-hidden="true">&rarr;</span>
+          <a href="#" className="text-sm font-semibold leading-6 text-white">
+            Iniciar Sesion <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
       </nav>
@@ -88,8 +77,8 @@ export default function Navbar() {
               <span className="sr-only">Your Company</span>
               <img
                 alt=""
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
-                className="h-8 w-auto"
+                src="/images/Logo_l.png"
+                className="h-10 w-auto"
               />
             </a>
             <button
@@ -104,41 +93,23 @@ export default function Navbar() {
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
-                <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pl-3 pr-3.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">
-                    Product
-                    <ChevronDownIcon aria-hidden="true" className="h-5 w-5 flex-none group-data-[open]:rotate-180" />
-                  </DisclosureButton>
-                  <DisclosurePanel className="mt-2 space-y-2">
-                    {[...products, ...callsToAction].map((item) => (
-                      <DisclosureButton
-                        key={item.name}
-                        as="a"
-                        href={item.href}
-                        className="block rounded-lg py-2 pl-6 pr-3 text-sm font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                      >
-                        {item.name}
-                      </DisclosureButton>
-                    ))}
-                  </DisclosurePanel>
-                </Disclosure>
                 <a
                   href="#"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
-                  Features
+                  Inicio
                 </a>
                 <a
                   href="#"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
-                  Marketplace
+                  ¿Necesitas un prestamo?
                 </a>
                 <a
                   href="#"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
-                  Company
+                  ¿Quieres prestar dinero?
                 </a>
               </div>
               <div className="py-6">
@@ -146,7 +117,7 @@ export default function Navbar() {
                   href="#"
                   className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
-                  Log in
+                  Iniciar Sesion
                 </a>
               </div>
             </div>
