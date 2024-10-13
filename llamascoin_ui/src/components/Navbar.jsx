@@ -31,7 +31,7 @@ export default function Navbar() {
     <header className="bg-[#1468E7]">
       <nav aria-label="Global" className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
         <div className="flex lg:flex-1">
-          <a href="#" className="-m-1.5 p-1.5">
+          <a href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">Your Company</span>
             <img
               alt=""
@@ -53,7 +53,7 @@ export default function Navbar() {
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
          
 
-          <a href="#" className="text-sm font-semibold leading-8 text-white">
+          <a href="/" className="text-sm font-semibold leading-8 text-white">
             Inicio
           </a>
           <a href="#" className="text-sm font-semibold leading-8 text-white">
@@ -64,7 +64,7 @@ export default function Navbar() {
           </a>
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <a href="#" className="text-sm font-semibold leading-6 text-white">
+          <a href="/login" className="text-sm font-semibold leading-6 text-white">
             Iniciar Sesion <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
@@ -94,7 +94,7 @@ export default function Navbar() {
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
                 <a
-                  href="#"
+                  href="/"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
                   Inicio
@@ -114,7 +114,7 @@ export default function Navbar() {
               </div>
               <div className="py-6">
                 <a
-                  href="#"
+                  href="/login"
                   className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
                   Iniciar Sesion
