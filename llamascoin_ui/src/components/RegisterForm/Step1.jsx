@@ -1,6 +1,7 @@
 import { React, useState } from "react";
 import { Input } from "@headlessui/react";
 import { Typography } from "@material-tailwind/react";
+import { formValidators } from "../../utils/formValidators";
 
 export function Step1({ register, errors }) {
   const [inputType, setInputType] = useState('text'); 
@@ -14,7 +15,7 @@ export function Step1({ register, errors }) {
         <Input
           label="Nombre"
           id="firstName"
-          {...register("firstName", { required: "Este campo es requerido" })}
+          {...register("firstName", formValidators.firstName)}
           type="text"
           placeholder="Nombre"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -28,7 +29,7 @@ export function Step1({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="lastName"
-          {...register("lastName", { required: "Este campo es requerido" })}
+          {...register("lastName",  formValidators.lastName)}
           type="text"
           placeholder="Apellido paterno"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -42,7 +43,7 @@ export function Step1({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="secondLastName"
-          {...register("secondLastName", { required: "Este campo es requerido" })}
+          {...register("secondLastName",  formValidators.secondLastName)}
           type="text"
           placeholder="Apellido materno"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -56,7 +57,7 @@ export function Step1({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="birthdate"
-          {...register("birthdate", { required: "Este campo es requerido" })}
+          {...register("birthdate", formValidators.birthdate)}
           placeholder="Fecha de nacimiento"
           type={inputType} 
           onFocus={() => setInputType('date')} // Cambiar a tipo date al enfocar
