@@ -1,6 +1,7 @@
 import { React } from "react";
 import { Input } from "@headlessui/react";
 import { Typography } from "@material-tailwind/react";
+import { formValidators } from "../../utils/formValidators";
 
 export function Step4({ register, errors }) {
   return (
@@ -11,7 +12,7 @@ export function Step4({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="identificationImage"
-          {...register("identificationImage", { required: "Este campo es requerido" })}
+          {...register("identificationImage", formValidators.identificationImage)}
           type="file"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.identificationImage ? 'border-red-500' : 'border-gray-300'

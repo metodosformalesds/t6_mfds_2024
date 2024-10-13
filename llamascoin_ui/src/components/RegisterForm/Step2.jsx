@@ -1,6 +1,7 @@
 import { React } from "react";
 import { Input } from "@headlessui/react";
 import { Typography } from "@material-tailwind/react";
+import { formValidators } from "../../utils/formValidators";
 
 export function Step2({ register, errors }) {
   return (
@@ -11,7 +12,7 @@ export function Step2({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="address"
-          {...register("address", { required: "Este campo es requerido" })}
+          {...register("address", formValidators.address)}
           type="text"
           placeholder="Dirección"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -25,7 +26,7 @@ export function Step2({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="municipality"
-          {...register("municipality", { required: "Este campo es requerido" })}
+          {...register("municipality", formValidators.municipality)}
           type="text"
           placeholder="Municipio"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -39,7 +40,7 @@ export function Step2({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="postalCode"
-          {...register("postalCode", { required: "Este campo es requerido" })}
+          {...register("postalCode", formValidators.postalCode)}
           type="text"
           placeholder="Código Postal"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -53,7 +54,7 @@ export function Step2({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="state"
-          {...register("state", { required: "Este campo es requerido" })}
+          {...register("state", formValidators.state)}
           type="text"
           placeholder="Estado"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${

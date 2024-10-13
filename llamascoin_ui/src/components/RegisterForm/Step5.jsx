@@ -1,6 +1,7 @@
 import { React } from "react";
 import { Input } from "@headlessui/react";
 import { Typography } from "@material-tailwind/react";
+import { formValidators } from "../../utils/formValidators";
 
 export function Step5({ register, errors }) {
   return (
@@ -11,7 +12,7 @@ export function Step5({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="clabe"
-          {...register("clabe", { required: "Este campo es requerido" })}
+          {...register("clabe", formValidators.clabe)}
           type="text"
           placeholder="CLABE"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -25,7 +26,7 @@ export function Step5({ register, errors }) {
       <div className="flex flex-col">
         <Input
           id="creditCard"
-          {...register("creditCard", { required: "Este campo es requerido" })}
+          {...register("creditCard", formValidators.creditCard)}
           type="text"
           placeholder="Número de tarjeta de crédito"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
