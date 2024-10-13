@@ -2,15 +2,17 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Stepper from "./Stepper";
 import { Step1 } from "./Step1";
-import {Step2} from "./Step2";
-import {Step3} from "./Step3";
-import {Step4} from "./Step4";
-import {Step5} from "./Step5";
-import {Step6} from "./Step6";
-import {Step7} from "./Step7";
+import { Step2 } from "./Step2";
+import { Step3 } from "./Step3";
+import { Step4 } from "./Step4";
+import { Step5 } from "./Step5";
+import { Step6 } from "./Step6";
+import { Step7 } from "./Step7";
 import { Button, Typography } from "@material-tailwind/react";
+import StatusComponent from "../StatusComponent";
 
 export function MultiStepForm() {
+  const [status, setStatus] = useState("");
 
   const {
     register,
@@ -85,51 +87,60 @@ export function MultiStepForm() {
         return "No hay paso definido";
     }
   }
-  
 
   return (
     <div className="flex  min-h-full flex-1   flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md sm:px-10 p-5 shadow-lg rounded-lg ">
-        <Typography variant="h3" className="font-bold">
-          Crear cuenta
-        </Typography>
-        <Stepper currentStep={step} />
-        <form>
-          {getStepContent(step)}
+      <div className="flex flex-col justify-between sm:mx-auto sm:w-full min-h-[500px] sm:max-w-md sm:px-10 p-5 shadow-lg rounded-lg ">
+        <div>
+          <Typography variant="h3" className="font-bold">
+            Crear cuenta
+          </Typography>
+          <Stepper currentStep={step} />
 
-          <div className="mt-6 flex justify-between">
-            {step > 0 && (
-              <Button
-                color="blue"
-                variant="outlined"
-                onClick={prevStep}
-                className="mr-2"
-              >
-                Anterior
-              </Button>
-            )}
-            {step < 6 && (
-              <Button
-                color="blue"
-                variant="filled"
-                onClick={nextStep}
-                className="ml-auto"
-              >
-                Siguiente
-              </Button>
-            )}
-            {step === 6 && (
-              <Button
-                onClick={handleSubmit(onSubmit)}
-                color="green"
-                variant="filled"
-                className="ml-auto"
-              >
-                Enviar
-              </Button>
-            )}
-          </div>
-        </form>
+          {status === "loading" ||
+          status === "error" ||
+          status === "success" ? (
+            <StatusComponent status={status} />
+          ) : (
+            <form>{getStepContent(step)}</form>
+          )}
+        </div>
+
+        <div className="mt-6 flex justify-between">
+          {step > 0 && (
+            <Button
+              color="blue"
+              variant="outlined"
+              onClick={prevStep}
+              className="mr-2"
+              disabled={status === "loading"}
+            >
+              Anterior
+            </Button>
+          )}
+          {step < 6 && (
+            <Button
+              color="blue"
+              variant="filled"
+              onClick={nextStep}
+              className="ml-auto"
+              disabled={status === "loading"}
+            >
+              Siguiente
+            </Button>
+          )}
+          {step === 6 && (
+            <Button
+              onClick={handleSubmit(onSubmit)}
+              color="green"
+              variant="filled"
+              className="ml-auto"
+              disabled={status === "loading"}
+            >
+              Enviar
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
