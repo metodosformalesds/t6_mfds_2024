@@ -16,6 +16,7 @@ a{
 :root{
     --bg-color: #ffffff;
     --second-bg-color: #154bca;
+    --fourth-bg-color: #4f82fa;
 	--thirth-bg-color: #7b8287;
     --text-color: #192029;
     --main-color: #F4AA3E;
@@ -77,3 +78,6 @@ body{
         height: 120px;
         margin-bottom:3rem;
     }
+    .custom-bg {
+        background-color: var(--text-color1);
+      }

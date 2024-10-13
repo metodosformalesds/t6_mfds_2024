@@ -1,13 +1,17 @@
 import '../LandingPage/css.css';
 import Stripe from '../../assets/landingpage/stripe.png'
 import Buro from '../../assets/landingpage/buro.png'
+import ima1 from '../../assets/landingpage/ima1.jpg'
+import ima2 from '../../assets/landingpage/ganar2.png'
+import ima3 from '../../assets/landingpage/Prestardinero.jpg'
+import ima4 from '../../assets/landingpage/noso.jpg'
 import {Card,CardHeader,CardBody,CardFooter,Typography,Button,} from "@material-tailwind/react";
 export function ContentDesign() {
     return(
         <section class="content1">
             <div class="sección-cont">
                 <h2 class="heading-t"> Nuestros  <span>Clientes</span></h2>
-                <h2 class="subtext">Nuestros socios</h2>
+                <h2 class="subtext">Algunos de nuestros socios</h2>
                 <div class="columns-2 ...">
                 <img src={Buro} class="image-paragraph"></img>
                 <img src={Stripe} class="image-paragraph"></img>
@@ -20,7 +24,7 @@ export function ContentDesign() {
                     <Card className="mt-6 w-full max-w-sm mx-auto shadow-lg">
                             <CardHeader color="blue-gray" className="relative h-56">
                             <img
-                                src="https://images.unsplash.com/photo-1540553016722-983e48a2cd10?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
+                                src={ima1}
                                 alt="card-image"
                                 className="object-cover h-full w-full"
                             />
@@ -40,7 +44,7 @@ export function ContentDesign() {
                     <Card className="mt-6 w-full max-w-sm mx-auto shadow-lg">
                         <CardHeader color="blue-gray" className="relative h-56">
                         <img
-                            src="https://images.unsplash.com/photo-1540553016722-983e48a2cd10?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
+                            src={ima2}
                             alt="card-image"
                             className="object-cover h-full w-full"
                         />
@@ -60,7 +64,7 @@ export function ContentDesign() {
                     <Card className="mt-6 w-full max-w-sm mx-auto shadow-lg">
                         <CardHeader color="blue-gray" className="relative h-56">
                         <img
-                            src="https://images.unsplash.com/photo-1540553016722-983e48a2cd10?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80"
+                            src={ima3}
                             alt="card-image"
                             className="object-cover h-full w-full"
                         />
@@ -79,7 +83,51 @@ export function ContentDesign() {
                 </div>
             </div>
             <div class="sección-cont">
-                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                    <div className="flex flex-col justify-center">
+                        <h2 className="text-2xl font-bold mb-4">El impacto de estar con nosotros</h2>
+                        <p className="text-gray-700 mb-4">
+                        Pasar tiempo en nuestra plataforma te permite mejorar tu salud financiera, ya sea como prestamista o prestatario. Con una comunidad en constante crecimiento, ofrecemos soluciones personalizadas que se adaptan a tus necesidades económicas, ayudándote a alcanzar tus metas financieras de manera eficiente y segura. ¡Forma parte de esta transformación!  
+                        </p>
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Mas información
+                        </button>
+                    </div>
+                    <div className="flex justify-center">
+                        <img
+                        src={ima4}
+                        className="object-cover w-full h-80 rounded-md"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div class="sectión-cont">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 custom-bg">
+      {/* Columna para la imagen (izquierda) */}
+      <div className="flex justify-center">
+        <img
+          src="https://via.placeholder.com/600"
+          alt="Imagen grande"
+          className="object-cover w-full h-80 rounded-md"
+        />
+      </div>
+
+      {/* Columna para el contenido (derecha) */}
+      <div className="flex flex-col justify-center">
+        <h2 className="text-2xl font-bold mb-4 custom-text-color">
+          Nuestros clientes
+        </h2>
+        <h2 className="text-2xl font-bold mb-4 custom-text-color">
+          Tim Smith
+        </h2>
+        <p className="text-gray-700 mb-4 custom-text-color">
+        “La plataforma me permitió diversificar mis inversiones fácilmente y con total transparencia. El proceso de préstamo fue rápido y sin complicaciones.” 
+        </p>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Mas información
+        </button>
+      </div>
+    </div>
             </div>
         </section>
         
