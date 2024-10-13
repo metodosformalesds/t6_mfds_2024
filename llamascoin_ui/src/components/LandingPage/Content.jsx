@@ -103,23 +103,24 @@ export function ContentDesign() {
             </div>
             <div class="sectión-cont">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 custom-bg">
-      {/* Columna para la imagen (izquierda) */}
       <div className="flex justify-center">
         <img
-          src="https://via.placeholder.com/600"
-          alt="Imagen grande"
+          src={ima3}
           className="object-cover w-full h-80 rounded-md"
         />
       </div>
 
-      {/* Columna para el contenido (derecha) */}
       <div className="flex flex-col justify-center">
         <h2 className="text-2xl font-bold mb-4 custom-text-color">
-          Nuestros clientes
+        Sus opiniones
         </h2>
-        <h2 className="text-2xl font-bold mb-4 custom-text-color">
-          Tim Smith
+        <h2>
+        Tim Smith
         </h2>
+        <p>
+        British Dragon Boat Racing Association    
+        </p>
+
         <p className="text-gray-700 mb-4 custom-text-color">
         “La plataforma me permitió diversificar mis inversiones fácilmente y con total transparencia. El proceso de préstamo fue rápido y sin complicaciones.” 
         </p>
