@@ -59,7 +59,7 @@ export default function Navbar() {
           <a href="#" className="text-sm font-semibold leading-8 text-white">
             ¿Necesitas un prestamo?
           </a>
-          <a href="#" className="text-sm font-semibold leading-8 text-white">
+          <a href="/subscription" className="text-sm font-semibold leading-8 text-white">
             ¿Quieres prestar dinero?
           </a>
         </PopoverGroup>
