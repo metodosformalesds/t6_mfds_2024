@@ -1,57 +1,65 @@
 import { Typography } from "@material-tailwind/react";
- 
+import React, { useState } from 'react';
+
+const LINKS = [
+  {
+    title: "Compañia",
+    items: ["Acerca de nosotros", "Contactanos", "Precios"],
+  },
+  {
+    title: "Soporte",
+    items: ["Terminos y condiciones", "Politicas de privacidad"],
+  },
+
+];
+
+const currentYear = new Date().getFullYear();
+
 export default function Footer() {
   return (
-    <footer className="w-full bg-white p-8">
-      <div className="flex flex-row flex-wrap items-center justify-center gap-y-6 gap-x-12 bg-white text-center md:justify-between">
-        <img src="https://docs.material-tailwind.com/img/logo-ct-dark.png" alt="logo-ct" className="w-10" />
-        <ul className="flex flex-wrap items-center gap-y-2 gap-x-8">
-          <li>
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-            >
-              About Us
-            </Typography>
-          </li>
-          <li>
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-            >
-              License
-            </Typography>
-          </li>
-          <li>
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-            >
-              Contribute
-            </Typography>
-          </li>
-          <li>
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              className="font-normal transition-colors hover:text-blue-500 focus:text-blue-500"
-            >
-              Contact Us
-            </Typography>
-          </li>
-        </ul>
+    <footer className="footer-background relative w-full">
+    <div className="mx-auto w-full max-w-7xl px-8">
+      <div className="grid grid-cols-1 justify-between gap-4 md:grid-cols-2">
+        <Typography variant="h5" className="mb-6 footer-text">
+          LlamasCoin
+        </Typography>
+        <div className="grid grid-cols-3 justify-between gap-4">
+          {LINKS.map(({ title, items }) => (
+            <ul key={title}>
+              <Typography
+                variant="small"
+                className="mb-3 font-medium opacity-40 footer-text"
+              >
+                {title}
+              </Typography>
+              {items.map((link) => (
+                <li key={link}>
+                  <Typography
+                    as="a"
+                    href="#"
+                    className="py-1.5 font-normal footer-text"
+                  >
+                    {link}
+                  </Typography>
+                </li>
+              ))}
+            </ul>
+          ))}
+        </div>
       </div>
-      <hr className="my-8 border-blue-gray-50" />
-      <Typography color="blue-gray" className="text-center font-normal">
-        &copy; 2023 Material Tailwind
-      </Typography>
-    </footer>
+      <div className="mt-12 flex w-full flex-col items-center justify-center border-t footer-border py-4 md:flex-row md:justify-between">
+        <Typography
+          variant="small"
+          className="mb-4 text-center font-normal footer-text md:mb-0"
+        >
+          &copy; {currentYear}{" "}
+          <a href="http://localhost:5173/" className="footer-link">
+            LlamasCoin
+          </a>. Todos los derechos reservados
+        </Typography>
+
+      </div>
+    </div>
+  </footer>  
   );
 }
