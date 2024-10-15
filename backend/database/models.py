@@ -10,6 +10,23 @@ class Moneylender(models.Model):
     Subscription = models.BooleanField() #Estado que indica si el prestamista pago la suscripcion
     LoansActive = models.IntegerField() #Prestamos que el prestatario tiene publicados/activos
 
+#Invoice Model
+class InvoiceHistory(models.Model):
+    ID_invoice = models.AutoField(primary_key=True) #Clave unica del historial de facturas
+    UUID = models.CharField(max_length=100) #UUID (Universally Unique Identifier), identificador asignado por el SAT a la factura
+    Download_date = models.DateField() #Fecha de descarga de la factura
+    CFDI_date = models.DateField() #Fecha de creacion de la factura
+    Timbre_date = models.DateField() #Fecha del timbre del SAT que certifica la factura
+    Cancellation_date = models.DateField(null=True) #Fecha de cancelacion de la factura en dado caso de haber sido cancelada
+    Status_date = models.DateField() #Fecha de la ultima actualizacion del estatus
+    Issuing_party = models.CharField(max_length=100) #Emisor de la factura
+    Receiving_party = models.CharField(max_length=100) #Receptopr de la factura
+    Type = models.CharField(max_length=100) #Tipo de factura
+    Status = models.CharField(max_length=100) #Estatus de factura
+    Total = models.DecimalField(max_digits=10, decimal_places=2) #Monto total de la factura
+    Acuse = models.BooleanField() #Indicativo de la existencia de un acuse
+    Invoice_pay = models.BooleanField() #Indicativo de si ya se pago la factura
+
 #Loans Model
 class Loans(models.Model):
     ID_Loan = models.AutoField(primary_key=True, max_length=10)
@@ -42,7 +59,7 @@ class Borrower(models.Model):
     CP_borrower = models.CharField(max_length=5) #Codigo postal del prestatario
     State_borrower = models.CharField(max_length=50) #Estado del territorio o estado del prestatario
     Country_borrower = models.CharField(max_length=50) #Pais del prestatario
-    PossibilityOfPay = models.FloatField(max_digits=10, decimal_places=2) #número que indica la posibilidad de que el prestatario cumpla con los pagos
+    PossibilityOfPay = models.DecimalField(max_digits=10, decimal_places=2) #número que indica la posibilidad de que el prestatario cumpla con los pagos
     ScoreLlamas = models.IntegerField() #Puntaje de calificación del prestatario dentro de la aplicación
 
 #Credit History Model
@@ -69,23 +86,6 @@ class CreditHistory(models.Model):
     code_score = models.FloatField()              # Score crediticio
     place_of_work = models.CharField(max_length=100)  # Lugar de trabajo
     salary = models.DecimalField(max_digits=10, decimal_places=2)  # Salario
-
-#Invoice Model
-class InvoiceHistory(models.Model):
-    ID_invoice = models.AutoField(primary_key=True) #Clave unica del historial de facturas
-    UUID = models.CharField(max_length=100) #UUID (Universally Unique Identifier), identificador asignado por el SAT a la factura
-    Download_date = models.DateField() #Fecha de descarga de la factura
-    CFDI_date = models.DateField() #Fecha de creacion de la factura
-    Timbre_date = models.DateField() #Fecha del timbre del SAT que certifica la factura
-    Cancellation_date = models.DateField(null=True) #Fecha de cancelacion de la factura en dado caso de haber sido cancelada
-    Status_date = models.DateField() #Fecha de la ultima actualizacion del estatus
-    Issuing_party = models.CharField(max_length=100) #Emisor de la factura
-    Receiving_party = models.CharField(max_length=100) #Receptopr de la factura
-    Type = models.CharField(max_length=100) #Tipo de factura
-    Status = models.CharField(max_length=100) #Estatus de factura
-    Total = models.DecimalField(max_digits=10, decimal_places=2) #Monto total de la factura
-    Acuse = models.BooleanField() #Indicativo de la existencia de un acuse
-    Invoice_pay = models.BooleanField() #Indicativo de si ya se pago la factura
 
 #Request model
 class UserRequest(models.Model):
