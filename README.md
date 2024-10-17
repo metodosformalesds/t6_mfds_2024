@@ -13,3 +13,5 @@ MFDS 2024 T6
 ### Minutas: https://docs.google.com/document/d/13yRGalP3TeQNiGMlYaZxj-WLsSbTONxrnYJfXdHe9ik/edit?usp=sharing
 
 ### Python AnyWhere LlamasCoin Api: https://adrianrvzz.pythonanywhere.com/api/schema/swagger-ui/
+
+### Frontend (Congelado): https://dreamy-faun-cebff9.netlify.app/
