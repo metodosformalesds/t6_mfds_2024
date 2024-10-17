@@ -9,7 +9,7 @@ class Moneylender(models.Model):
     Middlename_Moneylender = models.CharField(max_length=50) #Segundo nombre del prestatario
     Firstsurname_Moneylender = models.CharField(max_length=50) #Primer apellido o apellido paterno del prestatario
     Secondsurname_Moneylender = models.CharField(max_length=50) #Segundo apellido o apellido materno del prestatario
-    BirthDate_Moneylender = models.CharField() #Fecha de nacimiento del prestamista
+    BirthDate_Moneylender = models.DateField() #Fecha de nacimiento del prestamista
     Email_Moneylender = models.CharField(max_length=100) #Direccion de correo electronico del prestatario
     Password_Moneylender = models.CharField(max_length=60) #Contraseña de la cuenta del prestatario
     Phonenumber_Moneylender = models.CharField(max_length=10) #Numero de telefono del prestatario
