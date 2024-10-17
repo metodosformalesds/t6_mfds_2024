@@ -2,13 +2,44 @@ from django.db import models
 
 #Moneylender Model
 class Moneylender(models.Model):
-    id_moneylender = models.AutoField(primary_key=True) #Clave unica del usuario prestamista 
-    username_moneylender = models.CharField(max_length=50) #Nombre de usuario del prestamista
-    Name_moneylender = models.CharField(max_length=50) #Nombre completo del prestamista
-    Email_moneylender = models.CharField(max_length=100) #Direccion de correo electronico del prestamista
-    Password_moneylender = models.CharField(max_length=60) #Contraseña de la cuenta del prestamista
-    Subscription = models.BooleanField() #Estado que indica si el prestamista pago la suscripcion
-    LoansActive = models.IntegerField() #Prestamos que el prestatario tiene publicados/activos
+    id_Moneylender = models.AutoField(primary_key=True, max_length=10) #Clave unica del usuario prestamista
+    Username_Moneylender = models.CharField(max_length=50) #Nombre de usuario del prestatario
+    Name_Moneylender = models.CharField(max_length=100) #Nombre completo del prestatario
+    Firstname_Moneylender = models.CharField(max_length=50) #Primer nombre del prestatario
+    Middlename_Moneylender = models.CharField(max_length=50) #Segundo nombre del prestatario
+    Firstsurname_Moneylender = models.CharField(max_length=50) #Primer apellido o apellido paterno del prestatario
+    Secondsurname_Moneylender = models.CharField(max_length=50) #Segundo apellido o apellido materno del prestatario
+    BirthDate_Moneylender = models.CharField() #Fecha de nacimiento del prestamista
+    Email_Moneylender = models.CharField(max_length=100) #Direccion de correo electronico del prestatario
+    Password_Moneylender = models.CharField(max_length=60) #Contraseña de la cuenta del prestatario
+    Phonenumber_Moneylender = models.CharField(max_length=10) #Numero de telefono del prestatario
+    RFC_Moneylender = models.CharField(max_length=13) #Registro Federal de Contribuyentes (RFC) relacionado al prestatario
+    CIEC_Moneylender = models.CharField(max_length=100) #Clave de Identificación Electrónica Confidencial del prestatario
+    Fulladdress_Moneylender = models.CharField(max_length=200) #Direccion completa del prestatario
+    City_Moneylender = models.CharField(max_length=50) #Ciudad del prestatario
+    neighboorn_Moneylender = models.CharField(max_length=50) #Vecindario, barrio, colonia o fraccionamiento del prestatario
+    CP_Moneylender = models.CharField(max_length=5) #Codigo postal del prestatario
+    State_Moneylender = models.CharField(max_length=50) #Estado del territorio o estado del prestatario
+    Country_Moneylender = models.CharField(max_length=50) #Pais del prestatario
+    Subscription_Moneylender = models.BooleanField() #Valor que indica si el prestamista pago la suscripcion
+    LoansActive_Moneylender = models.IntegerField() #Numero de prestamos que tiene activos el prestamista
+
+#Invoice Model
+class InvoiceHistory(models.Model):
+    ID_invoice = models.AutoField(primary_key=True) #Clave unica del historial de facturas
+    UUID = models.CharField(max_length=100) #UUID (Universally Unique Identifier), identificador asignado por el SAT a la factura
+    Download_date = models.DateField() #Fecha de descarga de la factura
+    CFDI_date = models.DateField() #Fecha de creacion de la factura
+    Timbre_date = models.DateField() #Fecha del timbre del SAT que certifica la factura
+    Cancellation_date = models.DateField(null=True) #Fecha de cancelacion de la factura en dado caso de haber sido cancelada
+    Status_date = models.DateField() #Fecha de la ultima actualizacion del estatus
+    Issuing_party = models.CharField(max_length=100) #Emisor de la factura
+    Receiving_party = models.CharField(max_length=100) #Receptopr de la factura
+    Type = models.CharField(max_length=100) #Tipo de factura
+    Status = models.CharField(max_length=100) #Estatus de factura
+    Total = models.DecimalField(max_digits=10, decimal_places=2) #Monto total de la factura
+    Acuse = models.BooleanField() #Indicativo de la existencia de un acuse
+    Invoice_pay = models.BooleanField() #Indicativo de si ya se pago la factura
 
 #Loans Model
 class Loans(models.Model):
@@ -51,6 +82,7 @@ class Borrower(models.Model):
     Middlename_borrower = models.CharField(max_length=50) #Segundo nombre del prestatario
     Firstsurname_borrower = models.CharField(max_length=50) #Primer apellido o apellido paterno del prestatario
     Secondsurname_borrower = models.CharField(max_length=50) #Segundo apellido o apellido materno del prestatario
+    BirthDate_borrower = models.DateField() #Fecha de nacimiento del prestatario
     Email_borrower = models.CharField(max_length=100) #Direccion de correo electronico del prestatario
     Password_borrower = models.CharField(max_length=60) #Contraseña de la cuenta del prestatario
     Phonenumber_borrower = models.CharField(max_length=10) #Numero de telefono del prestatario
