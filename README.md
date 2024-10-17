@@ -11,3 +11,5 @@ MFDS 2024 T6
 ### ClickUp: https://app.clickup.com/9011398265/home
 
 ### Minutas: https://docs.google.com/document/d/13yRGalP3TeQNiGMlYaZxj-WLsSbTONxrnYJfXdHe9ik/edit?usp=sharing
+
+### Python AnyWhere LlamasCoin Api: https://adrianrvzz.pythonanywhere.com/api/schema/swagger-ui/
