@@ -2,7 +2,7 @@ from django.db import models
 
 #Moneylender Model
 class Moneylender(models.Model):
-    id_Moneylender = models.AutoField(primary_key=True, max_length=10) #Clave unica del usuario prestamista
+    id_Moneylender = models.AutoField(primary_key=True) #Clave unica del usuario prestamista
     Username_Moneylender = models.CharField(max_length=50) #Nombre de usuario del prestatario
     Name_Moneylender = models.CharField(max_length=100) #Nombre completo del prestatario
     Firstname_Moneylender = models.CharField(max_length=50) #Primer nombre del prestatario
@@ -37,7 +37,7 @@ class InvoiceHistory(models.Model):
     Receiving_party = models.CharField(max_length=100) #Receptopr de la factura
     Type = models.CharField(max_length=100) #Tipo de factura
     Status = models.CharField(max_length=100) #Estatus de factura
-    Total = models.DecimalField(max_digits=10, decimal_places=2) #Monto total de la factura
+    Total = models.FloatField() #Monto total de la factura
     Acuse = models.BooleanField() #Indicativo de la existencia de un acuse
     Invoice_pay = models.BooleanField() #Indicativo de si ya se pago la factura
 
@@ -49,7 +49,7 @@ class Loans(models.Model):
     Difficulty = models.IntegerField()
     InterestRate = models.FloatField()
     PaymentTerm = models.DateField()
-    Amortization = models.DecimalField(max_digits=10, decimal_places=2)
+    Amortization = models.FloatField()
 
 
 
@@ -66,7 +66,7 @@ class InvoiceHistory(models.Model):
     Receiving_party = models.CharField(max_length=100) #Receptopr de la factura
     Type = models.CharField(max_length=100) #Tipo de factura
     Status = models.CharField(max_length=100) #Estatus de factura
-    Total = models.DecimalField(max_digits=10, decimal_places=2) #Monto total de la factura
+    Total = models.FloatField() #Monto total de la factura
     Acuse = models.BooleanField() #Indicativo de la existencia de un acuse
     Invoice_pay = models.BooleanField() #Indicativo de si ya se pago la factura
 
@@ -102,9 +102,9 @@ class CreditHistory(models.Model):
     id_check = models.AutoField(primary_key=True)  # Clave única 
     borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE)  # Relación con el prestatario
     date_account_open = models.DateField()          # Fecha de apertura de la cuenta
-    actual_balance = models.DecimalField(max_digits=10, decimal_places=2)  # Saldo pendiente
-    max_credit = models.DecimalField(max_digits=10, decimal_places=2)      # Cantidad máxima solicitada
-    lim_credit = models.DecimalField(max_digits=10, decimal_places=2)       # Monto máximo disponible
+    actual_balance = models.DecimalField(max_digits=10)  # Saldo pendiente
+    max_credit = models.FloatField()     # Cantidad máxima solicitada
+    lim_credit = models.FloatField()     # Monto máximo disponible
     pay_history = models.CharField(max_length=50)  # Historial de pagos
     current_pay_status = models.CharField(max_length=10)  # Estado actual de los pagos
     accounts_open = models.IntegerField()           # Cuentas activas
@@ -120,7 +120,7 @@ class CreditHistory(models.Model):
     check_date = models.DateField()                 # Fecha de consulta
     code_score = models.FloatField()              # Score crediticio
     place_of_work = models.CharField(max_length=100)  # Lugar de trabajo
-    salary = models.DecimalField(max_digits=10, decimal_places=2)  # Salario
+    salary = models.FloatField() # Salario
 
 #Request model
 class UserRequest(models.Model):
