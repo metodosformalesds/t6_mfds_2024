@@ -1,34 +1,24 @@
-"""
-URL configuration for llamascoin project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
-from database.views import HelloWorld, CreditHistoryViewSet
+from database.views import CreditHistoryViewSet, MoneylenderViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
-router = DefaultRouter()
-router.register(r'credit_history', CreditHistoryViewSet, basename='credit_history')
+# Creación del router y registro de los endpoints con sus respectivos basenames
+credit_history_router = DefaultRouter()
+credit_history_router.register(r'', CreditHistoryViewSet, basename='credit_history')
+
+moneylender_router = DefaultRouter()
+moneylender_router.register(r'', MoneylenderViewSet, basename='moneylender')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('hello_world/', HelloWorld.as_view(), name='hello_world'),
-    path('api/', include(router.urls)),
+
+    # Incluyendo las rutas de los diferentes routers
+    path('credit_history/', include(credit_history_router.urls)),
+    path('moneylender/', include(moneylender_router.urls)),
     
-    #Endpoint para ver los endpoints
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'), 
+    # Endpoint para ver los endpoints
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
