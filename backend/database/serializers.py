@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CreditHistory, Moneylender, Loans, Borrower, ActiveLoans, InvoiceHistory, UserRequest, Transaction
+from .models import CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, InvoiceHistory, Request, Transaction
 
 
 
@@ -11,44 +11,44 @@ class CreditHistorySerializer(serializers.ModelSerializer):
 
 #serializer del prestamista
 class MoneylenderSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Moneylender
         fields = '__all__'
 
 #Serializer de los prestamos
 class LoansSerializer(serializers.ModelSerializer):
-    class meta:
-        model = Loans
+    class Meta:
+        model = Loan
         fields = '__all__'
 
 #Serializer del prestatario
 class BorrowerSerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = Borrower
         fields = '__all__'
 
 #Serializer de los detalles de los prestamos
 class ActiveLoansSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ActiveLoans
+        model = ActiveLoan
         fields = '__all__'
         
 #Serializer del historial de facturas
 class InvoiceHistorySerializer(serializers.ModelSerializer):
-    class meta:
+    class Meta:
         model = InvoiceHistory
         fields = '__all__'
 
 #Serializer de las solicitudes de prestamo
-class UserRequestSerializer(serializers.ModelSerializer):
-    class meta:
-        model = UserRequest
+class RequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Request
         fields = '__all__'
 
 #Serializer de los detalles de los prestamos
-class ActiveLoansSerializer(serializers.ModelSerializer):
+class ActiveLoanSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ActiveLoans
+        model = ActiveLoan
         fields = '__all__'
         
 #Serializer de las solicitudes transaccionadas
@@ -56,14 +56,4 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction  # Asegúrate de que este modelo exista y sea correcto
         fields = '__all__'
-        
-class PaymentSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
-    currency = serializers.CharField(max_length=3)
-
-class PayoutSerializer(serializers.Serializer):
-    recipient_email = serializers.EmailField()
-    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
-    currency = serializers.CharField(max_length=3, default='USD')
-    
 
