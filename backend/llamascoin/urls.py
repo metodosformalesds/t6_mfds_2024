@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from database.views import CreditHistoryViewSet, MoneylenderViewSet
+from database.views import CreditHistoryViewSet, MoneylenderViewSet, BorrowerViewSet, LoanViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
@@ -11,12 +11,21 @@ credit_history_router.register(r'', CreditHistoryViewSet, basename='credit_histo
 moneylender_router = DefaultRouter()
 moneylender_router.register(r'', MoneylenderViewSet, basename='moneylender')
 
+#Creacion del router y registro de los endpoints de borrower y loans
+Borrower_router = DefaultRouter()
+Borrower_router.register(r'', BorrowerViewSet, basename='borrower')
+
+Loan_router = DefaultRouter()
+Loan_router.register(r'', LoanViewSet, basename='loan')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Incluyendo las rutas de los diferentes routers
     path('credit_history/', include(credit_history_router.urls)),
     path('moneylender/', include(moneylender_router.urls)),
+    path('borrower/', include(Borrower_router.urls)),
+    path('loan/', include(Loan_router.urls)),
     
     # Endpoint para ver los endpoints
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
