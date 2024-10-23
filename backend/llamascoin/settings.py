@@ -58,7 +58,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'database',
     'corsheaders',
-    
+    'rest_framework',
+    'rest_framework.authtoken',
+    'Cuenta',
     #Spectacular para una documentacion y pruebas de la API
     'drf_spectacular',
 ]
