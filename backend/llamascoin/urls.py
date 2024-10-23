@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from services.validation import ImageNameExtractorView
 from database.views import CreditHistoryViewSet, MoneylenderViewSet, BorrowerViewSet, LoanViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
@@ -17,7 +18,6 @@ Borrower_router.register(r'', BorrowerViewSet, basename='borrower')
 
 Loan_router = DefaultRouter()
 Loan_router.register(r'', LoanViewSet, basename='loan')
-
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -26,6 +26,8 @@ urlpatterns = [
     path('moneylender/', include(moneylender_router.urls)),
     path('borrower/', include(Borrower_router.urls)),
     path('loan/', include(Loan_router.urls)),
+    
+    path('validate-ine/', ImageNameExtractorView.as_view(), name='validate-ine'),
     
     # Endpoint para ver los endpoints
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
