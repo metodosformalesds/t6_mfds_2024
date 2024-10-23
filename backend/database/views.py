@@ -26,8 +26,3 @@ class MoneylenderViewSet(viewsets.ModelViewSet):
 class CreditHistoryViewSet(viewsets.ModelViewSet):
     queryset = CreditHistory.objects.all()
     serializer_class = CreditHistorySerializer
-
-#Vista de modelo para end point Certificados de Facturas SAT
-class SATCertificate(viewsets.modelEndPint):
-    queryset = CreditHistory.objects.all()
-    serializer_class = CreditHistorySerializer

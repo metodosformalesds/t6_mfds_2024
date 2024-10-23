@@ -135,4 +135,3 @@ class Transaction(models.Model):
     paypal_transaction_id = models.CharField(max_length=100, unique=True)  # ID de la transacción de PayPal (único)
     status = models.CharField(max_length=20, choices=[('completed', 'Completed'), ('failed', 'Failed'), ('pending', 'Pending')])  # Estado de la transacción
     transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPE_CHOICES)  # Tipo de transacción
-
