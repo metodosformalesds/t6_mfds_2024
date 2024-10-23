@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from .models import CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, InvoiceHistory, Request, Transaction
 
-
-
 #Serializer del historial crediticio
 class CreditHistorySerializer(serializers.ModelSerializer):
     class Meta:
