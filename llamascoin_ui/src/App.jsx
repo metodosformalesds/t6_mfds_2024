@@ -6,6 +6,7 @@ import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import Subscription from "./pages/Subscription";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import HomePage from "./pages/HomePage";
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
   
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<HomePage/>}/>
           <Route path="/login" element={<LoginPage/>}/>
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/subscription" element={<Subscription />} />
