@@ -4,7 +4,7 @@ from . import views
 from llamascoin.views import RegisterView, LoginView
 from database.views import CreditHistoryViewSet, MoneylenderViewSet, BorrowerViewSet, LoanViewSet, UserViewSet
 from services.validation import ImageNameExtractorView
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView, CreateSATView
 from rest_framework.routers import DefaultRouter
 from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
 
@@ -47,7 +47,10 @@ urlpatterns = [
     path('paypal/cancel/', PayPalCancelView.as_view(), name='paypal-cancel'),
     
     
-    # Endpoint para ver los endpoints
+    # Endpoint para el swapper
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+
+    #Endopoints de Moffin
+    path('Moffin/getSAT/', CreateSATView.as_view(), name='Get-SAT'),
 ]
