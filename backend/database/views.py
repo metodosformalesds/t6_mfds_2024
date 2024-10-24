@@ -5,6 +5,10 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan
 from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, LoansSerializer
+from django.contrib.auth.models import User
+from llamascoin.serializers import UserSerializer
+from rest_framework.permissions import AllowAny
+
 # Create your views here.
 
 #Vista de modelo para Borrower
@@ -19,6 +23,7 @@ class LoanViewSet(viewsets.ModelViewSet):
 
 #Vista de modelo para money lender
 class MoneylenderViewSet(viewsets.ModelViewSet):
+
     queryset = Moneylender.objects.all()
     serializer_class = MoneylenderSerializer
 
@@ -26,3 +31,8 @@ class MoneylenderViewSet(viewsets.ModelViewSet):
 class CreditHistoryViewSet(viewsets.ModelViewSet):
     queryset = CreditHistory.objects.all()
     serializer_class = CreditHistorySerializer
+
+#Vista de modelo para ver usuarios registrados
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

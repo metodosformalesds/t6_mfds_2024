@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
 from . import views
-from database.views import CreditHistoryViewSet, MoneylenderViewSet, BorrowerViewSet, LoanViewSet
+from llamascoin.views import RegisterView, LoginView
+from database.views import CreditHistoryViewSet, MoneylenderViewSet, BorrowerViewSet, LoanViewSet, UserViewSet
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
@@ -19,16 +20,22 @@ Borrower_router.register(r'', BorrowerViewSet, basename='borrower')
 
 Loan_router = DefaultRouter()
 Loan_router.register(r'', LoanViewSet, basename='loan')
+
+user_router = DefaultRouter()
+user_router.register(r'', UserViewSet, basename='user')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Cuenta.urls')),
-    re_path('login', views.login),
-    re_path('register', views.register),
+    
+    path('login/', LoginView.as_view()),
+    path('register/', RegisterView.as_view()),
     # Incluyendo las rutas de los diferentes routers
     path('credit_history/', include(credit_history_router.urls)),
     path('moneylender/', include(moneylender_router.urls)),
     path('borrower/', include(Borrower_router.urls)),
     path('loan/', include(Loan_router.urls)),
+    path('user/', include(user_router.urls)),
     
     path('validate-ine/', ImageNameExtractorView.as_view(), name='validate-ine'),
     

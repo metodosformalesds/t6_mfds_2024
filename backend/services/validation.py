@@ -7,12 +7,16 @@ import easyocr
 import re
 import numpy as np
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import User
 
-# Serializer para manejar la carga de imágenes
+# Serializer para manejar la carga de imágenes y el nombre completo
 class ImageUploadSerializer(serializers.Serializer):
     image = serializers.FileField(required=False, allow_null=True)
+    full_name = serializers.CharField(required=True, max_length=255)  # Campo para el nombre completo
+    rfc = serializers.CharField(required=True, max_length=13)  # Campo para el RFC
 
-# Vista para extraer nombres de ine
+# Vista para extraer nombres de INE
 class ImageNameExtractorView(APIView):
     parser_classes = (MultiPartParser,)
     serializer_class = ImageUploadSerializer
@@ -24,6 +28,8 @@ class ImageNameExtractorView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         image_file = serializer.validated_data['image']
+        full_name = serializer.validated_data['full_name']
+        rfc = serializer.validated_data['rfc']
 
         # Convertir el archivo subido a un formato que OpenCV pueda leer
         image = np.frombuffer(image_file.read(), np.uint8)
@@ -33,7 +39,12 @@ class ImageNameExtractorView(APIView):
         name = self.process_image(image)
 
         if name:
-            return Response({'name': name}, status=status.HTTP_200_OK)
+            # Comprobar si el nombre extraído coincide con el nombre completo proporcionado
+            if self.names_match(full_name, name):
+                return self.generate_token(rfc)
+            else:
+                return Response({'error': 'The extracted name does not match the provided full name.'}, 
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'Name not found in the text.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -51,7 +62,7 @@ class ImageNameExtractorView(APIView):
     def crop_image(self, image):
         height, width = image.shape[:2]
         
-        #Recortes para area del nombre de la INE
+        # Recortes para área del nombre de la INE
         left_crop_pct = 0.318   # 31.8% desde la izquierda
         top_crop_pct = 0.267    # 26.7% desde la parte superior
         right_crop_pct = 0.287  # 28.7% desde la derecha
@@ -89,3 +100,21 @@ class ImageNameExtractorView(APIView):
                 return match.group().strip()
         
         return None
+    
+    def generate_token(self, rfc):
+        # Intentar obtener o crear un usuario con el RFC como nombre de usuario
+        user, created = User.objects.get_or_create(username=rfc)
+
+        # Si el usuario ya existe, generamos un nuevo token
+        refresh = RefreshToken.for_user(user)  # Generar token para el usuario creado
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, status=status.HTTP_200_OK)
+
+    def names_match(self, full_name, extracted_name):
+        """Compara el nombre completo proporcionado con el nombre extraído sin importar el orden."""
+        # Convertir ambos nombres a conjuntos de palabras en mayúsculas
+        set_full_name = set(full_name.strip().upper().split())
+        set_extracted_name = set(extracted_name.strip().upper().split())
+        return set_full_name == set_extracted_name  # Comparar conjuntos
