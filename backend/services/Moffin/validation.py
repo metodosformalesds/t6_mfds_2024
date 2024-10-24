@@ -1,14 +1,4 @@
-from rest_framework import status
-from rest_framework.parsers import MultiPartParser
-from rest_framework.response import Response
-from rest_framework.views import APIView
-import cv2
-import easyocr
-import re
-import numpy as np
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.models import User
 
 # Serializer para manejar la consulta del SAT:
 class UploadScore(serializers.Serializer):
