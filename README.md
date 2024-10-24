@@ -14,4 +14,6 @@ MFDS 2024 T6
 
 ### Python AnyWhere LlamasCoin Api: https://adrianrvzz.pythonanywhere.com/api/schema/swagger-ui/
 
+### AWS IP: http://52.7.196.119:8000/api/schema/swagger-ui/
+
 ### Frontend (Congelado): https://dreamy-faun-cebff9.netlify.app/
