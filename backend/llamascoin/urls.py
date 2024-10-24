@@ -6,6 +6,7 @@ from database.views import CreditHistoryViewSet, MoneylenderViewSet, BorrowerVie
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
+from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
 
 # Creación del router y registro de los endpoints con sus respectivos basenames
 credit_history_router = DefaultRouter()
@@ -38,6 +39,13 @@ urlpatterns = [
     path('user/', include(user_router.urls)),
     
     path('validate-ine/', ImageNameExtractorView.as_view(), name='validate-ine'),
+    
+    #Endopoints de PayPal
+    path('paypal/create-payment/', CreatePaymentView.as_view(), name='create-payment'),
+    path('paypal/payout/', SendPayoutView.as_view(), name='send-payout'),
+    path('paypal/return/', PayPalReturnView.as_view(), name='paypal-return'), 
+    path('paypal/cancel/', PayPalCancelView.as_view(), name='paypal-cancel'),
+    
     
     # Endpoint para ver los endpoints
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
