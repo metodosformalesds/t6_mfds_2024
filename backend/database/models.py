@@ -1,18 +1,14 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 #Moneylender Model
 
 class Moneylender(models.Model):
-    id = models.AutoField(primary_key=True)  # Clave única del prestamista
-    username = models.CharField(max_length=50)  # Nombre de usuario del prestamista
-    full_name = models.CharField(max_length=100)  # Nombre completo del prestamista
-    first_name = models.CharField(max_length=50)  # Primer nombre
+    user = models.OneToOneField(User, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
+    first_name = models.CharField(max_length=100)  # Primer nombre
     middle_name = models.CharField(max_length=50, blank=True, null=True)  # Segundo nombre (opcional)
     first_surname = models.CharField(max_length=50)  # Primer apellido
     second_surname = models.CharField(max_length=50, blank=True, null=True)  # Segundo apellido (opcional)
     birth_date = models.DateField()  # Fecha de nacimiento
-    email = models.EmailField(max_length=100, unique=True)  # Dirección de correo electrónico
-    password = models.CharField(max_length=60)  # Contraseña 
     phone_number = models.CharField(max_length=15)  # Número de teléfono  
     rfc = models.CharField(max_length=13, unique=True)  # Registro Federal de Contribuyentes
     ciec = models.CharField(max_length=100)  # Clave de Identificación Electrónica Confidencial
@@ -22,6 +18,7 @@ class Moneylender(models.Model):
     postal_code = models.CharField(max_length=5)  # Código postal
     state = models.CharField(max_length=50)  # Estado
     country = models.CharField(max_length=50)  # País
+    
     is_subscribed = models.BooleanField(default=False)  # Indica si pagó la suscripción
     active_loans = models.PositiveIntegerField(default=0)  # Número de préstamos activos
 
@@ -34,6 +31,27 @@ class Loan(models.Model):
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2)  # Tasa de interés del préstamo
     payment_term = models.DateField()  # Plazo de pago del préstamo
     amortization = models.DecimalField(max_digits=10, decimal_places=2)  # Monto de amortización
+
+class Borrower(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
+    first_name = models.CharField(max_length=50)  # Primer nombre del prestatario
+    middle_name = models.CharField(max_length=50, blank=True, null=True)   # Segundo nombre del prestatario
+    first_surname = models.CharField(max_length=50)  # Primer apellido o apellido paterno del prestatario
+    second_surname = models.CharField(max_length=50)  # Segundo apellido o apellido materno del prestatario
+    birth_date = models.DateField()  # Fecha de nacimiento del prestatario
+    phone_number = models.CharField(max_length=10)  # Número de teléfono del prestatario
+    rfc = models.CharField(max_length=13)  # Registro Federal de Contribuyentes (RFC) relacionado al prestatario
+    ciec = models.CharField(max_length=100)  # Clave de Identificación Electrónica Confidencial del prestatario
+    full_address = models.CharField(max_length=200)  # Dirección completa del prestatario
+    city = models.CharField(max_length=50)  # Ciudad del prestatario
+    neighborhood = models.CharField(max_length=50)  # Vecindario, barrio, colonia o fraccionamiento del prestatario
+    postal_code = models.CharField(max_length=5)  # Código postal del prestatario
+    state = models.CharField(max_length=50)  # Estado del territorio o estado del prestatario
+    country = models.CharField(max_length=50)  # País del prestatario
+    
+    
+    possibility_of_pay = models.FloatField(default=0)  # Número que indica la posibilidad de que el prestatario cumpla con los pagos
+    score_llamas = models.IntegerField(default=0)  # Puntaje de calificación del prestatario dentro de la aplicación
 
 
 class InvoiceHistory(models.Model):
@@ -51,34 +69,9 @@ class InvoiceHistory(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)  # Monto total de la factura
     acuse = models.BooleanField()  # Indicativo de la existencia de un acuse
     invoice_pay = models.BooleanField()  # Indicativo de si ya se pagó la factura
+    borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE, related_name='invoices')
 
 #Borrower Model
-
-class Borrower(models.Model):
-    id = models.AutoField(primary_key=True)  # Clave única del usuario prestatario
-    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, null=True, blank=True)  # Relación con la entidad loan
-    invoice_history = models.ForeignKey(InvoiceHistory, on_delete=models.CASCADE)  # Relación con la tabla del historial de facturas
-    username = models.CharField(max_length=50)  # Nombre de usuario del prestatario
-    name = models.CharField(max_length=100)  # Nombre completo del prestatario
-    first_name = models.CharField(max_length=50)  # Primer nombre del prestatario
-    middle_name = models.CharField(max_length=50)  # Segundo nombre del prestatario
-    first_surname = models.CharField(max_length=50)  # Primer apellido o apellido paterno del prestatario
-    second_surname = models.CharField(max_length=50)  # Segundo apellido o apellido materno del prestatario
-    birth_date = models.DateField()  # Fecha de nacimiento del prestatario
-    email = models.CharField(max_length=100)  # Dirección de correo electrónico del prestatario
-    password = models.CharField(max_length=60)  # Contraseña de la cuenta del prestatario
-    phone_number = models.CharField(max_length=10)  # Número de teléfono del prestatario
-    rfc = models.CharField(max_length=13)  # Registro Federal de Contribuyentes (RFC) relacionado al prestatario
-    ciec = models.CharField(max_length=100)  # Clave de Identificación Electrónica Confidencial del prestatario
-    full_address = models.CharField(max_length=200)  # Dirección completa del prestatario
-    city = models.CharField(max_length=50)  # Ciudad del prestatario
-    neighborhood = models.CharField(max_length=50)  # Vecindario, barrio, colonia o fraccionamiento del prestatario
-    cp = models.CharField(max_length=5)  # Código postal del prestatario
-    state = models.CharField(max_length=50)  # Estado del territorio o estado del prestatario
-    country = models.CharField(max_length=50)  # País del prestatario
-    possibility_of_pay = models.FloatField()  # Número que indica la posibilidad de que el prestatario cumpla con los pagos
-    score_llamas = models.IntegerField()  # Puntaje de calificación del prestatario dentro de la aplicación
-
 #Credit History Model
 class CreditHistory(models.Model):
     id = models.AutoField(primary_key=True)  # Clave única 
@@ -106,10 +99,16 @@ class CreditHistory(models.Model):
 
 #Request model
 class Request(models.Model):
-    id= models.AutoField(primary_key=True) #llave unica de la entidad
-    credit_history = models.ForeignKey(CreditHistory, on_delete=models.CASCADE) # llave foranea de la entidad CreditHistory,
+    id = models.AutoField(primary_key=True)  # Llave única de la entidad
     borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE)  # Relación con el prestatario
-    moneylender = models.ForeignKey(Moneylender, on_delete=models.CASCADE) #relacion con el prestamista
+    moneylender = models.ForeignKey(Moneylender, on_delete=models.CASCADE)  # Relación con el prestamista
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),  # Pendiente
+        ('approved', 'Approved'),  # Aprobado
+        ('rejected', 'Rejected'),  # Rechazado
+        ('completed', 'Completed'),  # Completado
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')  # Estado de la solicitud
     
 class ActiveLoan(models.Model):
     id = models.AutoField(primary_key=True)  # ID único del préstamo activo

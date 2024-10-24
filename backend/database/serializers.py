@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, InvoiceHistory, Request, Transaction
+from django.contrib.auth.models import User
 
 #Serializer del historial crediticio
 class CreditHistorySerializer(serializers.ModelSerializer):
@@ -9,6 +10,7 @@ class CreditHistorySerializer(serializers.ModelSerializer):
 
 #serializer del prestamista
 class MoneylenderSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True)
     class Meta:
         model = Moneylender
         fields = '__all__'
@@ -21,10 +23,10 @@ class LoansSerializer(serializers.ModelSerializer):
 
 #Serializer del prestatario
 class BorrowerSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True)
     class Meta:
         model = Borrower
         fields = '__all__'
-
 #Serializer de los detalles de los prestamos
 class ActiveLoansSerializer(serializers.ModelSerializer):
     class Meta:
