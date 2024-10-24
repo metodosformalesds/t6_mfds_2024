@@ -4,7 +4,7 @@ import { Typography } from "@material-tailwind/react";
 import { formValidators } from "../../utils/formValidators";
 
 export function Step1({ register, errors }) {
-  const [inputType, setInputType] = useState('text'); 
+  const [inputType, setInputType] = useState('text');
 
   return (
     <div className="space-y-4">
@@ -13,60 +13,93 @@ export function Step1({ register, errors }) {
       {/* Campo para Nombre */}
       <div className="flex flex-col">
         <Input
-          label="Nombre"
-          id="firstName"
-          {...register("firstName", formValidators.firstName)}
+          label="Primer Nombre"
+          id="first_name"
+          {...register("first_name", formValidators.first_name)}
           type="text"
           placeholder="Nombre"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.firstName ? 'border-red-500' : 'border-gray-300'
+            errors.first_name ? 'border-red-500' : 'border-gray-300'
           }`}
         />
-        <span className="text-sm">{errors.firstName && <p className="text-red-500">{errors.firstName.message}</p>}</span>
+        <span className="text-sm">{errors.first_name && <p className="text-red-500">{errors.first_name.message}</p>}</span>
+      </div>
+
+      {/* Campo para Segundo Nombre (opcional) */}
+      <div className="flex flex-col">
+        <Input
+          label="Segundo Nombre (opcional)"
+          id="middle_name"
+          {...register("middle_name", formValidators.middle_name)}
+          type="text"
+          placeholder="Segundo nombre (opcional)"
+          className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            errors.middle_name ? 'border-red-500' : 'border-gray-300'
+          }`}
+        />
+        <span className="text-sm">{errors.middle_name && <p className="text-red-500">{errors.middle_name.message}</p>}</span>
       </div>
 
       {/* Campo para Apellido Paterno */}
       <div className="flex flex-col">
         <Input
-          id="lastName"
-          {...register("lastName",  formValidators.lastName)}
+          label="Apellido Paterno"
+          id="first_surname"
+          {...register("first_surname", formValidators.first_surname)}
           type="text"
           placeholder="Apellido paterno"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.lastName ? 'border-red-500' : 'border-gray-300'
+            errors.first_surname ? 'border-red-500' : 'border-gray-300'
           }`}
         />
-        <span className="text-sm">{errors.lastName && <p className="text-red-500">{errors.lastName.message}</p>}</span>
+        <span className="text-sm">{errors.first_surname && <p className="text-red-500">{errors.first_surname.message}</p>}</span>
       </div>
 
-      {/* Campo para Apellido Materno */}
+      {/* Campo para Apellido Materno (opcional) */}
       <div className="flex flex-col">
         <Input
-          id="secondLastName"
-          {...register("secondLastName",  formValidators.secondLastName)}
+          label="Apellido Materno (opcional)"
+          id="second_surname"
+          {...register("second_surname", formValidators.second_surname)}
           type="text"
           placeholder="Apellido materno"
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.secondLastName ? 'border-red-500' : 'border-gray-300'
+            errors.second_surname ? 'border-red-500' : 'border-gray-300'
           }`}
         />
-        <span className="text-sm">{errors.secondLastName && <p className="text-red-500">{errors.secondLastName.message}</p>}</span>
+        <span className="text-sm">{errors.second_surname && <p className="text-red-500">{errors.second_surname.message}</p>}</span>
       </div>
 
       {/* Campo para Fecha de Nacimiento */}
       <div className="flex flex-col">
         <Input
-          id="birthdate"
-          {...register("birthdate", formValidators.birthdate)}
+          label="Fecha de Nacimiento"
+          id="birth_date"
+          {...register("birth_date", formValidators.birth_date)}
           placeholder="Fecha de nacimiento"
           type={inputType} 
           onFocus={() => setInputType('date')} // Cambiar a tipo date al enfocar
           onBlur={() => setInputType('text')} // Cambiar a tipo text al desenfocar
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.birthdate ? 'border-red-500' : 'border-gray-300'
+            errors.birth_date ? 'border-red-500' : 'border-gray-300'
           }`}
         />
-        <span className="text-sm">{errors.birthdate && <p className="text-red-500">{errors.birthdate.message}</p>}</span>
+        <span className="text-sm">{errors.birth_date && <p className="text-red-500">{errors.birth_date.message}</p>}</span>
+      </div>
+
+      {/* Campo para Número de Teléfono */}
+      <div className="flex flex-col">
+        <Input
+          label="Número de Teléfono"
+          id="phone_number"
+          {...register("phone_number", formValidators.phone_number)}
+          type="text"
+          placeholder="Número de teléfono"
+          className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            errors.phone_number ? 'border-red-500' : 'border-gray-300'
+          }`}
+        />
+        <span className="text-sm">{errors.phone_number && <p className="text-red-500">{errors.phone_number.message}</p>}</span>
       </div>
     </div>
   );

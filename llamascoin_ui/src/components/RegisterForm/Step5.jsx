@@ -1,39 +1,27 @@
 import { React } from "react";
-import { Input } from "@headlessui/react";
 import { Typography } from "@material-tailwind/react";
 import { formValidators } from "../../utils/formValidators";
 
-export function Step5({ register, errors }) {
+export function Step5({ register, errors, defaultValues }) {
   return (
     <div className="space-y-4">
-      <Typography variant="h5" className="font-bold mb-4">Datos Financieros</Typography>
+      <Typography variant="h5" className="font-bold mb-4">Tipo de Cuenta</Typography>
 
-      {/* Campo para CLABE */}
+      {/* Campo para Tipo de Cuenta */}
       <div className="flex flex-col">
-        <Input
-          id="clabe"
-          {...register("clabe", formValidators.clabe)}
-          type="text"
-          placeholder="CLABE"
+        <select
+          id="account_type"
+          {...register("account_type", formValidators.accountType)} 
           className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.clabe ? 'border-red-500' : 'border-gray-300'
+            errors.account_type ? 'border-red-500' : 'border-gray-300'
           }`}
-        />
-        <span className="text-sm">{errors.clabe && <p className="text-red-500">{errors.clabe.message}</p>}</span>
-      </div>
+        >
+          <option value="" disabled>Selecciona un tipo de cuenta</option>
+          <option value="moneylender">Prestamista</option>
+          <option value="borrower">Prestatario</option>
+        </select>
 
-      {/* Campo para Tarjeta de Crédito */}
-      <div className="flex flex-col">
-        <Input
-          id="creditCard"
-          {...register("creditCard", formValidators.creditCard)}
-          type="text"
-          placeholder="Número de tarjeta de crédito"
-          className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.creditCard ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        <span className="text-sm">{errors.creditCard && <p className="text-red-500">{errors.creditCard.message}</p>}</span>
+        <span className="text-sm">{errors.account_type && <p className="text-red-500">{errors.account_type.message}</p>}</span>
       </div>
     </div>
   );

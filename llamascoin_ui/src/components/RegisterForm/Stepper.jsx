@@ -6,12 +6,11 @@ const Stepper = ({ currentStep }) => {
   const stepsKeys ={
     "0": 1,
     "1": 1,
-    "2": 1,
-    "3": 1,
-    "4": 2, 
-    "5": 3,
+    "2": 2,
+    "3": 2,
+    "4": 3, 
+    "5": 4,
     "6": 4,
-    "7": 4
   }
   return (
     <div className="flex items-center justify-center  w-full">
