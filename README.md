@@ -16,4 +16,4 @@ MFDS 2024 T6
 
 ### AWS IP: http://52.7.196.119:8000/api/schema/swagger-ui/
 
-### Frontend (Congelado): https://dreamy-faun-cebff9.netlify.app/
+### Frontend (Conectado a AWS, sin HTTPS): https://llamascoin-ui.netlify.app/
