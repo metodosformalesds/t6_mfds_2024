@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     'adrianrvzz.pythonanywhere.com', 
     'localhost',  
     '127.0.0.1', 
+    '54.165.87.139'
 ]
 #Dominios que permitira la aplicacion 
 CORS_ALLOWED_ORIGINS = [
