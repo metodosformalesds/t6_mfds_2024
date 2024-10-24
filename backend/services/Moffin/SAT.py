@@ -6,28 +6,22 @@ from services.Moffin.validation import UploadScore
 from database.models import Borrower
 from rest_framework.response import Response
 
-CLIENT_ID_MOFFIN = os.getenv('CLIENT_ID_SAT', 'Default_Secret')
-SECRET_MOFFIN = os.getenv('SECRET_MOFFIN', '')
-def get_moffin_access_token():
-    client_id = CLIENT_ID_MOFFIN
-    secret = SECRET_MOFFIN
-    url = "https://sandbox.moffin.mx/api/v1"
+def analizar_datos(datos):
+    # Definir la URL del endpoint de la API de Moffin
+    url ='https://sandbox.moffin.mx/api/v1/query/bureau_pf'
+    SECRET_MOFFIN = os.getenv('ACCES_TOKEN_MOFFIN', '')
+    
+    # Configurar los headers para la autenticación
     headers = {
-        "Accept": "application/json",
-        "Accept-Language": "en_US"
+        'Authorization': f'Bearer {SECRET_MOFFIN}',
+        'Content-Type': 'application/json',
     }
-    response = requests.post(url, headers=headers, auth=(client_id, secret), data={"grant_type": "client_credentials"})
-    return response.json().get("access_token")
-
-class CreateObtenerSAT(APIView):
-    serializer_class = UploadScore
-    def post(self, request):
-        serializer = UploadScore(data=request.data)
-        if serializer.is_valid():
-            access_token_moffin = get_moffin_access_token()
-            url = ""
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {access_token_moffin}"
-            }
-        
+    
+    # Enviar una solicitud POST a la API de Moffin con los datos a analizar
+    try:
+        response = requests.post(url, json=datos, headers=headers)
+        response.raise_for_status()  # Lanza una excepción si la respuesta tiene un error de HTTP
+        return response.json()  # Retorna la respuesta en formato JSON
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")  # Manejar errores HTTP
+        return None
