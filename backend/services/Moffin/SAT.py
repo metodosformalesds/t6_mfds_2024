@@ -11,7 +11,7 @@ SECRET_MOFFIN = os.getenv('SECRET_MOFFIN', '')
 def get_moffin_access_token():
     client_id = CLIENT_ID_MOFFIN
     secret = SECRET_MOFFIN
-    url = "https://sandbox.moffin.mx/api/v1/query/bureau_pf"
+    url = "https://sandbox.moffin.mx/api/v1"
     headers = {
         "Accept": "application/json",
         "Accept-Language": "en_US"
@@ -24,10 +24,10 @@ class CreateObtenerSAT(APIView):
     def post(self, request):
         serializer = UploadScore(data=request.data)
         if serializer.is_valid():
-            access_token = get_moffin_access_token()
+            access_token_moffin = get_moffin_access_token()
             url = ""
             headers = {
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {access_token}"
+                "Authorization": f"Bearer {access_token_moffin}"
             }
         

@@ -7,6 +7,7 @@ from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView, CreateSATView
 from rest_framework.routers import DefaultRouter
 from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
+from services.Moffin.SAT import CreateObtenerSAT
 
 # Creación del router y registro de los endpoints con sus respectivos basenames
 credit_history_router = DefaultRouter()
@@ -52,5 +53,5 @@ urlpatterns = [
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
     #Endopoints de Moffin
-    path('Moffin/getSAT/', CreateSATView.as_view(), name='Get-SAT'),
+    path('Moffin/SAT/', CreateObtenerSAT.as_view(), name='obtener-SAT'),
 ]
