@@ -4,22 +4,22 @@ from rest_framework import status
 import requests
 from database.models import Borrower
 from database.serializers import BorrowerSerializer
-import environ
+import os
 
-env = environ.Env()
-environ.Env.read_env()  
-
+#Puse como defecto el token que habias puesto en caso de que no crees el .env aun
+TOKEN_MOFFIN = os.getenv('ACCESS_TOKEN_MOFFIN', 'd0a8721978878bd705228203826fa9178a1f2c496db20e4402f92ff84b2b3379')
 class Muffin(APIView):
+    #Agreguee el serializer_class para hacer pruebas en swagger
+    serializer_class = BorrowerSerializer
     def post(self, request, *args, **kwargs):
         borrower = Borrower.objects.all()
         serializer = BorrowerSerializer(borrower, many=True)
 
         # Configurar la URL de la API y obtener el token de la variable de entorno
         api_url = "https://staging.moffin.mx/api/v1/query/bureau_pf"
-        token = env('d0a8721978878bd705228203826fa9178a1f2c496db20e4402f92ff84b2b3379')
-
+        
         headers = {
-            'Authorization': f'Bearer {token}',  
+            'Authorization': f'Bearer {TOKEN_MOFFIN}',  
             'Content-Type': 'application/json'  
         }
 

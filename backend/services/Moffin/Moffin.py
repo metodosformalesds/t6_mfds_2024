@@ -6,14 +6,10 @@ from services.Moffin.validation import UploadScore
 from database.models import Borrower
 from rest_framework.response import Response
 from database.serializers import BorrowerSerializer
-import environ
-
-# Inicializa el entorno de variables
-env = environ.Env()
-environ.Env.read_env()  # Lee el archivo .env
+import os
 
 # Obtén el token
-api_token = env("ACCES_TOKEN_MOFFIN") 
+api_token = os.getenv("ACCESS_TOKEN_MOFFIN") 
 
 
 
