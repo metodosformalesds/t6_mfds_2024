@@ -4,10 +4,10 @@ from . import views
 from llamascoin.views import RegisterView, LoginView
 from database.views import CreditHistoryViewSet, MoneylenderViewSet, BorrowerViewSet, LoanViewSet, UserViewSet
 from services.validation import ImageNameExtractorView
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView, CreateSATView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
-from services.Moffin.SAT import CreateObtenerSAT
+##from services.Moffin.SAT import analizar_datos
 
 # Creación del router y registro de los endpoints con sus respectivos basenames
 credit_history_router = DefaultRouter()
@@ -29,7 +29,7 @@ user_router.register(r'', UserViewSet, basename='user')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Cuenta.urls')),
-    
+    path('', include('moffin.urls')),
     path('login/', LoginView.as_view()),
     path('register/', RegisterView.as_view()),
     # Incluyendo las rutas de los diferentes routers
@@ -53,5 +53,5 @@ urlpatterns = [
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 
     #Endopoints de Moffin
-    path('Moffin/SAT/', CreateObtenerSAT.as_view(), name='obtener-SAT'),
+    ##path('Moffin/SAT/', analizar_datos.as_view(), name='obtener-SAT'),
 ]
