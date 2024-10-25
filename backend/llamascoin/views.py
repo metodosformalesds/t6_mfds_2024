@@ -119,3 +119,4 @@ class RegisterView(APIView):
             
 
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
