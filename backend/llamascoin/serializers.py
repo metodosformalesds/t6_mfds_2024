@@ -8,6 +8,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User 
         fields = ['id', 'username', 'email', 'password']
 
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(write_only=True)
+
 class UserRegistrationSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField()

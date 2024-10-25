@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.routers import DefaultRouter
+from rest_framework.exceptions import PermissionDenied
 
 # Create your views here.
 
@@ -22,6 +23,21 @@ class BorrowerViewSet(viewsets.ModelViewSet):
 class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
     serializer_class = LoansSerializer
+    
+    def create(self, request, *args, **kwargs):
+        # Verificar si el usuario es un Moneylender
+        if not hasattr(request.user, 'moneylender'):
+            raise PermissionDenied("No tienes permiso para crear un préstamo.")
+
+        # Obtener el Moneylender asociado al usuario
+        moneylender = request.user.moneylender
+
+        # Verificar si is_subscribed es True
+        if not moneylender.is_subscribed:
+            raise PermissionDenied("El Moneylender no está suscrito.")
+
+        # Si todas las verificaciones son satisfactorias, proceder a crear el préstamo
+        return super().create(request, *args, **kwargs)
 
 #Vista de modelo para money lender
 class MoneylenderViewSet(viewsets.ModelViewSet):
@@ -49,6 +65,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class ActiveLoanViewSet(viewsets.ModelViewSet):
     queryset = ActiveLoan.objects.all()
     serializer_class = ActiveLoanSerializer
+
     
 def register_routers():
     """
