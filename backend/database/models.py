@@ -40,7 +40,8 @@ class Borrower(models.Model):
     second_surname = models.CharField(max_length=50)  # Segundo apellido o apellido materno del prestatario
     birth_date = models.DateField()  # Fecha de nacimiento del prestatario
     phone_number = models.CharField(max_length=10)  # Número de teléfono del prestatario
-    rfc = models.CharField(max_length=13)  # Registro Federal de Contribuyentes (RFC) relacionado al prestatario
+    rfc = models.CharField(max_length=13)# Registro Federal de Contribuyentes (RFC) relacionado al prestatario
+    PersonaFoM = models.CharField(max_length=10, default= 'Pf') #Persona fisica o moral
     ciec = models.CharField(max_length=100)  # Clave de Identificación Electrónica Confidencial del prestatario
     full_address = models.CharField(max_length=200)  # Dirección completa del prestatario
     city = models.CharField(max_length=50)  # Ciudad del prestatario
@@ -48,6 +49,9 @@ class Borrower(models.Model):
     postal_code = models.CharField(max_length=5)  # Código postal del prestatario
     state = models.CharField(max_length=50)  # Estado del territorio o estado del prestatario
     country = models.CharField(max_length=50)  # País del prestatario
+    municipality = models.CharField(max_length=50, default= 'Muni')
+    nationality = models.CharField(max_length=50, default= 'MX' )
+    exteriorNumber = models.CharField(max_length=50, null=True)
     
     
     possibility_of_pay = models.FloatField(default=0)  # Número que indica la posibilidad de que el prestatario cumpla con los pagos
