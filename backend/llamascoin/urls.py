@@ -2,29 +2,13 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from . import views
 from llamascoin.views import RegisterView, LoginView
-from database.views import CreditHistoryViewSet, MoneylenderViewSet, BorrowerViewSet, LoanViewSet, UserViewSet
+from database.views import register_routers
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from rest_framework.routers import DefaultRouter
 from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
 from services.Moffin.Moffin import ObtenerSat
 
-# Creación del router y registro de los endpoints con sus respectivos basenames
-credit_history_router = DefaultRouter()
-credit_history_router.register(r'', CreditHistoryViewSet, basename='credit_history')
-
-moneylender_router = DefaultRouter()
-moneylender_router.register(r'', MoneylenderViewSet, basename='moneylender')
-
-#Creacion del router y registro de los endpoints de borrower y loans
-Borrower_router = DefaultRouter()
-Borrower_router.register(r'', BorrowerViewSet, basename='borrower')
-
-Loan_router = DefaultRouter()
-Loan_router.register(r'', LoanViewSet, basename='loan')
-
-user_router = DefaultRouter()
-user_router.register(r'', UserViewSet, basename='user')
+db_routers = register_routers()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,14 +16,19 @@ urlpatterns = [
     path('', include('moffin.urls')),
     path('login/', LoginView.as_view()),
     path('register/', RegisterView.as_view()),
-    # Incluyendo las rutas de los diferentes routers
-    path('credit_history/', include(credit_history_router.urls)),
-    path('moneylender/', include(moneylender_router.urls)),
-    path('borrower/', include(Borrower_router.urls)),
-    path('loan/', include(Loan_router.urls)),
-    path('user/', include(user_router.urls)),
     
-    path('validate-ine/', ImageNameExtractorView.as_view(), name='validate-ine'),
+    # Incluyendo las rutas de los diferentes routers de database
+    path('credit_history/', include(db_routers['credit_history'].urls)),
+    path('moneylender/', include(db_routers['moneylender'].urls)),
+    path('borrower/', include(db_routers['borrower'].urls)),
+    path('loan/', include(db_routers['loan'].urls)),
+    path('user/', include(db_routers['user'].urls)),
+    path('transaction/', include(db_routers['transaction'].urls)),
+    path('request/', include(db_routers['request'].urls)),
+    path('active_loan/', include(db_routers['active_loan'].urls)),
+
+    
+    path('validate_ine/', ImageNameExtractorView.as_view(), name='validate_ine'),
     
     #Endopoints de PayPal
     path('paypal/create-payment/', CreatePaymentView.as_view(), name='create-payment'),

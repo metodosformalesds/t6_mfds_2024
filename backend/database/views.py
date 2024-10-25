@@ -3,11 +3,13 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
-from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan
-from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, LoansSerializer
+from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan, ActiveLoan
+from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer 
+from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
+from rest_framework.routers import DefaultRouter
 
 # Create your views here.
 
@@ -23,7 +25,6 @@ class LoanViewSet(viewsets.ModelViewSet):
 
 #Vista de modelo para money lender
 class MoneylenderViewSet(viewsets.ModelViewSet):
-
     queryset = Moneylender.objects.all()
     serializer_class = MoneylenderSerializer
 
@@ -37,4 +38,37 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-#Vista de SAT del moffin
+class RequestViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = RequestSerializer
+    
+class TransactionViewSet(viewsets.ModelViewSet):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+    
+class ActiveLoanViewSet(viewsets.ModelViewSet):
+    queryset = ActiveLoan.objects.all()
+    serializer_class = ActiveLoanSerializer
+    
+def register_routers():
+    """
+    Función para registrar múltiples routers.
+    """
+    # Lista de viewsets con sus respectivos basenames
+    viewsets_with_basenames = [
+        ('credit_history', CreditHistoryViewSet),
+        ('moneylender', MoneylenderViewSet),
+        ('borrower', BorrowerViewSet),
+        ('loan', LoanViewSet),
+        ('user', UserViewSet),
+        ('request', RequestViewSet),
+        ('transaction', TransactionViewSet),
+        ('active_loan', ActiveLoanViewSet)
+    ]
+    routers = {}
+    for basename, viewset in viewsets_with_basenames:
+        router = DefaultRouter()
+        router.register(r'', viewset, basename=basename)
+        routers[basename] = router
+        
+    return routers
