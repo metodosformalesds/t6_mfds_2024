@@ -65,6 +65,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class ActiveLoanViewSet(viewsets.ModelViewSet):
     queryset = ActiveLoan.objects.all()
     serializer_class = ActiveLoanSerializer
+
     
 def register_routers():
     """
