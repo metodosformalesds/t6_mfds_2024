@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 # Serializer para manejar la consulta del score:
 class UploadScore(serializers.Serializer):
-    birthdate= serializers.DateField(required=True, format='%Y-%m-%d') 
+    birthdate= serializers.CharField(required=True) 
     firstName= serializers.CharField(required=True, max_length=255)  
     firstLastName= serializers.CharField(required=True, max_length=255)  
     rfc= serializers.CharField(required=True, max_length=255)  
