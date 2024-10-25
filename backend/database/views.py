@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.routers import DefaultRouter
-
+from services.Moffin.validation import UploadScore
 # Create your views here.
 
 #Vista de modelo para Borrower
@@ -49,6 +49,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class ActiveLoanViewSet(viewsets.ModelViewSet):
     queryset = ActiveLoan.objects.all()
     serializer_class = ActiveLoanSerializer
+
     
 def register_routers():
     """

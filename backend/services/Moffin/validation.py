@@ -1,9 +1,16 @@
 from rest_framework import serializers
 
-# Serializer para manejar la consulta del SAT:
+# Serializer para manejar la consulta del score:
 class UploadScore(serializers.Serializer):
-    externalID= serializers.CharField(required=True, max_length=100)  # Campo para el Id
-    rfc=serializers.CharField(required=True, max_length=255)  # Campo para el rfc
-    CIEC=serializers.CharField(required=True, max_length=255)  # Campo para el CIEC 
-    startdate=serializers.DateField() #Campo de fecha de inicio.
-    enddat=serializers.DateField() #Campo de fecha de finalización.
+    birthdate= serializers.DateField(required=True, format='%Y-%m-%d') 
+    firstName= serializers.CharField(required=True, max_length=255)  
+    firstLastName= serializers.CharField(required=True, max_length=255)  
+    rfc= serializers.CharField(required=True, max_length=255)  
+    address= serializers.CharField(required=True, max_length=255)  
+    city= serializers.CharField(required=True, max_length=255)  
+    municipality= serializers.CharField(required=True, max_length=255)  
+    state= serializers.CharField(required=True, max_length=255)  
+    zipCode= serializers.CharField(required=True, max_length=255)  
+    neighborhood= serializers.CharField(required=True, max_length=255)  
+    country= serializers.CharField(required=True, max_length=255)  
+    nationality= serializers.CharField(required=True, max_length=255)  
