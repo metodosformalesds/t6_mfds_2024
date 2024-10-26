@@ -3,9 +3,9 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
-from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan, ActiveLoan
+from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
 from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer 
-from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer
+from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
@@ -23,18 +23,30 @@ class BorrowerViewSet(viewsets.ModelViewSet):
 class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
     serializer_class = LoansSerializer
-    
+
+
+    def list(self, request):
+        borrower = request.user.borrower  # Obtener el objeto Borrower del usuario autenticado
+
+        # Obtener todos los préstamos
+        loans = Loan.objects.all()
+
+        # Serializar los préstamos y pasar el ID del Borrower en el contexto
+        serializer = BorrowerLoanSerializer(loans, many=True, context={'borrower_id': borrower.id})
+
+        return Response(serializer.data)
+
     def create(self, request, *args, **kwargs):
         # Verificar si el usuario es un Moneylender
-        if not hasattr(request.user, 'moneylender'):
-            raise PermissionDenied("No tienes permiso para crear un préstamo.")
+        # if not hasattr(request.user, 'moneylender'):
+        #     raise PermissionDenied("No tienes permiso para crear un préstamo.")
 
         # Obtener el Moneylender asociado al usuario
-        moneylender = request.user.moneylender
+        # moneylender = request.user.moneylender
 
-        # Verificar si is_subscribed es True
-        if not moneylender.is_subscribed:
-            raise PermissionDenied("El Moneylender no está suscrito.")
+        # # Verificar si is_subscribed es True
+        # if not moneylender.is_subscribed:
+        #     raise PermissionDenied("El Moneylender no está suscrito.")
 
         # Si todas las verificaciones son satisfactorias, proceder a crear el préstamo
         return super().create(request, *args, **kwargs)
@@ -55,7 +67,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 class RequestViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = Request.objects.all()
     serializer_class = RequestSerializer
     
 class TransactionViewSet(viewsets.ModelViewSet):
