@@ -16,7 +16,7 @@ from services.Score.serializer import ScoreSerializer
 
 # Funciones para aumentar y reducir el score
 porcentaje_Prestamo = 0.06
-Descuento_MalP = 0.1
+Descuento_MalP = 0.04
 
 def aumentar_Score(monto, n_cuotas, pagos_fuera_fecha, total):
     valor_obtenido = n_cuotas * (monto * porcentaje_Prestamo)
