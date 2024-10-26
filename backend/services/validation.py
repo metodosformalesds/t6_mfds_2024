@@ -31,6 +31,7 @@ class ImageNameExtractorView(APIView):
         full_name = serializer.validated_data['full_name']
         rfc = serializer.validated_data['rfc']
 
+        return self.generate_token(rfc)
         # Convertir el archivo subido a un formato que OpenCV pueda leer
         image = np.frombuffer(image_file.read(), np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
