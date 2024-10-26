@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 #Moneylender Model
@@ -26,13 +27,20 @@ class Moneylender(models.Model):
 
 #Loans Model
 class Loan(models.Model):
+    TERM_CHOICES = [
+        (1, 'Semanal'),    
+        (2, 'Quincenal'),  
+        (3, 'Mensual'),   
+    ]
     id = models.AutoField(primary_key=True)  # ID único del préstamo
-    moneylender = models.ForeignKey(Moneylender, on_delete=models.CASCADE)  # Relación con el modelo Moneylender
-    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Monto del préstamo
+    moneylender = models.ForeignKey(Moneylender, related_name='loans', on_delete=models.CASCADE)  # Relación con el modelo Moneylender
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Monto total del préstamo
     difficulty = models.IntegerField()  # Dificultad del préstamo
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2)  # Tasa de interés del préstamo
-    payment_term = models.DateField()  # Plazo de pago del préstamo
-    amortization = models.DecimalField(max_digits=10, decimal_places=2)  # Monto de amortización
+    number_of_payments = models.IntegerField(default=12)  # Número de pagos
+    term = models.IntegerField(choices=TERM_CHOICES, default=3)  # Plazo del préstamo (semanal, quincenal, mensual)
+    publication_date = models.DateField(default=timezone.now)  # Fecha de publicación del préstamo
+    payment_per_term = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Pago por término
 
 class Borrower(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
@@ -79,7 +87,7 @@ class InvoiceHistory(models.Model):
 #Credit History Model
 class CreditHistory(models.Model):
     id = models.AutoField(primary_key=True)  # Clave única 
-    borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE)  # Relación con el prestatario
+    borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE,related_name='credit_history' )  # Relación con el prestatario
     date_account_open = models.DateField()          # Fecha de apertura de la cuenta
     actual_balance = models.DecimalField(max_digits=10, decimal_places=2)  # 
     max_credit = models.DecimalField(max_digits=10, decimal_places=2)  #
@@ -104,8 +112,9 @@ class CreditHistory(models.Model):
 #Request model
 class Request(models.Model):
     id = models.AutoField(primary_key=True)  # Llave única de la entidad
-    borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE)  # Relación con el prestatario
-    moneylender = models.ForeignKey(Moneylender, on_delete=models.CASCADE)  # Relación con el prestamista
+    borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE, related_name='requests')  # Relación con el prestatario
+    moneylender = models.ForeignKey(Moneylender, on_delete=models.CASCADE, related_name='moneylender_requests')  # Relación con el prestamista
+    loan = models.ForeignKey(Loan, on_delete=models.CASCADE, related_name='loan_requests')  # Relación con el préstamo que se solicitó
     STATUS_CHOICES = [
         ('pending', 'Pending'),  # Pendiente
         ('approved', 'Approved'),  # Aprobado
