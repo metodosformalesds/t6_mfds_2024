@@ -7,20 +7,21 @@ import LoginPage from "./pages/LoginPage";
 import Subscription from "./pages/Subscription";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import HomePage from "./pages/HomePage";
-
+import { AuthProvider } from "./context/AuthContext";
 const App = () => {
   return (
+    <AuthProvider> 
     <Router>
-  
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/home" element={<HomePage/>}/>
-          <Route path="/login" element={<LoginPage/>}/>
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/subscription" element={<Subscription />} />
-          <Route path="/TermsAndConditions" element={<TermsAndConditions />} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/subscription" element={<Subscription />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+      </Routes>
     </Router>
+  </AuthProvider>
   );
 };
 

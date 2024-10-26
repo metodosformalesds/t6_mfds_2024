@@ -1,16 +1,28 @@
-import React from "react";
+import { React, useEffect } from "react";
 import Layout from "../components/Layout";
-import { CarouselDefault } from "../components/LandingPage/Carousell";
-import { ContentDesign } from "../components/LandingPage/Content";
-import PaymentButton from "../components/PaymentButton";
+import { Sidebar } from "../components/SideBar";
+import Loans from "../components/Loans";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 const HomePage = () => {
+  const { authData } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authData.accessToken) {
+      navigate("/login");
+    }
+  }, [authData, navigate]);
+
   return (
-    <Layout>
-    
-    <PaymentButton></PaymentButton>
+    <Layout isHome={false}>
+      <div className="flex p-4">
+        <Sidebar></Sidebar>
+        <Loans />
+      </div>
     </Layout>
   );
-
 };
 
 export default HomePage;

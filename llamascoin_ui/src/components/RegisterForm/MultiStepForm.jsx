@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Stepper from "./Stepper";
 import { Step1 } from "./Step1";
@@ -12,10 +12,12 @@ import { Link, useNavigate } from "react-router-dom";
 import StatusComponent from "../StatusComponent";
 import axios from "axios";
 import { apiHost } from "../../utils/apiconfig";
+import { useAuth } from "../../context/AuthContext";
 
 export function MultiStepForm() {
   const [status, setStatus] = useState("");
   const navigate = useNavigate();
+  const { login, authData } = useAuth(); 
   const {
     register,
     handleSubmit,
@@ -56,9 +58,14 @@ export function MultiStepForm() {
     },
   });
 
+  useEffect(() => {
+    if (authData.accessToken) {
+      navigate('/home'); 
+    }
+  }, [authData, navigate]);
   
   const [step, setStep] = useState(0);
-  const [accessToken, setAccessToken] = useState(""); 
+ 
 
   const onSubmit = async () => {
     // Obtener todos los valores del formulario
@@ -125,6 +132,7 @@ export function MultiStepForm() {
       if (response.status === 201) {
         setStatus("success");
         console.log("Registro exitoso:", response.data);
+        await login(response.data)
         navigate('/home');
       } else {
         setStatus("error");
@@ -155,7 +163,7 @@ export function MultiStepForm() {
       try {
         setStatus("loading");
         const response = await axios.post(
-          apiHost+ "validate-ine/",
+          apiHost+ "validate_ine/",
           formDataToSend,
           {
             headers: {

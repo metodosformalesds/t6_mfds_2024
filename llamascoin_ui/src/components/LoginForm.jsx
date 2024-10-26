@@ -7,7 +7,11 @@ import axios from 'axios'
 import StatusComponent from "./StatusComponent";
 import { formValidators } from "../utils/formValidators";
 import { apiHost } from "../utils/apiconfig";
+import { useAuth } from "../context/AuthContext"; 
+
+
 export function LoginForm({ onSubmit }) {
+  const { login } = useAuth(); 
   const [status, setStatus] = useState("");
   const navigate = useNavigate();
   const {
@@ -33,6 +37,7 @@ export function LoginForm({ onSubmit }) {
       });
 
       console.log(response.data);
+      await login(response.data);
       setStatus("success");
       navigate('/home');
 
