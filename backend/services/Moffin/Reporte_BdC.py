@@ -3,20 +3,20 @@ from rest_framework.response import Response
 from rest_framework import status
 import requests
 from database.models import Borrower
-from database.serializers import BorrowerSerializer
+from services.Moffin.serializers import BdCSerializer
 import os
 
 #Puse como defecto el token que habias puesto en caso de que no crees el .env aun
-TOKEN_MOFFIN = os.getenv('ACCESS_TOKEN_MOFFIN', 'd0a8721978878bd705228203826fa9178a1f2c496db20e4402f92ff84b2b3379')
+TOKEN_MOFFIN = os.getenv('ACCESS_TOKEN_MOFFIN', 'Token d0a8721978878bd705228203826fa9178a1f2c496db20e4402f92ff84b2b3379')
 class ReporteBdC(APIView):
     #Agreguee el serializer_class para hacer pruebas en swagger
-    serializer_class = BorrowerSerializer
+    serializer_class = BdCSerializer
     def post(self, request, *args, **kwargs):
         borrower = Borrower.objects.all()
-        serializer = BorrowerSerializer(borrower, many=True)
+        serializer = BdCSerializer(borrower, many=True)
 
         # Configurar la URL de la API y obtener el token de la variable de entorno
-        api_url = "https://staging.moffin.mx/api/v1/query/bureau_pf"
+        api_url = "https://sandbox.moffin.mx/api/v1/query/bureau_pf"
         
         headers = {
             'Authorization': f'Bearer {TOKEN_MOFFIN}',  
@@ -24,21 +24,19 @@ class ReporteBdC(APIView):
         }
 
         data = {
-            'birthdate': request.data.get('birt_date', None),
-            'firstName': request.data.get('firsn_name', None),
-            'middleName': request.data.get('midle_Name', None),
-            'firstLastName': request.data.get('first_surname', None),
-            'secondLastName': request.data.get('second_surname', None),
-            'accountType' : request.data.get('accountType', None),
+            'birthdate': request.data.get('birtdate', None),
+            'firstName': request.data.get('firstName', None),
+            'firstLastName': request.data.get('firstLastName', None),
+            'secondLastName': request.data.get('secondLastName', None),
             'rfc': request.data.get('rfc', None),
-            'address': request.data.get('full_address', None),
-            'municipality': request.data.get('municipality', None),
-            'neighborhood': request.data.get('neighborhood', None),
-            'zipCode': request.data.get('postal_code', None),
-            'state': request.data.get('state', None),
+            'accountType': request.data.get('accountType', None),
+            'address': request.data.get('address', None),
             'city': request.data.get('city', None),
+            'municipality': request.data.get('municipality', None),
+            'state': request.data.get('state', None),
+            'zipCode': request.data.get('zipCode', None),
+            'neighborhood': request.data.get('neighborhood', None),
             'country': request.data.get('country', None),
-            'exteriorNumber': request.data.get('exteriorNumber', None),
             'nationality': request.data.get('nationality', None)
         }
         
