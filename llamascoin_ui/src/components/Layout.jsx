@@ -1,13 +1,12 @@
 import React from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-
-const Layout = ({ children }) => {
+const Layout = ({ children, isHome=true }) => {
   return (
     <div>
-      <Navbar />
+      {isHome && <Navbar />}
       <main>{children}</main>
-      <Footer />
+      {isHome && <Footer />}
     </div>
   );
 };
