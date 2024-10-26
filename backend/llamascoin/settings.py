@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'Cuenta',
-    'moffin',
     #Spectacular para una documentacion y pruebas de la API
     'drf_spectacular',
 ]
