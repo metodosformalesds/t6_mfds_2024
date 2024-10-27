@@ -9,7 +9,7 @@ import os
 TOKEN_MOFFIN = os.getenv('ACCESS_TOKEN_MOFFIN', 'Token d0a8721978878bd705228203826fa9178a1f2c496db20e4402f92ff84b2b3379')
 
 class ReporteSerializer(serializers.Serializer):
-    id = serializers.CharField(required=True)  # Ajusta el campo para que coincida con tu modelo
+    user = serializers.IntegerField(required=True)  
 
 class Reporte(APIView):
     serializer_class = ReporteSerializer
@@ -17,35 +17,35 @@ class Reporte(APIView):
     def post(self, request):
         serializer = ReporteSerializer(data=request.data)
         if serializer.is_valid():
-            id = serializer.validated_data.get('id')
+            user = serializer.validated_data.get('user')
             
             try:
-                borrower = Borrower.objects.get(id=id)
+                borrower = Borrower.objects.get(id=user)
             except Borrower.DoesNotExist:
                 return Response({'error': 'Borrower not found.'}, status=status.HTTP_404_NOT_FOUND)
             
             # Datos específicos del prestatario para la API externa
-            data = {
-                'birthdate': borrower.get('birthdate'),
-                'firstName': borrower.get('first_name'),
-                'firstLastName': borrower.get('first_last_name'),
-                'secondLastName': borrower.get('second_last_name'),
-                'rfc': borrower.get('rfc'),
-                'accountType': borrower.get('account_type'),
-                'address': borrower.get('address'),
-                'city': borrower.get('city'),
-                'municipality': borrower.get('municipality'),
-                'state': borrower.get('state'),
-                'zipCode': borrower.get('zip_code'),
-                'neighborhood': borrower.get('neighborhood'),
-                'country': borrower.get('country'),
-                'nationality': borrower.get('nationality')
+            data = {    
+                'birthdate': borrower.birth_date.strftime('%Y-%m-%d'),
+                'firstName': borrower.first_name,
+                'firstLastName': borrower.first_name,
+                'secondLastName': borrower.second_surname,
+                'rfc': borrower.rfc,
+                'accountType': "PF",
+                'address': borrower.full_address,
+                'city': borrower.city,
+                'municipality': borrower.municipality,
+                'state': borrower.state,
+                'zipCode': borrower.postal_code,
+                'neighborhood': borrower.neighborhood,
+                'country': borrower.country,
+                'nationality': borrower.nationality
             }
 
             # Configurar la solicitud a la API externa
             api_url = "https://sandbox.moffin.mx/api/v1/query/bureau_pf"
             headers = {
-                'Authorization': f'Bearer {TOKEN_MOFFIN}',
+                'Authorization': 'Token d0a8721978878bd705228203826fa9178a1f2c496db20e4402f92ff84b2b3379',
                 'Content-Type': 'application/json'
             }
 
