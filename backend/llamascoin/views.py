@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view 
 from rest_framework.response import Response
 from .serializers import UserSerializer, UserRegistrationSerializer, UserLoginSerializer
-from database.serializers import BorrowerSerializer, MoneylenderSerializer
+from database.serializers import BorrowerSerializer, MoneylenderSerializer, RequestSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -9,6 +9,17 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
+from database.models import Request
+from services.filters import requestfilter
+
+class RequestViewSet(viewsets.ModelViewSet):
+    queryset = Request.objects.all()
+    serializer_class = RequestSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = requestfilter
+
 
 class LoginView(APIView):
     serializer_class = UserLoginSerializer
