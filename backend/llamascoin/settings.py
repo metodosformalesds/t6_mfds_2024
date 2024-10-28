@@ -175,3 +175,16 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Mail
+
+#  Acceder a las variables de entorno
+
+ACCESS_TOKEN_MOFFIN = os.getenv("ACCESS_TOKEN_MOFFIN")
+MAILTRAP_HOST = os.getenv("MAILTRAP_HOST")
+MAILTRAP_P = os.getenv("MAILTRAP_P")
+MAILTRAP_H_USER = os.getenv("MAILTRAP_H_USER")
+
+EMAIL_HOST = MAILTRAP_HOST
+EMAIL_HOST_USER =MAILTRAP_H_USER
+EMAIL_HOST_PASSWORD = MAILTRAP_P
+EMAIL_PORT = '2525'
