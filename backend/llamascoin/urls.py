@@ -2,14 +2,19 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from . import views
 from llamascoin.views import RegisterView, LoginView
-from database.views import register_routers
+from database.views import register_routers, RequestViewSet
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
 from services.Moffin.Moffin import ObtenerSat
 from services.Moffin.Reporte_BdC import Reporte
 from services.Score.score import ObtenerScore
+from rest_framework.routers import DefaultRouter
 db_routers = register_routers()
+
+filter_router = DefaultRouter()
+filter_router.register(r'filter', RequestViewSet, basename='filter')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +31,7 @@ urlpatterns = [
     path('request/', include(db_routers['request'].urls)),
     path('active_loan/', include(db_routers['active_loan'].urls)),
 
+    path('filter/', include(filter_router.urls)),
     
     path('validate_ine/', ImageNameExtractorView.as_view(), name='validate_ine'),
     
@@ -34,7 +40,8 @@ urlpatterns = [
     path('paypal/payout/', SendPayoutView.as_view(), name='send-payout'),
     path('paypal/return/', PayPalReturnView.as_view(), name='paypal-return'), 
     path('paypal/cancel/', PayPalCancelView.as_view(), name='paypal-cancel'),
-    
+    path('paypal/create-product/', CreatePayPalProductView.as_view(), name='paypal-create-product'),
+    path('paypal/create-plan/', CreatePayPalBillingPlanView.as_view(), name='paypal-create-plan' ),
     
     # Endpoint para el swapper
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
