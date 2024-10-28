@@ -2,7 +2,7 @@ import os
 import requests
 from rest_framework.views import APIView
 from rest_framework import status
-from services.paypal.serializers import PaymentSerializer, PayoutSerializer 
+from services.paypal.serializers import PaymentSerializer, PayoutSerializer, PayPalProductSerializer
 from database.models import Transaction
 from rest_framework.response import Response
 
@@ -13,7 +13,6 @@ def get_paypal_access_token():
     client_id = CLIENT_ID_PAYPAL
     secret = SECRET_PAYPAL
     url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
-    url = "https://sandbox.moffin.mx/api/v1/query/bureau_pf"
     headers = {
         "Accept": "application/json",
         "Accept-Language": "en_US"
@@ -156,3 +155,92 @@ class PayPalCancelView(APIView):
     def get(self, request):
         return Response({"message": "Pago cancelado"}, status=status.HTTP_200_OK)
 
+
+
+class CreatePayPalProductView(APIView):  
+    serializer_class = PayPalProductSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = PayPalProductSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            access_token = get_paypal_access_token()
+            if not access_token:
+                return Response({"error": "Could not retrieve PayPal access token"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            url = "https://api-m.sandbox.paypal.com/v1/catalogs/products"
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {access_token}",
+                "PayPal-Request-Id": "REQUEST-ID"
+            }
+            response = requests.post(url, headers=headers, json=serializer.validated_data)
+
+            if response.status_code == 201:
+                return Response(response.json(), status=status.HTTP_201_CREATED)
+            else:
+                return Response(response.json(), status=response.status_code)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class CreatePayPalBillingPlanView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        
+        access_token = get_paypal_access_token()
+        if not access_token:
+            return Response({"error": "Could not retrieve PayPal access token"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        url = "https://api-m.sandbox.paypal.com/v1/billing/plans"
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {access_token}",
+            "PayPal-Request-Id": "12"
+        }
+
+       
+        data = {
+        "product_id": "PROD-3G8497537T6075127",
+        "name": "LlamasCoin Subscription Plan",
+        "billing_cycles": [
+            {
+                "tenure_type": "REGULAR",
+                "sequence": 1,
+                "frequency": {
+                    "interval_unit": "MONTH",
+                    "interval_count": 1
+                },
+                "total_cycles": 12,
+                "pricing_scheme": {
+                    "fixed_price": {
+                        "value": "50",
+                        "currency_code": "USD"
+                    }
+                }
+            }
+        ],
+        "payment_preferences": {
+            "auto_bill_outstanding": True,
+            "setup_fee": {
+                "value": "0",
+                "currency_code": "USD"
+            },
+            "setup_fee_failure_action": "CONTINUE",
+            "payment_failure_threshold": 3
+        },
+        "description": "Plan plus para el servicio de prestamos",
+        "status": "ACTIVE",
+        "taxes": {
+            "percentage": "10",
+            "inclusive": False
+        }
+    }
+        response = requests.post(url, headers=headers, json=data)
+
+        if response.status_code == 201:
+            return Response(response.json(), status=status.HTTP_201_CREATED)
+        else:
+            return Response(response.json(), status=response.status_code)
+
+  

@@ -5,7 +5,7 @@ from llamascoin.views import RegisterView, LoginView
 from database.views import register_routers
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
+from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView, CreatePayPalProductView, CreatePayPalBillingPlanView
 from services.Moffin.Moffin import ObtenerSat
 from services.Moffin.Reporte_BdC import ReporteBdC
 from services.Moffin.Reporte import Reporte
@@ -36,7 +36,8 @@ urlpatterns = [
     path('paypal/payout/', SendPayoutView.as_view(), name='send-payout'),
     path('paypal/return/', PayPalReturnView.as_view(), name='paypal-return'), 
     path('paypal/cancel/', PayPalCancelView.as_view(), name='paypal-cancel'),
-    
+    path('paypal/create-product/', CreatePayPalProductView.as_view(), name='paypal-create-product'),
+    path('paypal/create-plan/', CreatePayPalBillingPlanView.as_view(), name='paypal-create-plan' ),
     
     # Endpoint para el swapper
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
