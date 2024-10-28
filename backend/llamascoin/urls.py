@@ -7,14 +7,12 @@ from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
 from services.Moffin.Moffin import ObtenerSat
-from services.Moffin.Reporte_BdC import ReporteBdC
-from services.Moffin.Reporte import Reporte
+from services.Moffin.Reporte_BdC import Reporte
 from services.Score.score import ObtenerScore
 db_routers = register_routers()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('Cuenta.urls')),
     path('login/', LoginView.as_view()),
     path('register/', RegisterView.as_view()),
     
@@ -44,11 +42,8 @@ urlpatterns = [
 
     #Endopoints de Moffin
     path('Moffin/SAT/', ObtenerSat.as_view(), name='obtener-SAT'),
-    path('Moffin/BdC/', ReporteBdC.as_view(), name='Consulta-BdC' ),
-    path('Moffin/Reporte/', Reporte.as_view(), name='Reporte' ),
+    path('Moffin/Reporte/', Reporte.as_view(), name='Reporte_BdC' ),
 
     #Endopoints de Score
     path('Score/score/', ObtenerScore.as_view(), name='operacion_score')
-
-
 ]

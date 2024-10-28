@@ -27,20 +27,22 @@ class Moneylender(models.Model):
 
 #Loans Model
 class Loan(models.Model):
-    TERM_CHOICES = [
+    TERM_CHOICES = [ #Eleccion de plazos
         (1, 'Semanal'),    
         (2, 'Quincenal'),  
         (3, 'Mensual'),   
     ]
     id = models.AutoField(primary_key=True)  # ID único del préstamo
     moneylender = models.ForeignKey(Moneylender, related_name='loans', on_delete=models.CASCADE)  # Relación con el modelo Moneylender
-    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Monto total del préstamo
+    amount = models.DecimalField(max_digits=10, decimal_places=2)# Monto total del préstamo
+    total_amount= models.DecimalField(max_digits=10, decimal_places=2,null=True) # Monto total con intereses
     difficulty = models.IntegerField()  # Dificultad del préstamo
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2)  # Tasa de interés del préstamo
     number_of_payments = models.IntegerField(default=12)  # Número de pagos
     term = models.IntegerField(choices=TERM_CHOICES, default=3)  # Plazo del préstamo (semanal, quincenal, mensual)
     publication_date = models.DateField(default=timezone.now)  # Fecha de publicación del préstamo
-    payment_per_term = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Pago por término
+    payment_per_term = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Pago periodico
+    duration_loan = models.CharField(max_length=50, blank=True, null=True) #Duracion de prestamo expresado en meses y dias
 
 class Borrower(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
@@ -83,12 +85,11 @@ class InvoiceHistory(models.Model):
     invoice_pay = models.BooleanField()  # Indicativo de si ya se pagó la factura
     borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE, related_name='invoices')
 
-#Borrower Model
-#Credit History Model
+
 class CreditHistory(models.Model):
     id = models.AutoField(primary_key=True)  # Clave única 
     borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE,related_name='credit_history' )  # Relación con el prestatario
-    date_account_open = models.DateField()          # Fecha de apertura de la cuenta
+    date_account_open = models.DateField(null=True, blank=True)          # Fecha de apertura de la cuenta
     actual_balance = models.DecimalField(max_digits=10, decimal_places=2)  # 
     max_credit = models.DecimalField(max_digits=10, decimal_places=2)  #
     lim_credit = models.DecimalField(max_digits=10, decimal_places=2)  #
@@ -106,6 +107,7 @@ class CreditHistory(models.Model):
     num_mop7 = models.IntegerField()                # Retrasos de 150 a 179 días
     check_date = models.DateField()                 # Fecha de consulta
     code_score = models.FloatField()              # Score crediticio
+    val_score = models.IntegerField(default=0)
     place_of_work = models.CharField(max_length=100)  # Lugar de trabajo
     salary = models.FloatField() # Salario
 
@@ -127,13 +129,19 @@ class ActiveLoan(models.Model):
     id = models.AutoField(primary_key=True)  # ID único del préstamo activo
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)  # Relación con el modelo Loans
     borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE)  # Relación con el modelo Borrower (quien recibe el dinero)
-    moneylender = models.ForeignKey(Moneylender, on_delete=models.CASCADE)  # Relación con el modelo Moneylender (quien presta el dinero)
-    total_debt = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad total de la deuda
+    moneylender = models.ForeignKey(Moneylender, on_delete=models.CASCADE)  # Relación con el modelo Moneylender (quien presta el dinero) 
     total_debt_paid = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad pagada por el prestatario
-    amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad que debe pagar el prestatario
-    day_of_pay = models.DateField()  # Fecha de pago actual
-    past_due_balance = models.DecimalField(max_digits=10, decimal_places=2)  # Saldo vencido
-
+    amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad pendiente de pagar
+    start_date = models.DateField(null=True) #Fecha de inicio del prestamo 
+    
+class Payments(models.Model):
+    id = models.AutoField(primary_key=True)
+    ActiveLoan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE)
+    Number_of_pay = models.IntegerField() #Numero que identifica el numero de pago
+    date_to_pay = models.DateField() #Fecha limite en que se tiene que hacer el pago 
+    paid = models.BooleanField(null=True) # Indicador si ya se pago o no 
+    paid_on_time = models.BooleanField(null=True) # Indicador si se pago en la fecha o no
+    
 class Transaction(models.Model):
     TRANSACTION_TYPE_CHOICES = [
         ('payment', 'Payment'),
