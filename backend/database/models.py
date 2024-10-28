@@ -122,7 +122,8 @@ class Request(models.Model):
         ('completed', 'Completed'),  # Completado
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')  # Estado de la solicitud
-    
+    created_at = models.DateTimeField(auto_now_add=True)  # Fecha de creación del registro
+
 class ActiveLoan(models.Model):
     id = models.AutoField(primary_key=True)  # ID único del préstamo activo
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)  # Relación con el modelo Loans

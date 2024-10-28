@@ -29,7 +29,6 @@ class RequestSerializer(serializers.ModelSerializer):
         
 #Serializer del prestatario
 class BorrowerSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True)
     credit_history = CreditHistorySerializer(many=True, read_only=True) 
 
     class Meta:
@@ -38,7 +37,7 @@ class BorrowerSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date',
             'phone_number', 'rfc', 'ciec', 'full_address', 'city', 'neighborhood', 'postal_code', 
             'state', 'country', 'municipality', 'nationality', 'possibility_of_pay', 
-            'score_llamas', 'credit_history', 'user'
+            'score_llamas', 'credit_history'
         ]
 #Serializer de los detalles de los prestamos
 class ActiveLoansSerializer(serializers.ModelSerializer):
@@ -102,3 +101,18 @@ class BorrowerLoanSerializer(serializers.ModelSerializer):
         if request:
             return request.status  # Retorna el estado si existe
         return ''  
+    
+
+class MoneylenderBorrowerSerializer(serializers.ModelSerializer):
+    credit_history = CreditHistorySerializer(many=True, read_only=True) 
+    class Meta:
+        model = Borrower
+        fields = ['id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date', 'rfc', 'score_llamas','credit_history']
+    
+class MoneylenderRequestsSerializer(serializers.ModelSerializer):
+    borrower = MoneylenderBorrowerSerializer(read_only=True)
+    loan = LoansSerializer(read_only=True) 
+
+    class Meta:
+        model = Request
+        fields = ['id', 'borrower', 'loan', 'status', 'created_at']  
