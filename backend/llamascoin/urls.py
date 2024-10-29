@@ -5,7 +5,7 @@ from llamascoin.views import RegisterView, LoginView
 from database.views import register_routers, RequestViewSet
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView
+from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView, CreatePayPalProductView, CreatePayPalBillingPlanView
 from services.Moffin.Moffin import ObtenerSat
 from services.Moffin.Reporte_BdC import Reporte
 from services.Score.score import ObtenerScore

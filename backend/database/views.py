@@ -1,18 +1,19 @@
 import os
+from django.utils import timezone
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
 from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
-from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer 
+from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer
 from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.routers import DefaultRouter
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_403_FORBIDDEN
-
+from rest_framework import serializers
+from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_403_FORBIDDEN, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 # Create your views here.
 
 #Vista de modelo para Borrower
@@ -53,19 +54,51 @@ class LoanViewSet(viewsets.ModelViewSet):
     
 
     def create(self, request, *args, **kwargs):
-        # Verificar si el usuario es un Moneylender
-        # if not hasattr(request.user, 'moneylender'):
-        #     raise PermissionDenied("No tienes permiso para crear un préstamo.")
+            # Verificar si el usuario es un Moneylender
+            if not hasattr(request.user, 'moneylender'):
+                raise PermissionDenied("No tienes permiso para crear un préstamo.")
 
-        # Obtener el Moneylender asociado al usuario
-        # moneylender = request.user.moneylender
+            # Obtener el Moneylender asociado al usuario
+            moneylender = request.user.moneylender
 
-        # # Verificar si is_subscribed es True
-        # if not moneylender.is_subscribed:
-        #     raise PermissionDenied("El Moneylender no está suscrito.")
+            # Verificar si is_subscribed es True
+            # if not moneylender.is_subscribed:
+            #     raise PermissionDenied("El Moneylender no está suscrito.")
 
-        # Si todas las verificaciones son satisfactorias, proceder a crear el préstamo
-        return super().create(request, *args, **kwargs)
+            # Usar el serializer para validar los datos del préstamo
+            moneylender_loan_serializer = MoneylenderLoanSerializer(data=request.data)
+            if moneylender_loan_serializer.is_valid():
+                # Obtener los datos validados
+                validated_data = moneylender_loan_serializer.validated_data
+                
+                # Extraer los datos necesarios
+                loan_amount = validated_data['amount']
+                interest_rate = validated_data['interest_rate'] / 100  
+                number_of_payments = validated_data['number_of_payments']
+                term = validated_data['term']
+
+                # Calcular el total a pagar
+                total_amount = loan_amount + (loan_amount * interest_rate * number_of_payments)
+                # Calcular el pago por término
+                payment_per_term = total_amount / number_of_payments
+
+                # Crear el préstamo
+                loan = Loan.objects.create(
+                    moneylender=moneylender,
+                    amount=loan_amount,
+                    interest_rate=validated_data['interest_rate'],
+                    number_of_payments=number_of_payments,
+                    term=term,
+                    total_amount=total_amount,
+                    payment_per_term=payment_per_term,
+                    difficulty=12,  # Valor predeterminado
+                    duration_loan="Duración predeterminada",  # Valor predeterminado
+                    publication_date=timezone.now()
+                     
+                )
+                return Response(moneylender_loan_serializer.data, status=HTTP_201_CREATED)
+
+            return Response(moneylender_loan_serializer.errors, status=HTTP_400_BAD_REQUEST)  
 
 #Vista de modelo para money lender
 class MoneylenderViewSet(viewsets.ModelViewSet):
