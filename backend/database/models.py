@@ -35,7 +35,7 @@ class Loan(models.Model):
     id = models.AutoField(primary_key=True)  # ID único del préstamo
     moneylender = models.ForeignKey(Moneylender, related_name='loans', on_delete=models.CASCADE)  # Relación con el modelo Moneylender
     amount = models.DecimalField(max_digits=10, decimal_places=2)# Monto total del préstamo
-    total_amount= models.DecimalField(max_digits=10, decimal_places=2,null=True) # Monto total con intereses
+    total_amount= models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True) # Monto total con intereses
     difficulty = models.IntegerField()  # Dificultad del préstamo
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2)  # Tasa de interés del préstamo
     number_of_payments = models.IntegerField(default=12)  # Número de pagos
@@ -137,8 +137,8 @@ class ActiveLoan(models.Model):
     
 class Payments(models.Model):
     id = models.AutoField(primary_key=True)
-    ActiveLoan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE)
-    Number_of_pay = models.IntegerField() #Numero que identifica el numero de pago
+    active_loan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE)
+    number_of_pay = models.IntegerField() #Numero que identifica el numero de pago
     date_to_pay = models.DateField() #Fecha limite en que se tiene que hacer el pago 
     paid = models.BooleanField(null=True) # Indicador si ya se pago o no 
     paid_on_time = models.BooleanField(null=True) # Indicador si se pago en la fecha o no

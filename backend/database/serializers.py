@@ -82,6 +82,7 @@ class BorrowerLoanSerializer(serializers.ModelSerializer):
             'id',
             'moneylender',
             'amount',
+            'total_amount',
             'difficulty',
             'interest_rate',
             'number_of_payments',
