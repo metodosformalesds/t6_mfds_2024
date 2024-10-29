@@ -6,19 +6,17 @@ import {
   DialogHeader,
   Typography,
 } from "@material-tailwind/react";
+import { ProfileCard } from "./ProfileCard";
 
 export const ConfirmationModal = ({
   open,
   onClose,
-  type,
-  entity = "",
+  title,
+  message,
+  entity,
+
   onConfirm,
 }) => {
-  const title =
-    type === "lender"
-      ? "Confirmar solicitud al Prestamista"
-      : "Confirmar solicitud al Prestatario";
-  const message = `¿Seguro que desea solicitar el prestamo?`;
   return (
     <Dialog
       open={open}
@@ -26,15 +24,16 @@ export const ConfirmationModal = ({
       size="xs"
       className=" items-center justify-center"
     >
-      <DialogBody className="flex flex-col justify-center items-center">
-        <Typography variant="h3" color="blue-gray" className="text-center mb-4">
-          {entity[0]}
-        </Typography>
-        <Typography variant="h5" color="blue-gray" className="text-center mb-4">
-          {entity[1]}
-        </Typography>
+      {title && (
+        <DialogHeader>
+          <>{title}</>
+        </DialogHeader>
+      )}
 
-        <Typography color="blue-gray" className="text-center mb-4 ">
+      <DialogBody className="flex flex-col justify-center items-center">
+        <ProfileCard entity={entity} />
+
+        <Typography color="blue-gray" className="text-center my-4 ">
           {message}
         </Typography>
         <div className="flex gap-5">

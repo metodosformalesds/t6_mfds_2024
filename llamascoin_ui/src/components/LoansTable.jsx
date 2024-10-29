@@ -40,13 +40,10 @@ export function LoansTable() {
         const lender = loan.moneylender
           ? `${loan.moneylender.first_name} ${loan.moneylender.first_surname}`
           : "Desconocido";
-        const borrower = loan.borrower
-          ? `${loan.borrower.first_name} ${loan.borrower.first_surname}`
-          : "Desconocido";
+
 
         return {
           lender: lender,
-          borrower: borrower,
           amount: `$${parseFloat(loan.amount).toFixed(2)}`,
           interest: `${loan.interest_rate}%`,
           terms: `${loan.term} meses`,
@@ -128,7 +125,6 @@ export function LoansTable() {
               (
                 {
                   lender,
-                  borrower,
                   amount,
                   interest,
                   terms,
@@ -215,7 +211,7 @@ export function LoansTable() {
                           disabled={status == "pending"}
                           onClick={() => {
                             if (status !== "rejected") {
-                              handleStatusClick([lender, amount], "lender");
+                              handleStatusClick(lender, "lender");
                             }
                           }}
                         >
@@ -234,6 +230,7 @@ export function LoansTable() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         type={entityType}
+        message={"¿Seguro que desea solicitar el prestamo?"}
         entity={selectedEntity}
         onConfirm={handleConfirm}
       />
