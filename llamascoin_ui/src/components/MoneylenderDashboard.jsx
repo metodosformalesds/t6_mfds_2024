@@ -12,6 +12,8 @@ import {
 import CardDashboard from "./CardDashboard";
 import { RequestsTable } from "./RequestsTable";
 import { CurrencyDollarIcon } from "@heroicons/react/24/solid";
+import { MultiStepLoanForm } from "./CreateLoanForm/MultiStepLoanForm";
+const MoneylenderDashboard = () => {
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => setOpen(!open);
@@ -67,6 +69,7 @@ import { CurrencyDollarIcon } from "@heroicons/react/24/solid";
       <div />
 
       <Dialog open={open} handler={handleOpen}>
+        <MultiStepLoanForm  />
       </Dialog>
     </Card>
   );
