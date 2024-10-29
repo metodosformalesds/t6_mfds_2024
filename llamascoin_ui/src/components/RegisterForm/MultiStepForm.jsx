@@ -65,7 +65,8 @@ export function MultiStepForm() {
   }, [authData, navigate]);
   
   const [step, setStep] = useState(0);
- 
+  const [accessToken, setAccessToken] = useState(""); 
+
 
   const onSubmit = async () => {
     // Obtener todos los valores del formulario
@@ -179,7 +180,7 @@ export function MultiStepForm() {
           response.data.refresh &&
           response.data.access
         ) {
-          setAccessToken(response.data.access);
+          setAccessToken(response.data.access)
           setStatus("success");
           setStep((currentStep) => currentStep + 1);
           setStatus("");
