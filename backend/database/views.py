@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
 from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
-from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer
+from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer
 from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
@@ -156,10 +156,36 @@ class RequestViewSet(viewsets.ModelViewSet):
         # Seleccionar el serializer adecuado basado en el tipo de cuenta
         if hasattr(self.request.user, 'moneylender'):
             return MoneylenderRequestsSerializer
+        elif hasattr(self.request.user, 'borrower'):
+            return BorrowerRequestSerializer
         else:
             return RequestSerializer  # Usa el serializer por defecto
+        
+    def create(self, request, *args, **kwargs):
+        serializer = BorrowerRequestSerializer(data=request.data)
 
+        if serializer.is_valid():
+            moneylender_id = serializer.validated_data['moneylender_id']
+            loan_id = serializer.validated_data['loan_id']
 
+            try:
+                moneylender = Moneylender.objects.get(id=moneylender_id)
+                loan = Loan.objects.get(id=loan_id)
+            except (Moneylender.DoesNotExist, Loan.DoesNotExist):
+                return Response({"error": "Moneylender or Loan not found."}, status=HTTP_404_NOT_FOUND)
+
+            # Crear la instancia de Request
+            request_instance = Request.objects.create(
+                borrower=request.user.borrower,
+                moneylender=moneylender,
+                loan=loan,
+                status='pending'
+            )
+
+            response_serializer = BorrowerRequestSerializer(request_instance)
+            return Response(response_serializer.data, status=HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer

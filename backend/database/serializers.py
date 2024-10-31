@@ -129,4 +129,10 @@ class BorrowerCreditHistorySerializer(serializers.ModelSerializer):
         fields = [
             'first_name', 'middle_name', 'first_surname', 'second_surname', 'credit_history', 'rfc'
         ]
-        
+
+class BorrowerRequestSerializer(serializers.ModelSerializer):
+    moneylender_id = serializers.IntegerField()
+    loan_id = serializers.IntegerField()
+    class Meta:
+        model = Request
+        fields = ['moneylender_id', 'loan_id']
