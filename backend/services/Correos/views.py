@@ -21,7 +21,7 @@ def simple_mail(request):
 
 def html(request):
     subject='envio'
-    html_message=render_to_string('plantillas/envio.html',{'message':'prueba'})
+    html_message=render_to_string('plantillas/envio.html',{'message':'Ghana'})
     plain_message=strip_tags(html_message)
     from_email='u21210757@utp.edu.pe'
     to='a@gmail.com'
