@@ -69,7 +69,13 @@ CORS_ALLOW_METHODS = [
     "OPTIONS"
 ]
 
-# Application definition
+#Deploy configurations, extract to another file
+#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# CORS_ALLOW_CREDENTIALS = True
+# # Application definition
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -89,9 +95,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     #Cors como middleware para permitir peticiones
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
