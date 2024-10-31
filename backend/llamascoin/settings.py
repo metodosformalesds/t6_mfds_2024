@@ -36,7 +36,8 @@ ALLOWED_HOSTS = [
     'adrianrvzz.pythonanywhere.com', 
     'localhost',  
     '127.0.0.1', 
-    '54.165.87.139'
+    '54.165.87.139',
+    'llamascoin-api.xyz'
 ]
 #Dominios que permitira la aplicacion 
 CORS_ALLOWED_ORIGINS = [
@@ -46,6 +47,26 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:8080",
     "http://127.0.0.1:9000",
+    "https://llamascoin-ui.netlify.app",
+    "http://llamascoin-ui.netlify.app"
+]
+
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS"
 ]
 
 # Application definition
