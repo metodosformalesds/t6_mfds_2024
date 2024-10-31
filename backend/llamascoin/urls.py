@@ -10,6 +10,7 @@ from services.Moffin.Moffin import ObtenerSat
 from services.Moffin.Reporte_BdC import Reporte
 from services.Score.score import ObtenerScore
 from rest_framework.routers import DefaultRouter
+from services.Correos.views import simple_mail 
 db_routers = register_routers()
 
 filter_router = DefaultRouter()
@@ -52,5 +53,11 @@ urlpatterns = [
     path('Moffin/Reporte/', Reporte.as_view(), name='Reporte_BdC' ),
 
     #Endopoints de Score
-    path('Score/score/', ObtenerScore.as_view(), name='operacion_score')
+    path('Score/score/', ObtenerScore.as_view(), name='operacion_score'),
+    #Endopoints de correos
+    path('correos/',simple_mail)
+
+
 ]
+
+ 
