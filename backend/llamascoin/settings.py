@@ -134,7 +134,7 @@ ROOT_URLCONF = 'llamascoin.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'plantillas')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -206,20 +206,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #  Acceder a las variables de entorno
 
-ACCESS_TOKEN_MOFFIN = os.getenv("ACCESS_TOKEN_MOFFIN")
-MAILTRAP_HOST = os.getenv("MAILTRAP_HOST")
-MAILTRAP_P = os.getenv("MAILTRAP_P")
-MAILTRAP_H_USER = os.getenv("MAILTRAP_H_USER")
-
-EMAIL_HOST = MAILTRAP_HOST
-EMAIL_HOST_USER =MAILTRAP_H_USER
-EMAIL_HOST_PASSWORD = MAILTRAP_P
-EMAIL_PORT = '2525'
+# Asegúrate de que estas variables de entorno estén configuradas en tu archivo .env
+MAILTRAP_HOST = os.getenv("MAILTRAP_HOST")  
+MAILTRAP_P = os.getenv("MAILTRAP_P")        # El password de Mailtrap
+MAILTRAP_H_USER = os.getenv("MAILTRAP_H_USER")  # El usuario de Mailtrap
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = MAILTRAP_HOST
-EMAIL_PORT = '2525'
-EMAIL_HOST_USER = 'your@djangoapp.com'
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_PORT = 2525  
+EMAIL_HOST_USER = MAILTRAP_H_USER
 EMAIL_HOST_PASSWORD = MAILTRAP_P
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
