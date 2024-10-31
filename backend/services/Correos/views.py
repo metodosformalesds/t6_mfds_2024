@@ -1,7 +1,7 @@
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMessage,get_connection,send_mass_mail
 from django.utils.html import strip_tags
 
 
