@@ -14,6 +14,29 @@ MFDS 2024 T6
 
 ### Python AnyWhere LlamasCoin Api: https://adrianrvzz.pythonanywhere.com/api/schema/swagger-ui/
 
-### AWS IP: http://52.7.196.119:8000/api/schema/swagger-ui/
+### AWS API: https://llamascoin-api.xyz/api/schema/swagger-ui/
 
-### Frontend (Conectado a AWS, sin HTTPS): https://llamascoin-ui.netlify.app/
+### Frontend: https://llamascoin-ui.netlify.app/
+
+
+# Cuentas Prueba
+
+## Cuenta moneylender:
+moneylender@email.com
+
+Llamascoin!098
+
+## Cuenta borrower:
+borrower@email.com
+
+Llamascoin!098
+
+## Cuentas sandbox PayPal
+
+sb-dnswu33411376@personal.example.com
+
+OhV|/>3N
+
+sb-47qtz233411373@personal.example.com
+
+g1Q/U>6;
