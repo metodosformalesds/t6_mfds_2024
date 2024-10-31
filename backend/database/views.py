@@ -6,13 +6,14 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
 from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer
-from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer
+from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.routers import DefaultRouter
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_403_FORBIDDEN, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 # Create your views here.
 
@@ -108,8 +109,13 @@ class MoneylenderViewSet(viewsets.ModelViewSet):
 #Vista de modelo para credit history
 class CreditHistoryViewSet(viewsets.ModelViewSet):
     queryset = CreditHistory.objects.all()
-    serializer_class = CreditHistorySerializer
+    serializer_class = BorrowerCreditHistorySerializer
+    def retrieve(self, request, *args, **kwargs):
+        user_id = kwargs.get('pk')  
+        borrower = get_object_or_404(Borrower, user__id=user_id)  
 
+        serializer = self.get_serializer(borrower)
+        return Response(serializer.data, status=HTTP_200_OK)
 #Vista de modelo para ver usuarios registrados
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

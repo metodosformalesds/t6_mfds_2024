@@ -28,6 +28,7 @@ class RequestSerializer(serializers.ModelSerializer):
 #Serializer del prestatario
 class BorrowerSerializer(serializers.ModelSerializer):
     credit_history = CreditHistorySerializer(many=True, read_only=True) 
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True)
 
     class Meta:
         model = Borrower
@@ -35,7 +36,7 @@ class BorrowerSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date',
             'phone_number', 'rfc', 'ciec', 'full_address', 'city', 'neighborhood', 'postal_code', 
             'state', 'country', 'municipality', 'nationality', 'possibility_of_pay', 
-            'score_llamas', 'credit_history'
+            'score_llamas', 'credit_history', 'user'
         ]
 #Serializer de los detalles de los prestamos
 class ActiveLoansSerializer(serializers.ModelSerializer):
@@ -120,3 +121,12 @@ class MoneylenderLoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
         fields = ['amount', 'interest_rate', 'number_of_payments', 'term']
+        
+class BorrowerCreditHistorySerializer(serializers.ModelSerializer):
+    credit_history = CreditHistorySerializer(many=True, read_only=True)  
+    class Meta:
+        model = Borrower
+        fields = [
+            'first_name', 'middle_name', 'first_surname', 'second_surname', 'credit_history', 'rfc'
+        ]
+        
