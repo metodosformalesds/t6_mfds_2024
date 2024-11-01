@@ -14,7 +14,7 @@ MFDS 2024 T6
 
 ### Python AnyWhere LlamasCoin Api: https://adrianrvzz.pythonanywhere.com/api/schema/swagger-ui/
 
-### AWS API: https://llamascoin-api.xyz/api/schema/swagger-ui/
+### AWS API: [https://llamascoin-api.xyz/api/schema/swagger-ui/](https://llamascoin-api.xyz/api/schema/swagger-ui/)
 
 ### Frontend: https://llamascoin-ui.netlify.app/
 
