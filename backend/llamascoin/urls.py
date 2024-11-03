@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
-from . import views
-from llamascoin.views import RegisterView, LoginView
+from llamascoin.views import RegisterView, LoginView, Formulario, jumioValidation
 from database.views import register_routers, RequestViewSet
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -21,8 +20,9 @@ filter_router.register(r'filter', RequestViewSet, basename='filter')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('login/', LoginView.as_view()),
-    path('register/', RegisterView.as_view()),
-    
+    path('register/', RegisterView.as_view(), name = 'registro'),
+    path('formulario/', Formulario ,name='formulario'),
+    path('jumioValidation/', jumioValidation ,name='validacion'),
     # Incluyendo las rutas de los diferentes routers de database
     path('credit_history/', include(db_routers['credit_history'].urls)),
     path('moneylender/', include(db_routers['moneylender'].urls)),

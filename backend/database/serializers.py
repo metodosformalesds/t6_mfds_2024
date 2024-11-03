@@ -1,7 +1,9 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, InvoiceHistory, Request, Transaction
-from django.contrib.auth.models import User
+from .models import  CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, InvoiceHistory, Request, Transaction
+##from django.contrib.auth.models import User
 #Serializer del historial crediticio
+User = get_user_model()
 class CreditHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditHistory

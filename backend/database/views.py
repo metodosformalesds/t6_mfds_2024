@@ -15,6 +15,7 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_403_FORBIDDEN, HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from django.contrib.auth import get_user_model
 # Create your views here.
 
 #Vista de modelo para Borrower
@@ -117,6 +118,7 @@ class CreditHistoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(borrower)
         return Response(serializer.data, status=HTTP_200_OK)
 #Vista de modelo para ver usuarios registrados
+User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
