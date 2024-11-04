@@ -5,7 +5,7 @@ from llamascoin.views import RegisterView, LoginView
 from database.views import register_routers, RequestViewSet
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from services.paypal.paypal import CreatePaymentView, SendPayoutView, PayPalReturnView, PayPalCancelView, CreatePayPalProductView, CreatePayPalBillingPlanView
+from services.paypal.paypal import CreateCheckout, CaptureCheckout, CreatePayPalProductView, CreatePayPalBillingPlanView
 from services.Moffin.Moffin import ObtenerSat
 from services.Moffin.Reporte_BdC import Reporte
 from services.Score.score import ObtenerScore
@@ -38,10 +38,10 @@ urlpatterns = [
     path('validate_ine/', ImageNameExtractorView.as_view(), name='validate_ine'),
     
     #Endopoints de PayPal
-    path('paypal/create-payment/', CreatePaymentView.as_view(), name='create-payment'),
-    path('paypal/payout/', SendPayoutView.as_view(), name='send-payout'),
-    path('paypal/return/', PayPalReturnView.as_view(), name='paypal-return'), 
-    path('paypal/cancel/', PayPalCancelView.as_view(), name='paypal-cancel'),
+    path("paypal/create-checkout/", CreateCheckout.as_view(), name="create-checkout"),
+    path("paypal/capture-checkout/", CaptureCheckout.as_view(), name="capture-checkout"),
+
+
     path('paypal/create-product/', CreatePayPalProductView.as_view(), name='paypal-create-product'),
     path('paypal/create-plan/', CreatePayPalBillingPlanView.as_view(), name='paypal-create-plan' ),
     

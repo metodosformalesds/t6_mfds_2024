@@ -1,11 +1,12 @@
 import os
 import requests
+import time
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework import status
-from services.paypal.serializers import PaymentSerializer, PayoutSerializer, PayPalProductSerializer
-from database.models import Transaction
+from services.paypal.serializers import  PayPalProductSerializer
+from database.models import Transaction, Loan, Borrower, Moneylender, ActiveLoan
 from rest_framework.response import Response
-
 
 CLIENT_ID_PAYPAL = os.getenv('CLIENT_ID_PAYPAL', 'Default_Secret')
 SECRET_PAYPAL = os.getenv('SECRET_PAYPAL', '')
@@ -20,143 +21,242 @@ def get_paypal_access_token():
     response = requests.post(url, headers=headers, auth=(client_id, secret), data={"grant_type": "client_credentials"})
     return response.json().get("access_token")
 
-class CreatePaymentView(APIView):
-    serializer_class = PaymentSerializer
+class CreateCheckout(APIView):
     def post(self, request):
-    
-        serializer = PaymentSerializer(data=request.data)
-        if serializer.is_valid():
-            access_token = get_paypal_access_token()
-            url = "https://api-m.sandbox.paypal.com/v1/payments/payment"
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {access_token}"
-            }
-            payload = {
-                "intent": "sale",
-                "payer": {
-                    "payment_method": "paypal"
-                },
-                "redirect_urls": {
-                    "return_url": "http://127.0.0.1:8000/paypal/return/",
-                    "cancel_url": "http://127.0.0.1:8000/paypal/cancel/"
-                },
-                "transactions": [{
+        print("Received request data:", request.data)
+
+        loan_id = request.data.get("loan_id")  # Obtener el ID del préstamo de la solicitud
+        print("Extracted loan_id:", loan_id)
+
+        amount = None
+        print(request.user)
+        # Determinar la cantidad según el rol del usuario
+        if hasattr(request.user, 'moneylender'):
+            print("User is a Moneylender. Attempting to retrieve Loan.")
+            try:
+                loan = Loan.objects.get(id=loan_id)
+                amount = loan.amount  # Obtener la cantidad directamente del préstamo
+                print("Loan found. Amount:", amount)
+            except Loan.DoesNotExist:
+                print("Error: Loan not found for ID:", loan_id)
+                return Response({"error": "Loan not found"}, status=status.HTTP_404_NOT_FOUND)
+        elif hasattr(request.user, 'borrower'):
+            print("User is a Borrower. Attempting to retrieve ActiveLoan.")
+            try:
+                active_loan = ActiveLoan.objects.get(id=loan_id)
+                amount = active_loan.amount  # Obtener la cantidad directamente del ActiveLoan
+                print("ActiveLoan found. Amount:", amount)
+            except ActiveLoan.DoesNotExist:
+                print("Error: ActiveLoan not found for ID:", loan_id)
+                return Response({"error": "ActiveLoan not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if amount is None:
+            print("Error: Amount not found.")
+            return Response({"error": "Amount not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+        order_data = {
+            "intent": "CAPTURE",
+            "purchase_units": [
+                {
                     "amount": {
-                        "total": str(serializer.validated_data['amount']),
-                        "currency": serializer.validated_data['currency']
-                    },
-                    "description": "Descripción del producto o servicio"
-                }]
-            }
+                        "currency_code": "USD",
+                        "value": str(amount)  # Usar la cantidad obtenida
+                    }
+                }
+            ]
+        }
 
-            response = requests.post(url, headers=headers, json=payload)
-            if response.status_code == 201:
-                payment_info = response.json()
-                return Response({"payment_id": payment_info['id'], "links": payment_info['links']}, status=status.HTTP_201_CREATED)
-            else:
-                return Response({"error": response.json()}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class SendPayoutView(APIView):
-    serializer_class = PayoutSerializer
-
-    def post(self, request):
-        serializer = PayoutSerializer(data=request.data)
-        if serializer.is_valid():
-            access_token = get_paypal_access_token()
-            url = "https://api-m.sandbox.paypal.com/v1/payments/payouts"
-            headers = {
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {access_token}"
-            }
-            payload = {
-                "sender_batch_header": {
-                    "sender_batch_id": "batch_225",  # Debe ser único
-                    "email_subject": "You have a payment"
-                },
-                "items": [{
-                    "recipient_type": "EMAIL",
-                    "amount": {
-                        "value": str(serializer.validated_data['amount']),
-                        "currency": serializer.validated_data['currency']
-                    },
-                    "receiver": serializer.validated_data['recipient_email'],
-                    "note": "Gracias por tu negocio.",
-                    "sender_item_id": "item_1"
-                }]
-            }
-
-            response = requests.post(url, headers=headers, json=payload)
-            if response.status_code == 201:
-                payout_info = response.json()
-                print(payout_info)
-                payment_status = payout_info['batch_header']['batch_status']  # Actualiza según tu respuesta
-                # Registrar el payout en la base de datos
-                Transaction.objects.create(
-                    ID_ActiveLoan=serializer.validated_data['active_loan_id'],  # Asigna el ID del préstamo activo
-                    AmountPaid=float(serializer.validated_data['amount']),
-                    PayPalTransactionID=payout_info['batch_header']['payout_batch_id'],  # Usa el ID de batch de payout
-                    Status=payment_status,
-                    TransactionType='payout'  # O 'income' según corresponda
-                )
-                return Response({"payout_info": payout_info}, status=status.HTTP_201_CREATED)
-            else:
-                return Response({"error": response.json()}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-class PayPalReturnView(APIView):
-    
-    def get(self, request):
-        # Obtener los parámetros de la consulta
-        payment_id = request.query_params.get('paymentId')
-        payer_id = request.query_params.get('PayerID')
-
-        # Imprimir los parámetros recibidos
-        print("Payment ID:", payment_id)
-        print("Payer ID:", payer_id)
-
-        # Confirmar el pago con PayPal
+        # Obtener token de acceso llamando a la función
         access_token = get_paypal_access_token()
-        print("Access Token:", access_token)
 
-        # URL para ejecutar el pago
-        url = f"https://api-m.sandbox.paypal.com/v1/payments/payment/{payment_id}/execute"
+        # Crear la orden en PayPal
+        response = requests.post(
+            "https://api-m.sandbox.paypal.com/v2/checkout/orders",
+            json=order_data,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {access_token}"
+            }
+        )
+
+        if response.status_code == 201:
+            order_id = response.json().get("id")
+            return Response({"orderID": order_id}, status=status.HTTP_201_CREATED)
+        else:
+            return Response(response.json(), status=response.status_code)
+        
+class CaptureCheckout(APIView):
+    def post(self, request):
+        order_id = request.data.get("orderID")
+        loan_id = request.data.get("loan_id")  
+        person_id = request.data.get("person_id")  
+
+        # Obtener token de acceso 
+        access_token = get_paypal_access_token()
+
+        # Inicializar amount y recipient_email
+        recipient = None
+        amount = None
+        recipient_email = None
+        loan = None
+        
+        # Determinar la cantidad y el correo electrónico según el rol del usuario
+        if hasattr(request.user, 'moneylender'):
+            # Si el usuario es Moneylender, buscar el Loan
+            try:
+                loan = Loan.objects.get(id=loan_id)
+                amount = loan.amount  # Obtener la cantidad directamente del préstamo
+                recipient = Borrower.objects.get(id=person_id)
+                recipient_email = recipient.user.email  # Correo del Borrower
+                
+            except (Loan.DoesNotExist, Borrower.DoesNotExist):
+                return Response({"error": "Loan or Borrower not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        elif hasattr(request.user, 'borrower'):
+            # Si el usuario es Borrower, buscar el ActiveLoan
+            try:
+                loan = ActiveLoan.objects.get(id=loan_id)
+                amount = loan.amount_to_pay  # Obtener la cantidad directamente del ActiveLoan
+                recipient = Moneylender.objects.get(id=person_id)
+                recipient_email = recipient.user.email  # Correo del Moneylender
+
+            except (ActiveLoan.DoesNotExist, Moneylender.DoesNotExist):
+                return Response({"error": "ActiveLoan or Moneylender not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if amount is None:
+            return Response({"error": "Amount not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Capturar el pago de la orden
+        capture_url = f"https://api-m.sandbox.paypal.com/v2/checkout/orders/{order_id}/capture"
+        capture_response = requests.post(
+            capture_url,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {access_token}"
+            }
+        )
+
+        if capture_response.status_code == 201:
+            # Lógica para enviar el payout
+            
+            #Intentar el payout 3 veces
+            max_tries = 3
+            for attempt in range(max_tries):
+                
+                payout_info = self.send_payout(recipient_email, amount, "USD", loan,  request.user)  
+                if 'error' not in payout_info:
+                    # SI el moneylender envió el dinero correctamente, se crea un ActiveLoan
+                    if hasattr(request.user, 'moneylender'):
+                        # Crear un nuevo ActiveLoan
+                        new_active_loan = ActiveLoan.objects.create(
+                            loan=loan,  # Usar el loan recuperado
+                            borrower=recipient,  # El borrower asociado al loan
+                            moneylender=request.user.moneylender,  # El moneylender asociado al loan
+                            total_debt_paid=0,  # Inicializar como 0
+                            amount_to_pay=loan.amount,  # Usar la cantidad a pagar
+                            start_date=timezone.now()  # Fecha de inicio actual
+                        )
+
+                        # Crear la transacción después de crear el ActiveLoan
+                        self.create_transaction(new_active_loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'))
+
+                    # SI el borrower envía una parte de la deuda correctamente
+                    elif hasattr(request.user, 'borrower'):
+                        # Actualizar el ActiveLoan existente
+                        loan.total_debt_paid += amount  # Actualizar la cantidad pagada
+                        loan.amount_to_pay -= amount  # Disminuir la cantidad pendiente
+                        loan.save()  # Guardar los cambios en el ActiveLoan
+
+                        # Crear la transacción después de guardar los cambios en el ActiveLoan
+                        self.create_transaction(loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'))
+
+
+                        #Agregar la creacion de un registro de Payment 
+                    return Response({
+                        "capture_info": capture_response.json(),
+                        "payout_info": payout_info
+                    }, status=status.HTTP_200_OK)
+                
+                # Si falla el payout, esperar un momento antes de intentar de nuevo
+                time.sleep(2)
+             
+            # Si después de 3 intentos el payout falla, revertir el pago capturado
+            reversal_response = self.refund_payment(order_id)
+            return Response({
+                "error": "Erro al realizar la transaccion despues de multiples intentos.",
+                "reversal_info": reversal_response
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                 
+        else:
+            return Response(capture_response.json(), status=capture_response.status_code)
+       
+        
+    def send_payout(self, recipient_email, amount, currency, loan, user):
+        access_token = get_paypal_access_token()
+        url = "https://api-m.sandbox.paypal.com/v1/payments/payouts"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {access_token}"
         }
+        
+        # Generar un sender_batch_id único
+        sender_batch_id = f"loan_{loan.id}_user_{user.id}_{timezone.now().strftime('%Y%m%d%H%M%S')}"
+
+        # Personalizar el mensaje según el rol del usuario
+        if hasattr(user, 'moneylender'):
+            note = f"Se ha enviado un pago de {amount} para el préstamo ID: {loan.id}."
+        else:
+            note = f"Se ha recibido un pago de {amount} para el préstamo ID: {loan.id}."
+
         payload = {
-            "payer_id": payer_id
+            "sender_batch_header": {
+                "sender_batch_id": sender_batch_id, 
+                "email_subject": "You have a payment"
+            },
+            "items": [{
+                "recipient_type": "EMAIL",
+                "amount": {
+                    "value": str(amount),
+                    "currency": currency
+                },
+                #Cambiar a la variable recipient_email (cambiar el modelo de user para agregar paypal email)
+                "receiver": "sb-47qtz233411373@personal.example.com",
+                "note": note,
+                "sender_item_id": f"item_{loan.id}"
+            }]
         }
 
-        # Realizar la solicitud para ejecutar el pago
         response = requests.post(url, headers=headers, json=payload)
-
-        # Imprimir el código de estado y la respuesta de PayPal
-        print("Response Status Code:", response.status_code)
-        print("Response Content:", response.json())
-
-        if response.status_code == 200:
-            # Procesar el pago exitosamente
-            payment_info = response.json()
-            # Registrar el pago en la base de datos
-            Transaction.objects.create(
-                ID_ActiveLoan=payment_info['transactions'][0]['item_list']['items'][0]['id'], 
-                AmountPaid=float(payment_info['transactions'][0]['amount']['total']),
-                PayPalTransactionID=payment_info['id'],
-                Status='completed',  # Marca el pago como completado
-                TransactionType='income'  # O 'payout' según corresponda
-            )
-            return Response({"message": "Pago exitoso", "payment_info": payment_info}, status=status.HTTP_200_OK)
+        if response.status_code == 201:
+            payout_info = response.json()
+            return payout_info
         else:
-            return Response({"error": response.json()}, status=status.HTTP_400_BAD_REQUEST)
-class PayPalCancelView(APIView):
-    def get(self, request):
-        return Response({"message": "Pago cancelado"}, status=status.HTTP_200_OK)
+            return {"error": response.json()}
+        
+    def refund_payment(self, order_id):
+        access_token = get_paypal_access_token()
+        refund_url = f"https://api-m.sandbox.paypal.com/v2/payments/captures/{order_id}/refund"
+        response = requests.post(
+            refund_url,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {access_token}"
+            }
+        )
+        return response.json() if response.status_code == 201 else {"error": response.json()}
+        
+    def create_transaction(self, active_loan, amount, paypal_transaction_id):
+        """Crea una transacción relacionada con el ActiveLoan."""
+        Transaction.objects.create(
+            active_loan=active_loan,  # Relacionar la transacción con el ActiveLoan
+            amount_paid=amount,
+            paypal_transaction_id=paypal_transaction_id,  # ID de la transacción de PayPal
+            status='completed',  # Estado de la transacción
+            transaction_type='payment'  # Tipo de transacción
+        )
 
-
-
+        
 class CreatePayPalProductView(APIView):  
     serializer_class = PayPalProductSerializer
     def post(self, request, *args, **kwargs):
