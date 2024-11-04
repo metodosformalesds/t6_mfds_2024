@@ -127,7 +127,7 @@ class MoneylenderViewSet(viewsets.ModelViewSet):
 #Vista de modelo para credit history
 class CreditHistoryViewSet(viewsets.ModelViewSet):
     queryset = CreditHistory.objects.all()
-    serializer_class = BorrowerCreditHistorySerializer
+    serializer_class = CreditHistorySerializer
 
 #Vista de modelo para ver usuarios registrados
 User = get_user_model()

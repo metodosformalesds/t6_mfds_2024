@@ -6,19 +6,16 @@ from database.serializers import MoneylenderSerializer, BorrowerSerializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email','paypal_email','password','curp', 'account_type']
-        extra_akwargs = {
-            'password': {'write_only': True}
-        }
+        fields = "__all__"
 
 class UserLoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(write_only=True)
 
-class UserRegistrationSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
-    email = serializers.EmailField()
-    paypal_email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
-    curp = serializers.CharField(write_only=True)
-    account_type = serializers.ChoiceField(choices=[('borrower', 'Borrower'), ('moneylender', 'Moneylender')])
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email','paypal_email','password','curp', 'account_type']
+        extra_akwargs = {
+            'password': {'write_only': True}
+        }

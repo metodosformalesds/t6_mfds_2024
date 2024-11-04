@@ -21,9 +21,9 @@ import json
 
 #Vista para registrar el usuario
 class RegisterView(APIView):
-    serializer_class = UserSerializer
+    serializer_class = UserRegistrationSerializer
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             # Extraer los datos validados
             email = serializer.validated_data['email']
