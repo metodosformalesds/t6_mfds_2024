@@ -162,7 +162,7 @@ class LoginView(APIView):
     
     def post(self, request):
         # Buscar el usuario por correo electrónico en lugar de nombre de usuario
-        user = get_object_or_404(User, email=request.data['email'])
+        user = get_object_or_404(User, email=request.data['username'])
         
         # Validar la contraseña
         if not user.check_password(request.data['password']):
