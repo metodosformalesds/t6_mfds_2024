@@ -22,6 +22,23 @@ class BorrowerViewSet(viewsets.ModelViewSet):
     queryset = Borrower.objects.all()
     serializer_class = BorrowerSerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        borrower_id = kwargs.get('pk')
+
+        if hasattr(request.user, 'borrower'):
+            # Borrower accediendo a su propio historial
+            borrower = get_object_or_404(Borrower, user=request.user)
+            serializer = BorrowerCreditHistorySerializer(borrower)
+            return Response(serializer.data, status=HTTP_200_OK)
+        
+        elif hasattr(request.user, 'moneylender'):
+            # Moneylender accediendo al historial de un borrower específico
+            borrower = get_object_or_404(Borrower, id=borrower_id)
+            serializer = BorrowerCreditHistorySerializer(borrower)
+            return Response(serializer.data, status=HTTP_200_OK)
+
+        return Response({"detail": "No tienes permiso para acceder a esta información."}, status=HTTP_403_FORBIDDEN)
+    
 #Vista de modelo para Loans
 class LoanViewSet(viewsets.ModelViewSet):
     queryset = Loan.objects.all()
@@ -110,12 +127,7 @@ class MoneylenderViewSet(viewsets.ModelViewSet):
 class CreditHistoryViewSet(viewsets.ModelViewSet):
     queryset = CreditHistory.objects.all()
     serializer_class = BorrowerCreditHistorySerializer
-    def retrieve(self, request, *args, **kwargs):
-        user_id = kwargs.get('pk')  
-        borrower = get_object_or_404(Borrower, user__id=user_id)  
 
-        serializer = self.get_serializer(borrower)
-        return Response(serializer.data, status=HTTP_200_OK)
 #Vista de modelo para ver usuarios registrados
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
