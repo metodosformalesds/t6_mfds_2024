@@ -36,7 +36,7 @@ class BorrowerSerializer(serializers.ModelSerializer):
         model = Borrower
         fields = [
             'id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date',
-            'phone_number', 'rfc', 'ciec', 'full_address', 'city', 'neighborhood', 'postal_code', 
+            'phone_number', 'rfc', 'full_address', 'city', 'neighborhood', 'postal_code', 
             'state', 'country', 'municipality', 'nationality', 'possibility_of_pay', 
             'score_llamas', 'credit_history', 'user'
         ]

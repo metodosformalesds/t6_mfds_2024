@@ -6,15 +6,16 @@ from django.contrib.auth.base_user import AbstractBaseUser
 #Modelo de usuario personalizado
 class User(AbstractBaseUser):
     email = models.EmailField(("Direccion de correo"), max_length=254,unique=True)
+    paypal_email = models.EmailField(blank=True)
     curp = models.CharField(max_length=20, unique=True)
     account_type = models.CharField(max_length=20)
     is_verified = models.BooleanField(default=False)
     
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ("curp", "account_type")
+    REQUIRED_FIELDS = ("paypal_email","curp", "account_type")
     
 class Moneylender(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
     first_name = models.CharField(max_length=50)  # Primer nombre
     middle_name = models.CharField(max_length=50, blank=True, null=True)  # Segundo nombre (opcional)
     first_surname = models.CharField(max_length=50)  # Primer apellido

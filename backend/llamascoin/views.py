@@ -27,6 +27,7 @@ class RegisterView(APIView):
         if serializer.is_valid():
             # Extraer los datos validados
             email = serializer.validated_data['email']
+            paypal_email = serializer.validated_data['paypal_email']
             password = serializer.validated_data['password']
             curp = serializer.validated_data['curp']
             account_type = serializer.validated_data['account_type']
@@ -34,6 +35,7 @@ class RegisterView(APIView):
             # Crear el usuario provisional
             user = User(
                 email=email,
+                paypal_email=paypal_email,
                 curp=curp,
                 account_type=account_type
             )
@@ -157,9 +159,12 @@ class RequestViewSet(viewsets.ModelViewSet):
 
 class LoginView(APIView):
     serializer_class = UserLoginSerializer
+    
     def post(self, request):
-        user = get_object_or_404(User, username=request.data['username'])
+        # Buscar el usuario por correo electrónico en lugar de nombre de usuario
+        user = get_object_or_404(User, email=request.data['email'])
         
+        # Validar la contraseña
         if not user.check_password(request.data['password']):
             return Response({"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -168,19 +173,20 @@ class LoginView(APIView):
         
         # Incluir datos adicionales en el token
         token_data = {
-            'username': user.username,
+            'email': user.email,
             'role': 'borrower' if hasattr(user, 'borrower') else 'moneylender' if hasattr(user, 'moneylender') else 'user',
             'user_id': user.id,
         }
         
-        refresh['username'] = token_data['username']
+        # Añadir datos adicionales en el token
+        refresh['email'] = token_data['email']
         refresh['role'] = token_data['role']
         refresh['user_id'] = token_data['user_id']
         
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'username': token_data['username'],
+            'email': token_data['email'],
             'role': token_data['role'],
             'user_id': token_data['user_id'],
         }, status=status.HTTP_200_OK)
