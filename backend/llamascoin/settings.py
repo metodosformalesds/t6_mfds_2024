@@ -37,7 +37,8 @@ ALLOWED_HOSTS = [
     'localhost',  
     '127.0.0.1', 
     '54.165.87.139',
-    'llamascoin-api.xyz'
+    'llamascoin-api.xyz',
+    '3f9f-2806-1016-d-5a60-5dd1-47e0-5ab7-c03b.ngrok-free.app'
 ]
 #Dominios que permitira la aplicacion 
 CORS_ALLOWED_ORIGINS = [
@@ -160,6 +161,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = "database.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -178,7 +180,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

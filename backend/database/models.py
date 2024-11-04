@@ -1,18 +1,27 @@
 from django.utils import timezone
 from django.db import models
-from django.contrib.auth.models import User
-#Moneylender Model
+from django.conf import settings
+from django.contrib.auth.base_user import AbstractBaseUser
 
+#Modelo de usuario personalizado
+class User(AbstractBaseUser):
+    email = models.EmailField(("Direccion de correo"), max_length=254,unique=True)
+    curp = models.CharField(max_length=20, unique=True)
+    account_type = models.CharField(max_length=20)
+    is_verified = models.BooleanField(default=False)
+    
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ("curp", "account_type")
+    
 class Moneylender(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
-    first_name = models.CharField(max_length=100)  # Primer nombre
+    first_name = models.CharField(max_length=50)  # Primer nombre
     middle_name = models.CharField(max_length=50, blank=True, null=True)  # Segundo nombre (opcional)
     first_surname = models.CharField(max_length=50)  # Primer apellido
     second_surname = models.CharField(max_length=50, blank=True, null=True)  # Segundo apellido (opcional)
-    birth_date = models.DateField()  # Fecha de nacimiento
+    birth_date = models.CharField(max_length=20)   # Fecha de nacimiento
     phone_number = models.CharField(max_length=15)  # Número de teléfono  
     rfc = models.CharField(max_length=13, unique=True)  # Registro Federal de Contribuyentes
-    ciec = models.CharField(max_length=100)  # Clave de Identificación Electrónica Confidencial
     full_address = models.CharField(max_length=200)  # Dirección completa
     city = models.CharField(max_length=50)  # Ciudad
     neighborhood = models.CharField(max_length=50)  # Vecindario, barrio o colonia
@@ -45,15 +54,14 @@ class Loan(models.Model):
     duration_loan = models.CharField(max_length=50, blank=True, null=True) #Duracion de prestamo expresado en meses y dias
 
 class Borrower(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) #Vincular a un usuario token de DRF
     first_name = models.CharField(max_length=50)  # Primer nombre del prestatario
     middle_name = models.CharField(max_length=50, blank=True, null=True)   # Segundo nombre del prestatario
     first_surname = models.CharField(max_length=50)  # Primer apellido o apellido paterno del prestatario
     second_surname = models.CharField(max_length=50)  # Segundo apellido o apellido materno del prestatario
-    birth_date = models.DateField()  # Fecha de nacimiento del prestatario
+    birth_date = models.CharField(max_length=50)   # Fecha de nacimiento del prestatario
     phone_number = models.CharField(max_length=10)  # Número de teléfono del prestatario
     rfc = models.CharField(max_length=13)# Registro Federal de Contribuyentes (RFC) relacionado al prestatario
-    ciec = models.CharField(max_length=100)  # Clave de Identificación Electrónica Confidencial del prestatario
     full_address = models.CharField(max_length=200)  # Dirección completa del prestatario
     city = models.CharField(max_length=50)  # Ciudad del prestatario
     neighborhood = models.CharField(max_length=50)  # Vecindario, barrio, colonia o fraccionamiento del prestatario
