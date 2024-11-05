@@ -102,11 +102,11 @@ class CreditHistory(models.Model):
     actual_balance = models.DecimalField(max_digits=10, decimal_places=2)  # 
     max_credit = models.DecimalField(max_digits=10, decimal_places=2)  #
     lim_credit = models.DecimalField(max_digits=10, decimal_places=2)  #
-    pay_history = models.CharField(max_length=50)  # Historial de pagos
-    current_pay_status = models.CharField(max_length=10)  # Estado actual de los pagos
+    #pay_history = models.CharField(max_length=50)  # Historial de pagos
+    #current_pay_status = models.CharField(max_length=10)  # Estado actual de los pagos
     accounts_open = models.IntegerField()           # Cuentas activas
     accounts_closed = models.IntegerField()         # Cuentas cerradas
-    account_fixed_payment = models.BooleanField()   # Cuentas con pago fijo
+    #account_fixed_payment = models.BooleanField()   # Cuentas con pago fijo
     num_mop1 = models.IntegerField()                # Pagos a tiempo
     num_mop2 = models.IntegerField()                # Retrasos de 1 a 29 días
     num_mop3 = models.IntegerField()                # Retrasos de 30 a 59 días
@@ -114,11 +114,11 @@ class CreditHistory(models.Model):
     num_mop5 = models.IntegerField()                # Retrasos de 90 a 119 días
     num_mop6 = models.IntegerField()                # Retrasos de 120 a 149 días
     num_mop7 = models.IntegerField()                # Retrasos de 150 a 179 días
-    check_date = models.DateField()                 # Fecha de consulta
+    #check_date = models.DateField()                 # Fecha de consulta
     code_score = models.FloatField()              # Score crediticio
     val_score = models.IntegerField(default=0)
-    place_of_work = models.CharField(max_length=100)  # Lugar de trabajo
-    salary = models.FloatField() # Salario
+    #place_of_work = models.CharField(max_length=100)  # Lugar de trabajo
+    #salary = models.FloatField() # Salario
 
 #Request model
 class Request(models.Model):
