@@ -30,7 +30,7 @@ export function ContentDesign() {
       <div className="sección-cont">
         <h2 className="heading-t">
           {" "}
-          Nuestros <span>Clientes</span>
+          Nuestros <span className="span">Clientes</span>
         </h2>
         <h2 className="subtext">Algunos de nuestros socios</h2>
         <div className="columns-2 ...">
@@ -42,7 +42,7 @@ export function ContentDesign() {
         <h2 className="heading-t">
           {" "}
           Gestiona tus préstamos y oportunidades de inversión en{" "}
-          <span>un solo lugar</span>
+          <span className="span">un solo lugar</span>
         </h2>
         <h2 className="subtext">¿A quien está dirigida nuestra plataforma?</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
@@ -213,7 +213,7 @@ export function ContentDesign() {
       <div className="sección-cont">
         <h2 className="heading-t">
           {" "}
-          El <span>cuidado</span> es el nuevo <span>Marketing</span>
+          El <span className="span">cuidado</span> es el nuevo <span>Marketing</span>
         </h2>
         <h2 className="subtext">
           Nuestro blog es el mejor lugar para estar al día sobre tendencias
