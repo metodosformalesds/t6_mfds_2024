@@ -1,73 +1,112 @@
 import { useEffect, useState } from "react";
 import { XCircleIcon, CheckIcon } from "@heroicons/react/24/solid";
-import { Button, Card, CardBody, CardHeader, Typography } from "@material-tailwind/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  Typography,
+  IconButton,
+} from "@material-tailwind/react";
 import { useAuth } from "../context/AuthContext";
 import { useFetch } from "../hooks/useFetch";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { apiHost } from "../utils/apiconfig";
-import { ProfileCard } from "./ProfileCard";
-
+import CreditHistory from "./CreditHistory";
+import { PayPalCheckout } from "./PayPalCheckOut";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const TABLE_HEAD = ["Prestatario", "Cantidad", "Plazos", "Acciones"];
 
 export function RequestsTable() {
-  const [tableRows, setTableRows] = useState([]);
+  const [requestRows, setRequestRows] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
   const { authData } = useAuth();
   const { status, data } = useFetch(apiHost + "request/");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedEntity, setSelectedEntity] = useState("");
-  const [entityType, setEntityType] = useState("");
-  const [selectedRequestId, setSelectedRequestId] = useState("");
-
-  
+  const [creditHistoryOpen, setCreditHistoryOpen] = useState(false);
+  const [paypalDialogOpen, setPaypalDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-
     if (status === "success" && data) {
-      const rows = data.map((loan) => {
-        const borrower = loan.borrower
-          ? `${loan.borrower.first_name} ${loan.borrower.first_surname}`
-          : "Desconocido";
-
-        return {
-          requestId: loan.id,
-          borrower: borrower,
-          amount: `$${parseFloat(loan.loan.amount).toFixed(2)}`,
-          interest: `${loan.loan.interest_rate}%`,
-          terms: `${loan.loan.term} meses`,
-          status: loan.status || "Pendiente",
-        };
-      });
-
-      setTableRows(rows);
+      setRequestRows(data);
     } else if (status === "error") {
       console.error("Error fetching data: ", error);
     }
   }, [status, data]);
 
-  const handleStatusClick = (entity, type) => {
-    
-    setSelectedEntity(entity);
-    setEntityType(type);
-    setModalOpen(true);
+  useEffect(() => {
+    if (
+      selectedRequest?.actionType == "accept" ||
+      selectedRequest?.actionType == "reject"
+    ) {
+      setModalOpen(true);
+    } else if (selectedRequest?.actionType == "creditHistory") {
+      setCreditHistoryOpen(true);
+    }
+  }, [selectedRequest]);
+
+  const handleSelectRequest = (request, type) => {
+    setSelectedRequest({ ...request, actionType: type });
+    console.log(selectedRequest);
   };
 
-  const handleOpenModal = (type, requestId, borrower) => {
-    setSelectedRequestId(requestId);
-    setSelectedEntity(borrower);
-    setEntityType(type);
-    setModalOpen(true);
+  const handleAccept = async () => {
+    try {
+      if (selectedRequest) {
+        setModalOpen(false);
+        setPaypalDialogOpen(true);
+      }
+    } catch (error) {
+      console.error("Error accepting request: ", error);
+    }
   };
 
-  const handleAccept = () => {
-    console.log("Aceptando solicitud para: ", selectedRequestId);
-    setModalOpen(false);
+  const handleReject = async () => {
+    console.log("Rechazando solicitud para: ", selectedRequest.borrower);
+    try {
+      await axios.patch(
+        `${apiHost}request/${selectedRequest.id}/`,
+        {
+          status: "rejected",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authData.accessToken}`,
+          },
+        }
+      );
+      console.log("Solicitud rechazada para: ", selectedRequest.borrower);
+      navigate(0);
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Error rejecting request: ", error);
+    }
   };
 
-
-  const handleReject = () => {
-    console.log("Rechazando solicitud para: ", selectedRequestId);
-  
-    setModalOpen(false); 
+  const handlePaypalSuccess = async (selectedRequest) => {
+    try {
+      await axios.patch(
+        `${apiHost}request/${selectedRequest.id}/`,
+        {
+          status: "completed",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authData.accessToken}`,
+          },
+        }
+      );
+      console.log("Solicitud completada para: ", selectedRequest.borrower);
+      navigate(0);
+      setPaypalDialogOpen(false);
+    } catch (error) {
+      console.error("Error completing request: ", error);
+    }
   };
 
   return (
@@ -102,8 +141,8 @@ export function RequestsTable() {
             </tr>
           </thead>
           <tbody>
-            {tableRows.map(({requestId, borrower, amount, terms, status,  }, index) => {
-              const isLast = index === tableRows.length - 1;
+            {requestRows.map((request, index) => {
+              const isLast = index === requestRows.length - 1;
               const classes = isLast
                 ? "p-4"
                 : "p-4 border-b border-blue-gray-50";
@@ -111,38 +150,73 @@ export function RequestsTable() {
               return (
                 <tr key={index}>
                   <td className={classes}>
-                    <Typography variant="small" color="blue-gray" className="font-bold">
-                      {borrower}
+                    <Button
+                      variant="text"
+                      color="blue"
+                      className="font-bold cursor-pointer"
+                      onClick={() =>
+                        handleSelectRequest(request, "creditHistory")
+                      }
+                    >
+                      {request.borrower
+                        ? `${request.borrower.first_name} ${request.borrower.first_surname}`
+                        : "Desconocido"}
+                    </Button>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {request.loan.amount}
                     </Typography>
                   </td>
                   <td className={classes}>
-                    <Typography variant="small" color="blue-gray" className="font-normal">
-                      {amount}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography variant="small" color="blue-gray" className="font-normal">
-                      {terms}
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {request.loan.term}
                     </Typography>
                   </td>
                   <td className={classes}>
                     <div className="flex gap-2">
-                      <Button
-                        variant="text"
-                        color="green"
-                        size="md"
-                        onClick={() => handleOpenModal('accept', requestId, borrower)} 
-                      >
-                        <CheckIcon className="h-5 w-5" />
-                      </Button>
-                      <Button
-                        variant="text"
-                        color="red"
-                        size="md"
-                        onClick={() => handleOpenModal('reject', requestId, borrower)}
-                      >
-                        <XCircleIcon className="h-5 w-5" />
-                      </Button>
+                      {request.status === "pending" ? (
+                        <>
+                          <Button
+                            variant="text"
+                            color="green"
+                            size="md"
+                            onClick={() =>
+                              handleSelectRequest(request, "accept")
+                            }
+                          >
+                            <CheckIcon className="h-5 w-5" />
+                          </Button>
+                          <Button
+                            variant="text"
+                            color="red"
+                            size="md"
+                            onClick={() =>
+                              handleSelectRequest(request, "reject")
+                            }
+                          >
+                            <XCircleIcon className="h-5 w-5" />
+                          </Button>
+                        </>
+                      ) : (
+                        <Typography
+                          variant="small"
+                          color="gray"
+                          className="font-normal"
+                        >
+                          {request.status === "approved"
+                            ? "Aprobado"
+                            : "Rechazado"}
+                        </Typography>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -154,11 +228,51 @@ export function RequestsTable() {
       <ConfirmationModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-      
-        message={entityType === 'accept' ? "¿Seguro que desea aceptar el prestamo?" : "¿Seguro que desea cancelar el prestamo?"}
-        entity={selectedEntity}
-        onConfirm={entityType === 'accept' ? handleAccept : handleReject} 
+        message={
+          selectedRequest?.actionType === "accept"
+            ? "¿Seguro que desea aceptar el préstamo?"
+            : "¿Seguro que desea cancelar el préstamo?"
+        }
+        entity={selectedRequest?.borrower}
+        onConfirm={
+          selectedRequest?.actionType === "accept" ? handleAccept : handleReject
+        }
       />
+      <Dialog size="lg" handler={setCreditHistoryOpen} open={creditHistoryOpen}>
+        <DialogHeader className="flex justify-end">
+          <IconButton
+            color="black"
+            size="lg"
+            variant="text"
+            onClick={() => setCreditHistoryOpen(false)}
+          >
+            x
+          </IconButton>
+        </DialogHeader>
+        <CreditHistory borrowerId={selectedRequest?.borrower.id} />
+      </Dialog>
+      <Dialog size="lg" handler={setPaypalDialogOpen} open={paypalDialogOpen}>
+        <DialogHeader className="flex justify-end">
+          <IconButton
+            color="black"
+            size="lg"
+            variant="text"
+            onClick={() => setPaypalDialogOpen(false)}
+          >
+            x
+          </IconButton>
+        </DialogHeader>
+        <PayPalCheckout
+          loan={selectedRequest?.loan}
+          person={selectedRequest?.borrower}
+          onSuccess={() => {
+            handlePaypalSuccess;
+          }}
+          onError={() => {
+            setPaypalDialogOpen(false);
+          }}
+        />
+      </Dialog>
     </Card>
   );
 }
