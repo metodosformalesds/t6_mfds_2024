@@ -58,7 +58,6 @@ urlpatterns = [
     path('Score/score/', ObtenerScore.as_view(), name='operacion_score'),
     #Endopoints de correos
     path('correos/',simple_mail, name='simple_mail'),
-    path('correos/d',html, name='mail')
 
 ]
 

@@ -208,14 +208,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #  Acceder a las variables de entorno
 
 # Asegúrate de que estas variables de entorno estén configuradas en tu archivo .env
-MAILTRAP_HOST = os.getenv("MAILTRAP_HOST")  
-MAILTRAP_P = os.getenv("MAILTRAP_P")        # El password de Mailtrap
-MAILTRAP_H_USER = os.getenv("MAILTRAP_H_USER")  # El usuario de Mailtrap
+MAIL_HOST_U = os.getenv("EMAIL_HOST_USER")        # El password de Mailtrap
+MAIL_U_PASS = os.getenv("GML_PASS")  # El usuario de Mailtrap
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
-EMAIL_PORT = 2525  
-EMAIL_HOST_USER = MAILTRAP_H_USER
-EMAIL_HOST_PASSWORD = MAILTRAP_P
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Corrección aquí
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT=587
+EMAIL_HOST_USER=MAIL_HOST_U
+EMAIL_HOST_PASSWORD=MAIL_U_PASS
+EMAIL_USE_TLS=True
+
+
