@@ -32,6 +32,7 @@ urlpatterns = [
     path('transaction/', include(db_routers['transaction'].urls)),
     path('request/', include(db_routers['request'].urls)),
     path('active_loan/', include(db_routers['active_loan'].urls)),
+    path('payment/', include(db_routers['payment'].urls)),
 
     path('filter/', include(filter_router.urls)),
     

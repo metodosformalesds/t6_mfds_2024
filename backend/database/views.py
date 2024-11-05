@@ -4,8 +4,8 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
-from database.models import CreditHistory, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
-from database.serializers import CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer
+from database.models import CreditHistory, Payments, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
+from database.serializers import BorrowerActiveLoanSerializer, CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer, PaymentSerializer
 from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
@@ -58,20 +58,35 @@ class LoanViewSet(viewsets.ModelViewSet):
         if hasattr(request.user, 'borrower'):
             borrower = request.user.borrower  # Obtener el objeto Borrower del usuario autenticado
             
-            # Obtener todos los préstamos
-            loans = Loan.objects.all()
-            
-            # Serializar los préstamos y pasar el ID del Borrower en el contexto
-            serializer = BorrowerLoanSerializer(loans, many=True, context={'borrower_id': borrower.id})
-            return Response(serializer.data)
-        
-        # Si el usuario no es un Borrower, usa el serializer por defecto
-        # y devuelve los prestmoas normalmente
-        loans = Loan.objects.all()  
-        serializer = LoansSerializer(loans, many=True)
-        return Response(serializer.data)
-    
+            # Intentar obtener el ActiveLoan del Borrower si existe
+            try:
+                active_loan = ActiveLoan.objects.get(borrower=borrower)
+                # Usar el BorrowerActiveLoanSerializer para serializar el ActiveLoan
+                active_loan_serializer = BorrowerActiveLoanSerializer(active_loan)  
+                
+                # Si hay un ActiveLoan, retornar solo el ActiveLoan
+                response_data = {
+                    'active_loan': active_loan_serializer.data
+                }
+                return Response(response_data, status=HTTP_200_OK)
 
+            except ActiveLoan.DoesNotExist:
+                active_loan_serializer = None  # No hay ActiveLoan para este borrower
+            
+            # Si no hay ActiveLoan, obtener todos los préstamos
+            loans = Loan.objects.all()
+            # Serializar los préstamos y pasar el ID del Borrower en el contexto
+            loans_serializer = BorrowerLoanSerializer(loans, many=True, context={'borrower_id': borrower.id})
+            
+            # Construir la respuesta
+            response_data = {
+                'loans': loans_serializer.data
+            }
+            return Response(response_data, status=HTTP_200_OK)
+
+        return Response({'detail': 'Unauthorized'}, status=HTTP_403_FORBIDDEN)
+    
+    
     def create(self, request, *args, **kwargs):
             # Verificar si el usuario es un Moneylender
             if not hasattr(request.user, 'moneylender'):
@@ -128,6 +143,10 @@ class MoneylenderViewSet(viewsets.ModelViewSet):
 class CreditHistoryViewSet(viewsets.ModelViewSet):
     queryset = CreditHistory.objects.all()
     serializer_class = CreditHistorySerializer
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payments.objects.all()
+    serializer_class = PaymentSerializer
 
 #Vista de modelo para ver usuarios registrados
 User = get_user_model()
@@ -222,7 +241,8 @@ def register_routers():
         ('user', UserViewSet),
         ('request', RequestViewSet),
         ('transaction', TransactionViewSet),
-        ('active_loan', ActiveLoanViewSet)
+        ('active_loan', ActiveLoanViewSet),
+        ('payment', PaymentViewSet)
     ]
     routers = {}
     for basename, viewset in viewsets_with_basenames:

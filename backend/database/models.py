@@ -146,7 +146,7 @@ class ActiveLoan(models.Model):
     
 class Payments(models.Model):
     id = models.AutoField(primary_key=True)
-    active_loan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE)
+    active_loan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE, related_name='payments')
     number_of_pay = models.IntegerField() #Numero que identifica el numero de pago
     date_to_pay = models.DateField() #Fecha limite en que se tiene que hacer el pago 
     paid = models.BooleanField(null=True) # Indicador si ya se pago o no 

@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import  CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, InvoiceHistory, Request, Transaction
+from .models import  CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, InvoiceHistory, Payments, Request, Transaction
+from datetime import timedelta
+
 ##from django.contrib.auth.models import User
 #Serializer del historial crediticio
 User = get_user_model()
@@ -52,7 +54,10 @@ class InvoiceHistorySerializer(serializers.ModelSerializer):
         model = InvoiceHistory
         fields = '__all__'
 
-
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payments
+        fields = '__all__'
 #Serializer de los detalles de los prestamos
 class ActiveLoanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -138,3 +143,24 @@ class BorrowerRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Request
         fields = ['moneylender_id', 'loan_id']
+        
+        
+class BorrowerActiveLoanSerializer(serializers.ModelSerializer):
+    moneylender = BorrowerMoneylenderSerializer(read_only=True)  # Serializer for related Moneylender
+    loan = LoansSerializer(read_only=True)  # Serializer for related Loan
+    payments = PaymentSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = ActiveLoan
+        fields = [
+            'id',
+             #Campos de ActiveLoan
+            'total_debt_paid',
+            'amount_to_pay',
+            'start_date',
+            'loan',
+            'moneylender',
+            'payments',
+        ]
+
+
