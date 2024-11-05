@@ -1,4 +1,8 @@
-const apiHost = "http://52.7.196.119:8000/"
-//const apiHost = "http://localhost:8000"
+//const apiHost = "https://llamascoin-api.xyz/"
+const apiHost = "http://127.0.0.1:8000/"
+
 
 export {apiHost}
+
+
+export const validationForm = "https://tacosasada.sandbox.moffin.co/solicitud/validacion-de-identidad/comenzar"
