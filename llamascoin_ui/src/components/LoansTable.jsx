@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axios from "axios"; // Importa Axios
 import { PencilIcon } from "@heroicons/react/24/solid";
 import {
   ArrowDownTrayIcon,
@@ -16,6 +17,7 @@ import { useAuth } from "../context/AuthContext";
 import { useFetch } from "../hooks/useFetch";
 import { ConfirmationModal } from "./ConfirmationModal";
 import { apiHost } from "../utils/apiconfig";
+import { useNavigate } from "react-router-dom";
 const TABLE_HEAD = [
   "Prestamista",
   "Cantidad",
@@ -25,49 +27,71 @@ const TABLE_HEAD = [
   "Fecha de Publicación",
   "Estado",
 ];
+const TERM_CHOICES = {
+  1: "Semanal",
+  2: "Quincenal",
+  3: "Mensual",
+};
+const STATUS_CHOICES = {
+  pending: "Pending", // Pendiente
+  approved: "Approved", // Aprobado
+  rejected: "Rejected", // Rechazado
+  completed: "Completed", // Completado
+};
 
 export function LoansTable() {
-  const [tableRows, setTableRows] = useState([]);
+  const [loanRows, setLoanRows] = useState([]);
+  const [activeLoan, setActiveLoan] = useState();
   const { authData } = useAuth();
   const { status, data, error } = useFetch(apiHost + "loan/");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedEntity, setSelectedEntity] = useState("");
+  const [selectedLoan, setSelectedLoan] = useState("");
   const [entityType, setEntityType] = useState("");
+  const [loanId, setLoanId] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (status === "success" && data) {
-      const rows = data.map((loan) => {
-        const lender = loan.moneylender
-          ? `${loan.moneylender.first_name} ${loan.moneylender.first_surname}`
-          : "Desconocido";
-
-
-        return {
-          lender: lender,
-          amount: `$${parseFloat(loan.amount).toFixed(2)}`,
-          interest: `${loan.interest_rate}%`,
-          terms: `${loan.term} meses`,
-          paymentCount: loan.number_of_payments,
-          publishDate: loan.publication_date,
-          status: loan.request_status || "Solicitar",
-        };
-      });
-
-      setTableRows(rows);
+      if (data.loans) {
+          setLoanRows(data.loans); // Si hay préstamos, configurar loanRows
+      }
+      
+      if (data.active_loan) {
+          setActiveLoan(data.active_loan); // Si hay un préstamo activo, configurar activeLoan
+      }
     } else if (status === "error") {
       console.error("Error fetching data: ", error);
     }
   }, [status, data, error]);
 
-  const handleStatusClick = (entity, type) => {
-    setSelectedEntity(entity);
-    setEntityType(type);
+  const handleStatusClick = (loan) => {
+    setSelectedLoan(loan);
     setModalOpen(true);
   };
 
-  const handleConfirm = () => {
-    console.log(`Llamada confirmada para: ${selectedEntity}`);
-    setModalOpen(false);
+  const handleConfirm = async () => {
+    try {
+      const response = await axios.post(
+        apiHost + "request/",
+        {
+          moneylender_id: selectedLoan.moneylender.id,
+          loan_id: selectedLoan.id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authData.accessToken}`,
+          },
+        }
+      );
+
+      console.log("Llamada confirmada para: ", selectedLoan);
+      console.log("Respuesta de la API: ", response.data);
+      navigate(0);
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Error al confirmar la solicitud: ", error);
+    }
   };
 
   return (
@@ -121,108 +145,101 @@ export function LoansTable() {
             </tr>
           </thead>
           <tbody>
-            {tableRows.map(
-              (
-                {
-                  lender,
-                  amount,
-                  interest,
-                  terms,
-                  paymentCount,
-                  publishDate,
-                  status,
-                },
-                index
-              ) => {
-                const isLast = index === tableRows.length - 1;
-                const classes = isLast
-                  ? "p-4"
-                  : "p-4 border-b border-blue-gray-50";
+            {loanRows.map((loan, index) => {
+              const isLast = index === loanRows.length - 1;
+              const classes = isLast
+                ? "p-4"
+                : "p-4 border-b border-blue-gray-50";
 
-                let statusColor = "blue";
+              let statusColor = "blue";
 
-                if (status === "pending") statusColor = "amber";
-                else if (status === "rejected") statusColor = "red";
+              if (loan.request_status === "pending") statusColor = "amber";
+              else if (loan.request_status === "rejected") statusColor = "red";
 
-                return (
-                  <tr key={index}>
-                    <td className={classes}>
-                      <div className="flex items-center gap-3">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-bold"
-                        >
-                          {lender}
-                        </Typography>
-                      </div>
-                    </td>
-                    <td className={classes}>
+              return (
+                <tr key={index}>
+                  <td className={classes}>
+                    <div className="flex items-center gap-3">
                       <Typography
                         variant="small"
                         color="blue-gray"
-                        className="font-normal"
+                        className="font-bold"
                       >
-                        {amount}
+                        {loan.moneylender.first_name +
+                          " " +
+                          loan.moneylender.first_surname}
                       </Typography>
-                    </td>
-                    <td className={classes}>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal"
+                    </div>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {loan.amount} MXN
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {loan.interest_rate}%
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {TERM_CHOICES[loan.term] || "Unknown Term"}
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {loan.number_of_payments}
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal"
+                    >
+                      {loan.publication_date}
+                    </Typography>
+                  </td>
+                  <td className={classes}>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="filled"
+                        color={statusColor}
+                        size="md"
+                        disabled={loan.request_status === "pending"}
+                        onClick={() => {
+                          if (loan.request_status !== "rejected") {
+                            handleStatusClick(loan);
+                          }
+                        }}
                       >
-                        {interest}
-                      </Typography>
-                    </td>
-                    <td className={classes}>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal"
-                      >
-                        {terms}
-                      </Typography>
-                    </td>
-                    <td className={classes}>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal"
-                      >
-                        {paymentCount}
-                      </Typography>
-                    </td>
-                    <td className={classes}>
-                      <Typography
-                        variant="small"
-                        color="blue-gray"
-                        className="font-normal"
-                      >
-                        {publishDate}
-                      </Typography>
-                    </td>
-                    <td className={classes}>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="filled"
-                          color={statusColor}
-                          size="md"
-                          disabled={status == "pending"}
-                          onClick={() => {
-                            if (status !== "rejected") {
-                              handleStatusClick(lender, "lender");
-                            }
-                          }}
-                        >
-                          {status}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              }
-            )}
+                        {loan.request_status === ""
+                          ? "Solicitar"
+                          : loan.request_status === "rejected"
+                          ? STATUS_CHOICES["rejected"]
+                          : STATUS_CHOICES[loan.request_status]}
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </CardBody>
@@ -231,7 +248,7 @@ export function LoansTable() {
         onClose={() => setModalOpen(false)}
         type={entityType}
         message={"¿Seguro que desea solicitar el prestamo?"}
-        entity={selectedEntity}
+        entity={selectedLoan.moneylender}
         onConfirm={handleConfirm}
       />
     </Card>
