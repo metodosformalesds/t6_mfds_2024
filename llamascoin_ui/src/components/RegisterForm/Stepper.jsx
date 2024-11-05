@@ -5,12 +5,9 @@ const Stepper = ({ currentStep }) => {
   //Diccionario para mantener agrupado el progreso
   const stepsKeys ={
     "0": 1,
-    "1": 1,
-    "2": 2,
-    "3": 2,
-    "4": 3, 
-    "5": 4,
-    "6": 4,
+    "1": 2,
+    "2": 3,
+    "3": 4,
   }
   return (
     <div className="flex items-center justify-center  w-full">

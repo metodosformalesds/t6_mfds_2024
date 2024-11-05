@@ -50,6 +50,15 @@ export const formValidators = {
       message: "El RFC no es válido",
     },
   },
+  curp: {
+    required: "El CURP es requerido",
+    pattern: {
+      value: /^[A-Z]{4}\d{6}[A-Z]{6}[0-9A-Z]{2}$/,
+      message: "El CURP no es válido",
+    },
+  },
+  
+  
   ciec: {
     required: "La CIEC es requerida",
   },
@@ -70,6 +79,14 @@ export const formValidators = {
       message: "El correo electrónico no es válido",
     },
   },
+  paypal:{
+      required: "El correo electrónico es requerido",
+      pattern: {
+        value: /^\S+@\S+\.\S+$/,
+        message: "El correo electrónico no es válido",
+      },
+  
+  },
   password: {
     required: "La contraseña es requerida",
     pattern: {
@@ -78,4 +95,5 @@ export const formValidators = {
         "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial",
     },
   },
+  
 };
