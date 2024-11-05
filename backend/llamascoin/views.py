@@ -11,12 +11,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from database.models import Request, User, Moneylender, Borrower
+from database.models import Request, User, Moneylender, Borrower, CreditHistory
 from services.filters import requestfilter
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+import requests
+from django.utils import timezone
 
 
 #Vista para registrar el usuario
@@ -129,8 +131,10 @@ def jumioValidation(request):
         print("CURP:", curp)
         print("STATUS:", status)
         # Verifica si el usuario existe con el CURP
-        user = User.objects.filter(curp=curp).first()
-
+        #user = User.objects.filter(curp=curp).first()
+        user = User.objects.get(curp=curp)
+        user_id = user.id
+        print("user:", user_id)
         if not user:
             return JsonResponse({"error": "User not found"}, status=404)
 
@@ -146,7 +150,70 @@ def jumioValidation(request):
             return JsonResponse({"status": "User deleted"})
         else:
             return JsonResponse({"error": "Status no encontrado"}, status=400)
+        
+        
+        if user.account_type == 'borrower':
+            borrower = Borrower.objects.get(user_id=user_id)
+            datos = {    
+                'firstName': borrower.first_name,
+                'firstLastName': borrower.first_name,
+                'secondLastName': borrower.second_surname,
+                'rfc': borrower.rfc,
+                'birthdate': borrower.birth_date,
+                'accountType': "PF",
+                'address': borrower.full_address,
+                'city': borrower.city,
+                'municipality': borrower.municipality,
+                'state': borrower.state,
+                'zipCode': borrower.postal_code,
+                'neighborhood': borrower.neighborhood,
+                'country': borrower.country,
+                'nationality': borrower.nationality
+            }
+            
+            api_url = "https://sandbox.moffin.mx/api/v1/query/bureau_pf"
+            headers = {
+                'Authorization': 'Token d0a8721978878bd705228203826fa9178a1f2c496db20e4402f92ff84b2b3379',
+                'Content-Type': 'application/json'
+            }
 
+            try:
+                # Hacer la solicitud POST a la API externa
+                api_response = requests.post(api_url, json=datos, headers=headers)
+                api_response.raise_for_status()
+                api_data = api_response.json()
+
+                resumen_data = (api_data.get("response", {}).get("return", {}).get("Personas", {}).get("Persona", [{}])[0] .get("ResumenReporte", {}).get("ResumenReporte", [{}])[0] )
+                score_data = (api_data.get("response", {}).get("return", {}).get("Personas", {}).get("Persona", [{}])[0].get("ScoreBuroCredito", {}).get("ScoreBC", [{}])[0]) 
+                
+                credit_history = CreditHistory(
+                    
+                    borrower=borrower,
+                    date_account_open = timezone.now(),
+                    actual_balance = 0,
+                    max_credit = 1000,
+                    accounts_open=int(resumen_data.get('NumeroCuentas', 0)),
+                    accounts_closed=int(resumen_data.get('CuentasCerradas', 0)),
+                    num_mop1=int(resumen_data.get('NumeroMOP1', 0)),
+                    num_mop2=int(resumen_data.get('NumeroMOP2', 0)),
+                    num_mop3=int(resumen_data.get('NumeroMOP3', 0)),
+                    num_mop4=int(resumen_data.get('NumeroMOP4', 0)),
+                    num_mop5=int(resumen_data.get('NumeroMOP5', 0)),
+                    num_mop6=int(resumen_data.get('NumeroMOP6', 0)),
+                    num_mop7=int(resumen_data.get('NumeroMOP7', 0)),
+                    code_score=(score_data.get('CodigoScore', 0)), 
+                    val_score=(score_data.get('Valorscore', 0)),
+                    lim_credit=1000 
+                )
+                
+                credit_history.save()
+             
+                return JsonResponse({"status": "Data processed successfully"})
+            except requests.exceptions.RequestException:
+                return JsonResponse({"error": "API request failed"}, status=500)
+            except KeyError:
+                return JsonResponse({"error": "Missing data in API response"}, status=500)
+    
         return JsonResponse({"status": "Data processed successfully"})
     return JsonResponse({"error": "Invalid request method"}, status=405)
         
