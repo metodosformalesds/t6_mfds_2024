@@ -47,58 +47,9 @@ export function Step6({ register, errors, defaultValues }) {
         </span>
       </div>
 
-      {/* Checkbox para Términos y Condiciones */}
-      <div className="flex flex-col">
-        <Checkbox
-          id="terms"
-          color="blue"
-          {...register("terms", {
-            required: "Debes aceptar los términos y condiciones",
-          })}
-          label={
-            <span>
-              Acepto los{" "}
-              <a
-                href="/terms"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 underline"
-              >
-                Términos y Condiciones
-              </a>
-            </span>
-          }
-          className="text-sm text-gray-600"
-        />
-        {errors.terms && (
-          <p className="text-red-500 text-sm">{errors.terms.message}</p>
-        )}
 
-        <Checkbox
-          id="privacyPolicy"
-          color="blue"
-          {...register("privacyPolicy", {
-            required: "Debes aceptar la política de privacidad",
-          })}
-          label={
-            <span>
-              Acepto la{" "}
-              <a
-                href="/privacy_policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 underline"
-              >
-                Política de Privacidad
-              </a>
-            </span>
-          }
-          className="text-sm text-gray-600"
-        />
-        {errors.privacyPolicy && (
-          <p className="text-red-500 text-sm">{errors.privacyPolicy.message}</p>
-        )}
-      </div>
+   
+     
     </div>
   );
 }
