@@ -19,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import requests
 from django.utils import timezone
-
+from services.Correos.send_mail import EmailSender
 
 #Vista para registrar el usuario
 class RegisterView(APIView):
@@ -43,7 +43,6 @@ class RegisterView(APIView):
             )
             user.set_password(password)  # Hashear la contraseña
             user.save()
-
             return Response({"message": "Usuario registrado exitosamente"}, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -207,6 +206,21 @@ def jumioValidation(request):
                 )
                 
                 credit_history.save()
+                
+                try:
+                    recipient = user.email
+                    subject = "Validación y registro en LlamasCoin exitoso"
+                    template_name = "envio.html"
+                    name = borrower.first_name + " " + borrower.first_surname + " " + borrower.second_surname
+                    # Crea una instancia de EmailSender
+                    email_sender = EmailSender(recipient, subject, template_name, {"nombre": name})
+                    
+                    # Envía el correo
+                    email_sender.send_email()
+
+                except Exception as e:
+                    print(f"Error al enviar el correo de registro: {e}")
+
              
                 return JsonResponse({"status": "Data processed successfully"})
             except requests.exceptions.RequestException:

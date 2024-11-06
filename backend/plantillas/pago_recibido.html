@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Recibido</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd;">
+        <h2 style="color: #4CAF50;">¡Pago recibido!</h2>
+        <p>Estimado(a) {{ nombre_prestamista }},</p>
+        <p>Nos complace informarte que has recibido un pago del prestatario <strong>{{ nombre_prestatario }}</strong>.</p>
+        <p>Detalles del pago:</p>
+        <ul>
+            <li><strong>Monto:</strong> ${{ monto_pago }}</li>
+            <li><strong>Fecha de pago:</strong> {{ fecha_pago }}</li>
+        </ul>
+        <p>Gracias por usar nuestro servicio para gestionar tus préstamos de manera sencilla y segura.</p>
+        <p>Saludos cordiales,</p>
+        <p><strong>Equipo de LlamasCoin</strong></p>
+    </div>
+</body>
+</html>

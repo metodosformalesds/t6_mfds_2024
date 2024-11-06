@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud Aceptada</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd;">
+        <h2 style="color: #4CAF50;">¡Solicitud aceptada!</h2>
+        <p>Estimado(a) {{ nombre_prestatario }},</p>
+        <p>Nos complace informarte que tu solicitud ha sido aceptada por el prestamista <strong>{{ nombre_prestamista }}</strong>.</p>
+        <p>Detalles de la solicitud:</p>
+        <ul>
+            <li><strong>Monto solicitado:</strong> ${{ monto_solicitado }}</li>
+            <li><strong>Fecha de aceptación:</strong> {{ fecha_aceptacion }}</li>
+        </ul>
+        <p>Por favor, revisa los términos y condiciones para proceder con el préstamo.</p>
+        <p>Saludos cordiales,</p>
+        <p><strong>Equipo de LlamasCoin</strong></p>
+    </div>
+</body>
+</html>

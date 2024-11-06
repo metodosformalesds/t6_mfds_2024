@@ -5,6 +5,7 @@ import time
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework import status
+from services.Correos.send_mail import EmailSender
 from services.paypal.serializers import  PayPalProductSerializer
 from database.models import Payments, Transaction, Loan, Borrower, Moneylender, ActiveLoan
 from rest_framework.response import Response
@@ -147,6 +148,8 @@ class CaptureCheckout(APIView):
             )
 
             if capture_response.status_code == 201:
+                subject = None
+                template_name = None
                 # Lógica para enviar el payout
                 
                 # Si el usuario es un Borrower, verificar si tiene pagos pendientes
@@ -172,7 +175,16 @@ class CaptureCheckout(APIView):
                             )
                             self.create_payment_schedule(new_active_loan)
                             self.create_transaction(new_active_loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'))
-
+                            
+                            subject = "Solicitud aceptada, el pago se enviará a tu cuenta de PayPal"
+                            template_name = "solicitud_aceptada.html"
+                            context = {
+                                'nombre_prestatario': recipient.first_name,
+                                'nombre_prestamista': request.user.moneylender.first_name,
+                                'monto_solicitado': loan.amount,
+                                'fecha_aceptacion': timezone.now(),
+                            }
+                            
                         elif hasattr(request.user, 'borrower'):
                             most_recent_payment = Payments.objects.filter(active_loan=loan, paid=False).order_by('date_to_pay').first()
                             loan.total_debt_paid += amount
@@ -182,6 +194,25 @@ class CaptureCheckout(APIView):
                             most_recent_payment.paid_on_time = most_recent_payment.date_to_pay >= timezone.now().date()
                             most_recent_payment.save()
                             self.create_transaction(loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'))
+                            
+                            subject = "Haz recibido un pago, el pago se enviará a tu cuenta de PayPal"
+                            template_name = "pago_recibido.html"
+                            context = {
+                                'nombre_prestatario': request.user.borrower.first_name,
+                                'nombre_prestamista': recipient.first_name,
+                                'monto_pagado': amount,
+                                'fecha_pago': timezone.now(),
+                            }
+
+                        try:
+                            recipient = recipient.email
+                            # Crea una instancia de EmailSender
+                            email_sender = EmailSender(recipient, subject, template_name, context)
+                            # Envía el correo
+                            email_sender.send_email()
+
+                        except Exception as e:
+                            print(f"Error al enviar el correo de {subject}: {e}")
 
 
                         return Response({

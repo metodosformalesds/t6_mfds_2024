@@ -4,11 +4,11 @@ from django.conf import settings
 from django.template.loader import render_to_string
 
 class EmailSender:
-    def __init__(self, recipient, subject, template_name, name):
+    def __init__(self, recipient, subject, template_name, context = None):
         self.recipient = recipient
         self.subject = subject
         self.template_name = template_name  # Nombre del archivo HTML en templates
-        self.context = {'nombre': name}  # Contexto para la plantilla
+        self.context = context or {} # Contexto para la plantilla
 
     def send_email(self):
         try:
