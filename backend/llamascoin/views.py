@@ -6,7 +6,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
-from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters.rest_framework import DjangoFilterBackend
@@ -251,7 +250,9 @@ class LoginView(APIView):
         # Validar la contraseña
         if not user.check_password(request.data['password']):
             return Response({"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST)
-        
+        if not user.is_verified:
+            user.delete()
+            return Response({"error": "No se pudo validar su identidad correctamente, inice el registro nuevamente"}, status=status.HTTP_401_UNAUTHORIZED)
         # Crear el token JWT
         refresh = RefreshToken.for_user(user)
         

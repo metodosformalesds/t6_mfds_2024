@@ -13,6 +13,8 @@ import { useAuth } from "../context/AuthContext";
 export function LoginForm({ onSubmit }) {
   const { login } = useAuth(); 
   const [status, setStatus] = useState("");
+  const [customMessage, setCustomMessage] = useState(null);
+
   const navigate = useNavigate();
   const {
     register,
@@ -45,6 +47,8 @@ export function LoginForm({ onSubmit }) {
     } catch (error) {
       setStatus("error");
       console.error("Error al iniciar sesión:", error);
+      setCustomMessage(error.response.data.error || "Error desconocido");
+
     }
   };
 
@@ -89,7 +93,7 @@ export function LoginForm({ onSubmit }) {
 
           {/* Componente para mostrar el estado */}
           {(status === "loading" || status === "error" || status === "success") && (
-            <StatusComponent status={status} />
+            <StatusComponent status={status} customMessage={customMessage}/>
           )}
 
           <Button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md">
