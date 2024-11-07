@@ -45,8 +45,11 @@ class RegisterView(APIView):
             user.save()
             return Response({"message": "Usuario registrado exitosamente"}, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+            # Si los datos son inválidos
+            return Response(
+                {"error": "Datos inválidos", "details": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 #Vista para resivir form.procedded.succes y registar los datos del formulario
 @csrf_exempt
 def Formulario(request):

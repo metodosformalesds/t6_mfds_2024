@@ -14,6 +14,7 @@ import { useAuth } from "../../context/AuthContext";
 
 export function MultiStepForm() {
   const [status, setStatus] = useState("");
+  const [customMessage, setCustomMessage] = useState(null);
   const navigate = useNavigate();
   const { authData } = useAuth();
   const {
@@ -72,8 +73,19 @@ export function MultiStepForm() {
         setStatus("error");
       }
     } catch (error) {
-      console.error("Error al registrar:", error);
-      setStatus("error");
+
+      if (error.response) {
+        const errorData = error.response.data;
+        setStatus("error");
+        setCustomMessage(errorData.error || "Error desconocido");
+    
+        if (errorData.details) {
+          console.log("Detalles del error:", errorData.details);
+        }
+      } else {
+        setStatus("error");
+        setCustomMessage("Error de red o servidor.");
+      }
     }
     }
     
@@ -120,7 +132,7 @@ export function MultiStepForm() {
           <Stepper currentStep={step} />
 
           {status === "loading" || status === "error" || status === "success" ? (
-            <StatusComponent status={status} />
+            <StatusComponent status={status} customMessage={customMessage}/>
           ) : (
             <form>{getStepContent(step)}</form>
           )}
