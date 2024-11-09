@@ -56,7 +56,7 @@ export default function Navbar() {
           <a href="/" className="text-sm font-semibold leading-8 text-white">
             Inicio
           </a>
-          <a href="#" className="text-sm font-semibold leading-8 text-white">
+          <a href="/home" className="text-sm font-semibold leading-8 text-white">
             ¿Necesitas un prestamo?
           </a>
           <a href="/subscription" className="text-sm font-semibold leading-8 text-white">
@@ -100,13 +100,13 @@ export default function Navbar() {
                   Inicio
                 </a>
                 <a
-                  href="#"
+                  href="/home"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
                   ¿Necesitas un prestamo?
                 </a>
                 <a
-                  href="#"
+                  href="/subscription"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                 >
                   ¿Quieres prestar dinero?

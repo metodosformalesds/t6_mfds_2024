@@ -5,20 +5,19 @@ const LINKS = [
   {
     title: "Compañia",
     items: [
-      { text: "Acerca de nosotros", href: "http://localhost:5173/" },
-      { text: "Contactanos", href: "http://localhost:5173/"},
-      { text: "Precios", href: "http://localhost:5173/"},
+      { text: "Acerca de nosotros", href: "/about" },
+
+      { text: "Precios", href: "/subscription" },
     ],
   },
   {
     title: "Soporte",
     items: [
-      { text: "Terminos y condiciones", href: "http://localhost:5173/TermsAndConditions" },
-      { text: "Politicas de privacidad", href: "http://localhost:5173/TermsAndConditions" }, 
+      { text: "Terminos y condiciones", href: "/terms-and-conditions" },
+      { text: "Politicas de privacidad", href: "/terms-and-conditions" }, 
     ],
   },
 ];
-
 const currentYear = new Date().getFullYear();
 
 export default function Footer() {
