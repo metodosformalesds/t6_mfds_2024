@@ -2,7 +2,11 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from .models import  CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, InvoiceHistory, Payments, Request, Transaction
 from datetime import timedelta
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+INTEREST_BANK = float(os.getenv('INTEREST_BANK', 28.18))
 ##from django.contrib.auth.models import User
 #Serializer del historial crediticio
 User = get_user_model()
@@ -128,7 +132,36 @@ class MoneylenderLoanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Loan
         fields = ['amount', 'interest_rate', 'number_of_payments', 'term']
-        
+
+    # Validar la tasa de interés
+    def validate_interest_rate(self, value):
+        if value > INTEREST_BANK:
+            raise serializers.ValidationError(f"La tasa de interés no puede exceder el {INTEREST_BANK}%")
+        return value
+
+    # Validar el monto del préstamo
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("El monto del préstamo debe ser mayor que 0")
+        return value
+
+    # Validar el número de pagos
+    def validate_number_of_payments(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("El número de pagos debe ser mayor que 0")
+        return value
+
+    # Validación de varios campos
+    def validate(self, data):
+        # Ejemplo: Validar que el número de pagos y el término sean consistentes
+        if data['term'] == 1 and data['number_of_payments'] > 52:  # Semanalmente, máximo 52 semanas
+            raise serializers.ValidationError("Número de pagos no puede exceder las 52 semanas en plazo semanal")
+        if data['term'] == 2 and data['number_of_payments'] > 24:  # Quincenalmente, máximo 24 quincenas
+            raise serializers.ValidationError("Número de pagos no puede exceder las 24 quincenas en plazo quincenal")
+        if data['term'] == 3 and data['number_of_payments'] > 12:  # Mensual, máximo 12 meses
+            raise serializers.ValidationError("Número de pagos no puede exceder los 12 meses en plazo mensual")
+
+        return data
 class BorrowerCreditHistorySerializer(serializers.ModelSerializer):
     credit_history = CreditHistorySerializer(many=True, read_only=True)  
     class Meta:
