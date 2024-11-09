@@ -8,6 +8,7 @@ import Subscription from "./pages/Subscription";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import HomePage from "./pages/HomePage";
 import { AuthProvider } from "./context/AuthContext";
+import AboutUs from "./pages/AboutUs";
 const App = () => {
   return (
     <AuthProvider> 
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/subscription" element={<Subscription />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/about" element={<AboutUs/>}/>
       </Routes>
     </Router>
   </AuthProvider>

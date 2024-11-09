@@ -96,8 +96,8 @@ class LoanViewSet(viewsets.ModelViewSet):
             moneylender = request.user.moneylender
 
             # Verificar si is_subscribed es True
-            # if not moneylender.is_subscribed:
-            #     raise PermissionDenied("El Moneylender no está suscrito.")
+            if not moneylender.is_subscribed:
+                raise PermissionDenied("El Moneylender no está suscrito.")
 
             # Usar el serializer para validar los datos del préstamo
             moneylender_loan_serializer = MoneylenderLoanSerializer(data=request.data)
