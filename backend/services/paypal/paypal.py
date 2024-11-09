@@ -205,7 +205,7 @@ class CaptureCheckout(APIView):
                             }
 
                         try:
-                            recipient = recipient.email
+                            recipient = recipient.user.email
                             # Crea una instancia de EmailSender
                             email_sender = EmailSender(recipient, subject, template_name, context)
                             # Envía el correo
