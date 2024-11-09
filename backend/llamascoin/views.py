@@ -193,10 +193,10 @@ def jumioValidation(request):
                     
                     borrower=borrower,
                     date_account_open = timezone.now(),
-                    actual_balance = 0,
-                    max_credit = 1000,
+                    check_date = timezone.now(),
                     accounts_open=int(resumen_data.get('NumeroCuentas', 0)),
                     accounts_closed=int(resumen_data.get('CuentasCerradas', 0)),
+                    negative_accounts=int(resumen_data.get('CuentasNegativasActuales', 0)),
                     num_mop1=int(resumen_data.get('NumeroMOP1', 0)),
                     num_mop2=int(resumen_data.get('NumeroMOP2', 0)),
                     num_mop3=int(resumen_data.get('NumeroMOP3', 0)),
@@ -204,9 +204,9 @@ def jumioValidation(request):
                     num_mop5=int(resumen_data.get('NumeroMOP5', 0)),
                     num_mop6=int(resumen_data.get('NumeroMOP6', 0)),
                     num_mop7=int(resumen_data.get('NumeroMOP7', 0)),
+                    num_mop99=int(resumen_data.get('NumeroMOP99', 0)),
                     code_score=(score_data.get('CodigoScore', 0)), 
                     val_score=(score_data.get('Valorscore', 0)),
-                    lim_credit=1000 
                 )
                 
                 credit_history.save()

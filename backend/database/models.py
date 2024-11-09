@@ -1,4 +1,5 @@
 from django.utils import timezone
+from datetime import timedelta
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
@@ -69,14 +70,9 @@ class Borrower(models.Model):
     postal_code = models.CharField(max_length=5)  # Código postal del prestatario
     state = models.CharField(max_length=50)  # Estado del territorio o estado del prestatario
     country = models.CharField(max_length=50)  # País del prestatario
-    municipality = models.CharField(max_length=50, blank=True)
-    nationality = models.CharField(max_length=50, default= 'MX') 
+    municipality = models.CharField(max_length=50, blank=True) #Municipio
+    nationality = models.CharField(max_length=50, default= 'MX') #Nacionalidad
     
-    
-    possibility_of_pay = models.FloatField(default=0)  # Número que indica la posibilidad de que el prestatario cumpla con los pagos
-    score_llamas = models.IntegerField(default=0)  # Puntaje de calificación del prestatario dentro de la aplicación
-
-
 class InvoiceHistory(models.Model):
     id = models.AutoField(primary_key=True)  # Clave única del historial de facturas
     uuid = models.CharField(max_length=100)  # UUID (Universally Unique Identifier), identificador asignado por el SAT a la factura
@@ -98,28 +94,68 @@ class InvoiceHistory(models.Model):
 class CreditHistory(models.Model):
     id = models.AutoField(primary_key=True)  # Clave única 
     borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE,related_name='credit_history' )  # Relación con el prestatario
-    date_account_open = models.DateField(null=True, blank=True)          # Fecha de apertura de la cuenta
-    actual_balance = models.DecimalField(max_digits=10, decimal_places=2)  # 
-    max_credit = models.DecimalField(max_digits=10, decimal_places=2)  #
-    lim_credit = models.DecimalField(max_digits=10, decimal_places=2)  #
-    #pay_history = models.CharField(max_length=50)  # Historial de pagos
-    #current_pay_status = models.CharField(max_length=10)  # Estado actual de los pagos
-    accounts_open = models.IntegerField()           # Cuentas activas
-    accounts_closed = models.IntegerField()         # Cuentas cerradas
-    #account_fixed_payment = models.BooleanField()   # Cuentas con pago fijo
+    date_account_open = models.DateField()  # Fecha de apertura de la cuenta
+    
+    #Datos consultados en el buro de credito
+    accounts_open = models.IntegerField()           # “NumeroCuentas” : Presenta la suma total de los créditos integrados en el expediente del Cliente.
+    accounts_closed = models.IntegerField()         # “CuentasCerradas”: Presenta la suma total de los créditos con fecha de cierre integrados en el expediente del Cliente.
+    negative_accounts = models.CharField ()         # “CuentasNegativasActuales”: Presenta la suma total de créditos con MOP reportado igual o superior a 02.
     num_mop1 = models.IntegerField()                # Pagos a tiempo
-    num_mop2 = models.IntegerField()                # Retrasos de 1 a 29 días
-    num_mop3 = models.IntegerField()                # Retrasos de 30 a 59 días
-    num_mop4 = models.IntegerField()                # Retrasos de 60 a 89 días
-    num_mop5 = models.IntegerField()                # Retrasos de 90 a 119 días
-    num_mop6 = models.IntegerField()                # Retrasos de 120 a 149 días
-    num_mop7 = models.IntegerField()                # Retrasos de 150 a 179 días
-    #check_date = models.DateField()                 # Fecha de consulta
-    code_score = models.FloatField()              # Score crediticio
-    val_score = models.IntegerField(default=0)
-    #place_of_work = models.CharField(max_length=100)  # Lugar de trabajo
-    #salary = models.FloatField() # Salario
+    num_mop2 = models.IntegerField()                # suma total de créditos Retrasos de 1 a 29 días
+    num_mop3 = models.IntegerField()                # suma total de créditos Retrasos de 30 a 59 días
+    num_mop4 = models.IntegerField()                # suma total de créditos Retrasos de 60 a 89 días
+    num_mop5 = models.IntegerField()                # suma total de créditos Retrasos de 90 a 119 días
+    num_mop6 = models.IntegerField()                # suma total de créditos Retrasos de 120 a 149 días
+    num_mop7 = models.IntegerField()                # suma total de créditos Retrasos de 150 a 179 días
+    num_mop99 = models.IntegerField()               # Suma de cuentas reportadas por fraude 
+    code_score = models.IntegerField()              # Presenta el código del modelo estadístico solicitado
+    val_score = models.IntegerField(default=0)      # Presenta el valor del Score calculado o el valor de la estimación solicitada.
+    check_date = models.DateField()                 # Fecha de consulta
+    
+    #Datos generados con el historial del Presstatario en la plataforma
+    credit_line = models.DecimalField(max_digits=10, decimal_places=2, default=1000.00) #Linea de cedito otorgada por LLamascoin
+    score_llamas = models.IntegerField(default=0)  # Puntaje de calificación del prestatario dentro de la aplicación
+    on_time_payments = models.IntegerField(default=0) #Pagos a tiempo
+    late_payments = models.IntegerField(default=0)    #Pagos tardios
+    late_payments_over_week = models.IntegerField(default=0)  # Pagos atrasados por más de 7 días
+    on_time_payment_probability = models.DecimalField(max_digits=5, decimal_places=2, default=0.0) #Probabilidad de que pague a tiempo
+    closed_loans = models.IntegerField(default=0) #Prestamos cerrados
+    active_loans = models.IntegerField(default=0) #Prestamos Activos
+    available_credit = models.DecimalField(max_digits=10, decimal_places=2, default=0.0) #Linea de credito disponible
+    
+    def calculate_llamas_history(self):
+        payments = Payments.objects.filter(active_loan__borrower=self.borrower)
+        on_time_count = payments.filter(paid=True, paid_on_time=True).count()
+        late_count = payments.filter(paid=True, paid_on_time=False).count()
+        #Conteo de pagos
+        self.on_time_payments = on_time_count
+        self.late_payments = late_count
+        
+        # Calcular pagos atrasados por más de 7 días
+        seven_days_ago = timezone.now() - timedelta(days=7)
+        late_over_week_count = payments.filter(
+            paid=False, 
+            date_to_pay__lt=seven_days_ago
+        ).count()
+        
+        # Calcular probabilidad de pago a tiempo
+        total_payments = on_time_count + late_count
+        self.payment_probability = (on_time_count / total_payments) * 100 if total_payments > 0 else 0.0
 
+        # Calcular préstamos cerrados y activos
+        self.closed_loans = ActiveLoan.objects.filter(borrower=self.borrower, amount_to_pay=0).count()
+        self.active_loans = ActiveLoan.objects.filter(borrower=self.borrower).exclude(amount_to_pay=0).count()
+        
+        # Calcular el crédito disponible
+        active_loans_debt = ActiveLoan.objects.filter(borrower=self.borrower).aggregate(total_debt=models.Sum('amount_to_pay'))['total_debt'] or 0
+        self.available_credit = self.credit_limit - active_loans_debt
+        
+        self.on_time_payments = on_time_count
+        self.late_payments = late_count
+        self.late_payments_over_week = late_over_week_count
+         
+        self.save()
+    
 #Request model
 class Request(models.Model):
     id = models.AutoField(primary_key=True)  # Llave única de la entidad
@@ -143,7 +179,8 @@ class ActiveLoan(models.Model):
     total_debt_paid = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad pagada por el prestatario
     amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad pendiente de pagar
     start_date = models.DateField(null=True) #Fecha de inicio del prestamo 
-    
+    payment_by_term = models.DecimalField(max_digits=10, decimal_places=2) #Monto que se pagara por mes
+
 class Payments(models.Model):
     id = models.AutoField(primary_key=True)
     active_loan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE, related_name='payments')
