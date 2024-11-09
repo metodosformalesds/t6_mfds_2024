@@ -168,7 +168,7 @@ export function ContentDesign() {
               flexibles, y la atención al cliente es de primera. Me salvó en un
               momento de necesidad."
             </p>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <button  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700">
               Registrate
             </button>
           </div>
@@ -237,14 +237,7 @@ export function ContentDesign() {
                 </Typography>
               </CardBody>
             </div>
-            <CardFooter className="pt-2 flex items-end">
-              <button
-                type="button"
-                className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-2"
-              >
-                Ver más
-              </button>
-            </CardFooter>
+          
           </Card>
 
           <Card className="mt-6 w-full max-w-sm mx-auto shadow-lg flex flex-col justify-between">
@@ -263,14 +256,7 @@ export function ContentDesign() {
                 </Typography>
               </CardBody>
             </div>
-            <CardFooter className="pt-2 flex items-end">
-              <button
-                type="button"
-                className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-2"
-              >
-                Ver más
-              </button>
-            </CardFooter>
+           
           </Card>
 
           <Card className="mt-6 w-full max-w-sm mx-auto shadow-lg flex flex-col justify-between">
@@ -288,14 +274,7 @@ export function ContentDesign() {
                 </Typography>
               </CardBody>
             </div>
-            <CardFooter className="pt-2 flex items-end">
-              <button
-                type="button"
-                className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-2"
-              >
-                Ver más
-              </button>
-            </CardFooter>
+          
           </Card>
         </div>
       </div>
