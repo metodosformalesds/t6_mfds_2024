@@ -19,10 +19,12 @@ import json
 import requests
 from django.utils import timezone
 from services.Correos.send_mail import EmailSender
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 #Vista para registrar el usuario
 class RegisterView(APIView):
     serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
@@ -242,7 +244,8 @@ class RequestViewSet(viewsets.ModelViewSet):
 
 class LoginView(APIView):
     serializer_class = UserLoginSerializer
-    
+    permission_classes = [AllowAny]
+
     def post(self, request):
         # Buscar el usuario por correo electrónico en lugar de nombre de usuario
         user = get_object_or_404(User, email=request.data['username'])
