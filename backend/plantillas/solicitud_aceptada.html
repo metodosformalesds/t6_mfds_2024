@@ -1,23 +1,45 @@
-<!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud Aceptada</title>
+    <title>¡Solicitud aceptada!</title>
 </head>
-<body style="font-family: Arial, sans-serif; color: #333;">
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd;">
-        <h2 style="color: #4CAF50;">¡Solicitud aceptada!</h2>
-        <p>Estimado(a) {{ nombre_prestatario }},</p>
-        <p>Nos complace informarte que tu solicitud ha sido aceptada por el prestamista <strong>{{ nombre_prestamista }}</strong>.</p>
-        <p>Detalles de la solicitud:</p>
-        <ul>
-            <li><strong>Monto solicitado:</strong> ${{ monto_solicitado }}</li>
-            <li><strong>Fecha de aceptación:</strong> {{ fecha_aceptacion }}</li>
-        </ul>
-        <p>Por favor, revisa los términos y condiciones para proceder con el préstamo.</p>
-        <p>Saludos cordiales,</p>
-        <p><strong>Equipo de LlamasCoin</strong></p>
+<body>
+    <div class="container" style="margin:0 auto; width:800px; text-align:center;">
+        <table role="presentation" width="100%" style="background: linear-gradient(to right, #1d1d86, #232dd7); height:180px; text-align:center;">
+            <tr>
+                <td style="text-align:center; vertical-align:middle;">
+                    <img src="https://png.pngtree.com/png-clipart/20230801/original/pngtree-approved-allowance-papers-icon-picture-image_7819086.png" alt="Pago recibido" style="height:80px; width:80px; margin-top:20px;">
+                    <h2 style="color:#fafbfd;">¡Solicitud Aceptada!</h2>
+                </td>
+            </tr>
+        </table>
+        <table role="presentation" width="100%">
+            <tr>
+                <td>
+                    <img src="https://208f1686.rocketcdn.me/wp-content/uploads/2020/01/equipo-contadores-trabajando-oficina-reunion-nuevo-proyecto_34152-1466.jpg" alt="Detalle de pago" style="width:100%; height:300px; object-fit:cover;">
+                </td>
+            </tr>
+        </table>
+        <table role="presentation" width="100%" style="padding:5rem 9% 2rem; text-align:center;">
+            <tr>
+                <td>
+                    <h2 style="color:#1d1d86; margin-bottom:20px;">¡Se aceptó tu solicitud!</h2>
+                    <p style="margin-bottom:20px; text-align:left;">Estimado(a) {{ nombre_prestatario }},</p>
+                    <p style="margin-bottom:20px; text-align:left;">Nos complace informarte que tu solicitud ha sido aceptada por el prestamista <strong style="color:#1d1d86;">{{ nombre_prestamista }}</strong>.</p>
+                    <p style="margin-bottom:20px; text-align:left;">Detalles de la solicitud:</p>
+                    <ul style="text-align:left; padding-left:20px;">
+                        <li style="margin-bottom:20px;"><strong style="color:#1d1d86;">Monto solicitado:</strong> ${{ monto_solicitado }}</li>
+                        <li style="margin-bottom:20px;"><strong style="color:#1d1d86;">Fecha de aceptación:</strong> {{ fecha_aceptacion }}</li>
+                    </ul>
+                    <p style="margin-bottom:20px; text-align:left;">Por favor, revisa los términos y condiciones para proceder con el préstamo.</p>
+                    <p style="margin-bottom:20px; text-align:left;">Saludos cordiales,</p>
+                    <p style="margin-bottom:20px; text-align:left;">Atentamente,</p>
+                    <p><strong style="color:#1d1d86;">El equipo de LlamasCoin</strong></p>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>
+
