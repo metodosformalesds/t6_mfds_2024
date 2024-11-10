@@ -99,7 +99,7 @@ class CreditHistory(models.Model):
     #Datos consultados en el buro de credito
     accounts_open = models.IntegerField()           # “NumeroCuentas” : Presenta la suma total de los créditos integrados en el expediente del Cliente.
     accounts_closed = models.IntegerField()         # “CuentasCerradas”: Presenta la suma total de los créditos con fecha de cierre integrados en el expediente del Cliente.
-    negative_accounts = models.CharField ()         # “CuentasNegativasActuales”: Presenta la suma total de créditos con MOP reportado igual o superior a 02.
+    negative_accounts = models.IntegerField ()         # “CuentasNegativasActuales”: Presenta la suma total de créditos con MOP reportado igual o superior a 02.
     num_mop1 = models.IntegerField()                # Pagos a tiempo
     num_mop2 = models.IntegerField()                # suma total de créditos Retrasos de 1 a 29 días
     num_mop3 = models.IntegerField()                # suma total de créditos Retrasos de 30 a 59 días
@@ -122,6 +122,7 @@ class CreditHistory(models.Model):
     closed_loans = models.IntegerField(default=0) #Prestamos cerrados
     active_loans = models.IntegerField(default=0) #Prestamos Activos
     available_credit = models.DecimalField(max_digits=10, decimal_places=2, default=0.0) #Linea de credito disponible
+    outstanding_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0.0) #Saldo pendiente de pagar 
     
     def calculate_llamas_history(self):
         payments = Payments.objects.filter(active_loan__borrower=self.borrower)
@@ -140,7 +141,7 @@ class CreditHistory(models.Model):
         
         # Calcular probabilidad de pago a tiempo
         total_payments = on_time_count + late_count
-        self.payment_probability = (on_time_count / total_payments) * 100 if total_payments > 0 else 0.0
+        self.on_time_payment_probability = (on_time_count / total_payments) * 100 if total_payments > 0 else 0.0
 
         # Calcular préstamos cerrados y activos
         self.closed_loans = ActiveLoan.objects.filter(borrower=self.borrower, amount_to_pay=0).count()
@@ -148,8 +149,9 @@ class CreditHistory(models.Model):
         
         # Calcular el crédito disponible
         active_loans_debt = ActiveLoan.objects.filter(borrower=self.borrower).aggregate(total_debt=models.Sum('amount_to_pay'))['total_debt'] or 0
-        self.available_credit = self.credit_limit - active_loans_debt
+        self.available_credit = self.credit_line - active_loans_debt
         
+        self.outstanding_balance = active_loans_debt
         self.on_time_payments = on_time_count
         self.late_payments = late_count
         self.late_payments_over_week = late_over_week_count
