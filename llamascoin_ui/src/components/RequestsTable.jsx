@@ -35,7 +35,7 @@ export function RequestsTable() {
     if (status === "success" && data) {
       setRequestRows(data);
     } else if (status === "error") {
-      console.error("Error fetching data: ", error);
+      console.error("Error fetching data: ", status);
     }
   }, [status, data]);
 

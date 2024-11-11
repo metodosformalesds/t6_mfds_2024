@@ -1,74 +1,70 @@
 import * as React from 'react';
-import Stack from '@mui/material/Stack';
 import { PieChart } from '@mui/x-charts/PieChart';
+import { Box, Typography } from '@mui/material';
+import { ArrowUpIcon } from '@heroicons/react/24/solid';
 
-// Datos iniciales
 const data = [
-  { label: 'Bajo', value: 100 },    
-  { label: 'Normal', value: 100 },  
-  { label: 'Alto', value: 100 },  
+  { label: 'Group A', value: 33, color: "#F97027" }, // 0-33
+  { label: 'Group B', value: 33, color: "#FEC300" }, // 34-66
+  { label: 'Group C', value: 34, color: "#8DC53F" }, // 67-100
 ];
+let segment = 1
 
-const colors = ['#ff0000', '#ffff00', '#008000']; // Rojo, Amarillo, Verde
+export default function ScoreCharts() {
+  const [value, setValue] = React.useState(50); // Valor actual que se puede modificar
 
-const getScoreDistribution = (score = 25) => {
-  const lowThreshold = 25;   // Umbral para rango bajo
-  const highThreshold = 75;  // Umbral para rango alto
+  // Función para obtener el color y etiqueta según el valor
+  const getColorAndLabel = () => {
+    if (value <= 33) {
+      segment = 1
+      return { color: "#F97027", label: 'Group A' };
+    }
 
-  // Inicializa la distribución
-  const distribution = { low: 0, normal: 0, high: 0 };
+    else if (value <= 66) {
+      segment = 2
+      return { color: "#FEC300", label: 'Group B' }}
 
-  // Determina qué rangos deben ser pintados
-  if (score <= lowThreshold) {
-    distribution.low = 100;     // Pintar bajo
-    distribution.normal = 0;    // No pintar normal
-    distribution.high = 0;      // No pintar alto
-  } else if (score <= highThreshold) {
-    distribution.low = 100;     // Pintar bajo
-    distribution.normal = 100;   // Pintar normal
-    distribution.high = 0;      // No pintar alto
-  } else {
-    distribution.low = 100;     // Pintar bajo
-    distribution.normal = 100;   // Pintar normal
-    distribution.high = 100;     // Pintar alto
-  }
+    segment = 3
+    return { color: "#8DC53F", label: 'Group C' };
+  };
 
-  return distribution;
-};
+  // Obtener el ángulo de rotación en función del valor
+  const getRotationAngle = () => {
+    return (segment * 60) + 270; // Escala el valor de 0 a 100 a un rango de 0 a 180 grados
+  };
 
-export default function ScoreCharts({ score }) {
-  // Obtener la distribución según el score
-  const scoreDistribution = getScoreDistribution(score);
-
-  // Actualiza los datos según el score
-  const updatedData = data.map((item, index) => ({
-    ...item,
-    value: scoreDistribution[item.label.toLowerCase()], // Asigna el valor basado en el score
-  }));
+  const { color, label } = getColorAndLabel();
 
   return (
-    <Stack direction="row">
+    <Box display="flex" flexDirection="column" alignItems="center">
       <PieChart
         series={[
           {
             startAngle: -90,
             endAngle: 90,
-            paddingAngle: 5,
-            innerRadius: 60,
-            outerRadius: 80,
-            data: updatedData.map((item, index) => ({
-              ...item,
-              color: item.value > 0 ? colors[index] : 'transparent', // Asignar color o transparente
-            })),
+            data,
           },
         ]}
-        margin={{ right: 5 }}
-        width={200}
-        height={200}
         slotProps={{
           legend: { hidden: true },
         }}
+        height={300}
       />
-    </Stack>
+      <Box display="flex " alignItems="center" mt={2}>
+       
+        <Typography variant="h6" style={{ color, marginLeft: 8 }}>
+          {label} ({value}%)
+        </Typography>
+      </Box>
+      <ArrowUpIcon
+          className='absolute '
+          style={{
+            width: '200px',
+            color,
+            fontSize: 30,
+            transform: `rotate(${getRotationAngle()}deg)`, // Rota según el valor
+          }}
+        />
+    </Box>
   );
 }

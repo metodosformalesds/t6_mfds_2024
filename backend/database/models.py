@@ -118,7 +118,9 @@ class CreditHistory(models.Model):
     on_time_payments = models.IntegerField(default=0) #Pagos a tiempo
     late_payments = models.IntegerField(default=0)    #Pagos tardios
     late_payments_over_week = models.IntegerField(default=0)  # Pagos atrasados por más de 7 días
+    
     on_time_payment_probability = models.DecimalField(max_digits=5, decimal_places=2, default=0.0) #Probabilidad de que pague a tiempo
+    
     closed_loans = models.IntegerField(default=0) #Prestamos cerrados
     active_loans = models.IntegerField(default=0) #Prestamos Activos
     available_credit = models.DecimalField(max_digits=10, decimal_places=2, default=0.0) #Linea de credito disponible
@@ -181,7 +183,7 @@ class ActiveLoan(models.Model):
     total_debt_paid = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad pagada por el prestatario
     amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad pendiente de pagar
     start_date = models.DateField(null=True) #Fecha de inicio del prestamo 
-    payment_by_term = models.DecimalField(max_digits=10, decimal_places=2) #Monto que se pagara por mes
+    #payment_by_term = models.DecimalField(max_digits=10, decimal_places=2) #Monto que se pagara por mes
 
 class Payments(models.Model):
     id = models.AutoField(primary_key=True)
