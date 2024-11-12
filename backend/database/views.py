@@ -4,9 +4,10 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.response import Response
+from services.Score.score import calcular_dificultad
 from database.models import CreditHistory, Payments, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
 from database.serializers import BorrowerActiveLoanSerializer, CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer, PaymentSerializer
-from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer
+from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer, MoneylenderTransactionSerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
@@ -59,34 +60,27 @@ class LoanViewSet(viewsets.ModelViewSet):
             borrower = request.user.borrower  # Obtener el objeto Borrower del usuario autenticado
             
             # Intentar obtener el ActiveLoan del Borrower si existe
-            try:
-                active_loan = ActiveLoan.objects.get(borrower=borrower)
-                # Usar el BorrowerActiveLoanSerializer para serializar el ActiveLoan
-                active_loan_serializer = BorrowerActiveLoanSerializer(active_loan)  
-                
-                # Si hay un ActiveLoan, retornar solo el ActiveLoan
+            active_loan = ActiveLoan.objects.filter(borrower=borrower, amount_to_pay__gt=0).first()
+            
+            # Si existe un ActiveLoan con `amount_to_pay > 0`
+            if active_loan:
+                active_loan_serializer = BorrowerActiveLoanSerializer(active_loan)
                 response_data = {
                     'active_loan': active_loan_serializer.data
                 }
                 return Response(response_data, status=HTTP_200_OK)
-
-            except ActiveLoan.DoesNotExist:
-                active_loan_serializer = None  # No hay ActiveLoan para este borrower
             
-            # Si no hay ActiveLoan, obtener todos los préstamos
+            # Si no hay ActiveLoan pendiente, obtener todos los préstamos
             loans = Loan.objects.all()
-            # Serializar los préstamos y pasar el ID del Borrower en el contexto
             loans_serializer = BorrowerLoanSerializer(loans, many=True, context={'borrower_id': borrower.id})
             
-            # Construir la respuesta
+            # Construir la respuesta con todos los préstamos
             response_data = {
                 'loans': loans_serializer.data
             }
             return Response(response_data, status=HTTP_200_OK)
 
         return Response({'detail': 'Unauthorized'}, status=HTTP_403_FORBIDDEN)
-    
-    
     def create(self, request, *args, **kwargs):
             # Verificar si el usuario es un Moneylender
             if not hasattr(request.user, 'moneylender'):
@@ -112,10 +106,9 @@ class LoanViewSet(viewsets.ModelViewSet):
                 term = validated_data['term']
 
                 # Calcular el total a pagar
-                total_amount = loan_amount + (loan_amount * interest_rate * number_of_payments)
+                total_amount =  loan_amount * interest_rate
                 # Calcular el pago por término
                 payment_per_term = total_amount / number_of_payments
-
                 # Crear el préstamo
                 loan = Loan.objects.create(
                     moneylender=moneylender,
@@ -130,12 +123,17 @@ class LoanViewSet(viewsets.ModelViewSet):
                     publication_date=timezone.now()
                      
                 )
+                
+                loan.difficulty = calcular_dificultad(loan)
+                loan.save()
+                
                 return Response(moneylender_loan_serializer.data, status=HTTP_201_CREATED)
 
             return Response(moneylender_loan_serializer.errors, status=HTTP_400_BAD_REQUEST)  
 
 #Vista de modelo para money lender
 class MoneylenderViewSet(viewsets.ModelViewSet):
+    
     queryset = Moneylender.objects.all()
     serializer_class = MoneylenderSerializer
 
@@ -183,7 +181,7 @@ class RequestViewSet(viewsets.ModelViewSet):
             return Request.objects.filter(borrower=self.request.user.borrower)
         else:
             # Si no tiene tipo de cuenta, retornamos un queryset vacío
-            return Request.objects.none()  # No hay solicitudes para este usuario
+            return Request.objects.all()  # No hay solicitudes para este usuario
 
     def get_serializer_class(self):
         # Seleccionar el serializer adecuado basado en el tipo de cuenta
@@ -219,10 +217,54 @@ class RequestViewSet(viewsets.ModelViewSet):
             return Response(response_serializer.data, status=HTTP_201_CREATED)
 
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
-    
+    def get_serializer_class(self):
+    # Seleccionar el serializer adecuado basado en el tipo de cuenta
+        if hasattr(self.request.user, 'moneylender'):
+            return MoneylenderTransactionSerializer  # Serializer para Moneylender
+        elif hasattr(self.request.user, 'borrower'):
+            return TransactionSerializer  
+        else:
+            return TransactionSerializer 
+        
+    def list(self, request):
+        # Verificar si el usuario es un Moneylender
+        if hasattr(request.user, 'moneylender'):
+            moneylender = request.user.moneylender  
+            
+            # Obtener todos los ActiveLoans asociados al Moneylender
+            active_loans = ActiveLoan.objects.filter(moneylender=moneylender)
+            
+            # Obtener todas las transacciones asociadas a estos ActiveLoans
+            transactions = Transaction.objects.filter(active_loan__in=active_loans)
+            transactions = transactions.order_by('-payment_date')
+            
+            # Serializar los datos del Moneylender y sus transacciones
+            serializer = MoneylenderTransactionSerializer(moneylender)
+            
+            return Response(serializer.data['transactions'], status=HTTP_200_OK)
+        
+        # Si el usuario no es un Moneylender, se asume que es un Borrower
+        elif hasattr(request.user, 'borrower'):
+            borrower = request.user.borrower  # Obtener el objeto Borrower del usuario autenticado
+
+            # Obtener todos los ActiveLoans asociados al Borrower
+            active_loans = ActiveLoan.objects.filter(borrower=borrower)
+
+            # Obtener todas las transacciones asociadas a estos ActiveLoans
+            transactions = Transaction.objects.filter(active_loan__in=active_loans).order_by('-payment_date')
+
+            # Serializar las transacciones asociadas al Borrower
+            serializer = TransactionSerializer(transactions, many=True)
+
+            return Response(serializer.data, status=HTTP_200_OK)
+
+        # Si el usuario no es un Moneylender, retornar error
+        return Response({"detail": "No se puede determinar el rol del usuario."}, status=HTTP_400_BAD_REQUEST)
+
 class ActiveLoanViewSet(viewsets.ModelViewSet):
     queryset = ActiveLoan.objects.all()
     serializer_class = ActiveLoanSerializer
