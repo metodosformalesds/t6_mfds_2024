@@ -8,7 +8,6 @@ from services.paypal.paypal import CreateCheckout, CaptureCheckout, CreatePayPal
 from services.paypal.paypal_webhook import PayPalWebhook
 from services.Moffin.Moffin import ObtenerSat
 from services.Moffin.Reporte_BdC import Reporte
-from services.Score.score import ObtenerScore
 from rest_framework.routers import DefaultRouter
 from services.Correos.views import simple_mail 
 from services.Correos.views import html 
@@ -58,8 +57,7 @@ urlpatterns = [
     path('Moffin/SAT/', ObtenerSat.as_view(), name='obtener-SAT'),
     path('Moffin/Reporte/', Reporte.as_view(), name='Reporte_BdC' ),
 
-    #Endopoints de Score
-    path('Score/score/', ObtenerScore.as_view(), name='operacion_score'),
+
     #Endopoints de correos
     path('correos/',simple_mail, name='simple_mail'),
 
