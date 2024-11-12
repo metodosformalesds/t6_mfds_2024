@@ -18,17 +18,22 @@ MFDS 2024 T6
 
 ### Frontend: https://llamascoin-ui.netlify.app/
 
+## PD=https://drive.google.com/file/d/1ATRroI008bSzO61_V7EPPRotSX-M4-Zg/view?usp=drive_link
 
-# Cuentas Prueba
+### Cuentas Prueba
 
-## Cuenta moneylender:
-moneylender@email.com
-
+##Borrower:
+Borrower1@example.com  
 Llamascoin!098
-
-## Cuenta borrower:
-borrower@email.com
-
+ 
+Borrower2@example.com -> Tiene un préstamo activado
+Llamascoin!098
+ 
+Borrower3@example.com
+Llamascoin!098
+ 
+##Moneylender:
+moneylender@example.com
 Llamascoin!098
 
 ## Cuentas sandbox PayPal
