@@ -1,59 +1,31 @@
-import os
-import requests
-from rest_framework.views import APIView
-from django.shortcuts import render
-from django.http import JsonResponse
-from rest_framework import status
-from rest_framework.response import Response
-from services.Score.serializer import ScoreSerializer
-#Monto= Monto a pagar
-#Porcentaje_Prestamo=Porcentaje del prestamo
-#Descuento_MalP= Porcentaje de Descuento por no pagar a tiempo
-#N_CuotasS= Numero de cuotas sin pagar
-#Pagos_Fuera_Fecha= Pagos realizado despues de el plazo establecido para realizarlo
-#Total= Puntos totales
-#valor_obtenido= valor obtenido de puntos
+def calcular_dificultad(loan):
+    # Definir coeficientes de ponderación para cada atributo
+    coef_monto = 0.3
+    coef_interes = 0.2
+    coef_num_pagos = 0.2
+    coef_plazo = 0.15
+    coef_pago_term = 0.15
 
-# Funciones para aumentar y reducir el score
-porcentaje_Prestamo = 0.06
-Descuento_MalP = 0.04
+    # Obtención de los atributos del préstamo
+    monto = float(loan.amount)
+    tasa_interes = float(loan.interest_rate)
+    num_pagos = float(loan.number_of_payments)
+    plazo = loan.term
+    pago_term = float(loan.payment_per_term)
 
-def aumentar_Score(monto, n_cuotas, pagos_fuera_fecha, total):
-    valor_obtenido = n_cuotas * (monto * porcentaje_Prestamo)
-    return total + valor_obtenido
+    # Cálculo de la dificultad
+    # Puedes usar una fórmula que pondera estos factores. Aquí hay una fórmula de ejemplo:
+    
+    dificultad = (
+        coef_monto * (monto / 1000) +  # La cantidad del préstamo, normalizada por 1000
+        coef_interes * tasa_interes +  # La tasa de interés
+        coef_num_pagos * (num_pagos / 12) +  # Número de pagos, normalizado por 12 (considerando el plazo máximo de 12 meses)
+        coef_plazo * plazo +  # Plazo (puedes usar 1 para "Semanal", 2 para "Quincenal" y 3 para "Mensual")
+        coef_pago_term * (pago_term / monto)  # Proporción de pago por término respecto al monto total
+    )
 
-def reducir_Score(monto, n_cuotas, pagos_fuera_fecha, total):
-    valor_obtenido = -(pagos_fuera_fecha * (monto * Descuento_MalP))
-    return total + valor_obtenido
+    # Asegúrate de que el puntaje sea razonable
+    # Por ejemplo, podrías limitar el puntaje entre 0 y 100.
+    dificultad = min(max(dificultad, 0), 100)
 
-# Vista con el serializer incorporado
-class ObtenerScore(APIView):
-    serializer_class=ScoreSerializer
-    def post(self, request, *args, **kwargs):
-        # Validar datos con el serializer
-        serializer = ScoreSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # Extraer y convertir los datos
-        try:
-            monto = float(serializer.validated_data["Monto"])
-            n_cuotas = float(serializer.validated_data["N_CuotasS"])
-            pagos_fuera_fecha = float(serializer.validated_data["Pagos_Fuera_Fecha"])
-            total = float(serializer.validated_data["Total"])
-            operacion = serializer.validated_data["Operacion"]
-        except (TypeError, ValueError):
-            return Response({"error": "Valores deben ser numéricos"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Selección de la operación
-        operaciones = {
-            'aumentar_Score': aumentar_Score,
-            'reducir_Score': reducir_Score
-        }
-        funcion_operacion = operaciones.get(operacion)
-        if funcion_operacion is None:
-            return Response({"error": "Operación no válida"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Calcular y devolver el resultado
-        resultado = funcion_operacion(monto, n_cuotas, pagos_fuera_fecha, total)
-        return Response({"resultado": resultado}, status=status.HTTP_200_OK)
+    return dificultad
