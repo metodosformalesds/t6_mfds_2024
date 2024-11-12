@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { apiHost } from "../utils/apiconfig";
 import { useAuth } from "../context/AuthContext";
-
+import { Typography } from "@material-tailwind/react";
 
 
 export function PayPalCheckout({ loan, person, onSuccess, onError }) {
@@ -64,7 +64,14 @@ export function PayPalCheckout({ loan, person, onSuccess, onError }) {
 
   return (
     <PayPalScriptProvider options={{ "client-id": "AS64qtQYEXejSTE5SpX9JXETJjgrCXOpqiDyMfWTXNZKXenaNIigapqnRMtBWuZNcdHSOLnCeugOvadu" }}>
-      <PayPalButtons
+    
+<div className="text-center">
+    {/* Muestra el monto a pagar */}
+    <Typography variant="h5" className="mb-4 ">
+      Pagar ${loan.amount} con:
+    </Typography>
+    <PayPalButtons
+        fundingSource="paypal"
         createOrder={() => createOrder()} 
         onApprove={(data) => {
           console.log("Approval data:", data);
@@ -75,6 +82,9 @@ export function PayPalCheckout({ loan, person, onSuccess, onError }) {
           onError();
         }}
       />
+
+   
+  </div>
     </PayPalScriptProvider>
   );
 }

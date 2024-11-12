@@ -110,7 +110,7 @@ export function RequestsTable() {
   };
 
   return (
-    <Card className="h-full w-full shadow-none">
+    <Card className=" w-full shadow-none">
       <CardHeader floated={false} shadow={false} className="rounded-none">
         <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
           <div className="flex w-full shrink-0 gap-2 md:w-max">
@@ -120,7 +120,7 @@ export function RequestsTable() {
           </div>
         </div>
       </CardHeader>
-      <CardBody className="px-0">
+      <CardBody className="px-0 py-0 max-h-[200px] overflow-y-auto">
         <table className="w-full min-w-max table-auto text-left">
           <thead>
             <tr>
@@ -140,7 +140,8 @@ export function RequestsTable() {
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="px-0 max-h-[200px] overflow-y-auto" >
+            
             {requestRows.map((request, index) => {
               const isLast = index === requestRows.length - 1;
               const classes = isLast
@@ -238,30 +239,13 @@ export function RequestsTable() {
           selectedRequest?.actionType === "accept" ? handleAccept : handleReject
         }
       />
-      <Dialog size="lg" handler={setCreditHistoryOpen} open={creditHistoryOpen}>
-        <DialogHeader className="flex justify-end">
-          <IconButton
-            color="black"
-            size="lg"
-            variant="text"
-            onClick={() => setCreditHistoryOpen(false)}
-          >
-            x
-          </IconButton>
-        </DialogHeader>
+      <Dialog size="xl" handler={setCreditHistoryOpen} open={creditHistoryOpen}>
+       
         <CreditHistory borrowerId={selectedRequest?.borrower.id} />
       </Dialog>
-      <Dialog size="lg" handler={setPaypalDialogOpen} open={paypalDialogOpen}>
-        <DialogHeader className="flex justify-end">
-          <IconButton
-            color="black"
-            size="lg"
-            variant="text"
-            onClick={() => setPaypalDialogOpen(false)}
-          >
-            x
-          </IconButton>
-        </DialogHeader>
+      <Dialog size="sm" handler={setPaypalDialogOpen} open={paypalDialogOpen}>
+        
+        <div className="m-5">
         <PayPalCheckout
           loan={selectedRequest?.loan}
           person={selectedRequest?.borrower}
@@ -272,6 +256,7 @@ export function RequestsTable() {
             setPaypalDialogOpen(false);
           }}
         />
+        </div>
       </Dialog>
     </Card>
   );

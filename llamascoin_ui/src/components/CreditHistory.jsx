@@ -60,42 +60,55 @@ const CreditHistory = ({ borrowerId }) => {
         </Typography>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-        <div className="grid grid-cols-1 gap-5">
-          <Card className="shadow-lg p-4 mt-4 col-span-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5 ">
+        <div className="grid grid-cols-1 gap-5  ">
+          <Card className="shadow-lg p-6  justify-around overflow-y-auto">
             {creditHistory ? (
-              <ProfileCard entity={entity} />
-            ) : (
-              <p>Cargando historial crediticio...</p>
-            )}
+              <div>
+                <ProfileCard entity={entity} />
+              <div className="grid grid-cols-3 gap-4 mt-4">
 
-            <div className="grid grid-cols-3 gap-4 mt-4">
               <div className="flex flex-col items-center">
                 <Typography color="gray">LlamasScore</Typography>
                 <Typography variant="h6" className="font-bold cursor-pointer">
                   {creditHistory?.score_llamas || "N/A"}
                 </Typography>
               </div>
+              <div className="flex flex-col items-center">
+                <Typography color="gray">Pagos a tiempo</Typography>
+                <Typography variant="h6" className="font-bold cursor-pointer">
+                  {creditHistory?.on_time_payments || "N/A"}
+                </Typography>
+              </div>
+              <div className="flex flex-col items-center">
+                <Typography color="gray">Pagos retrasados</Typography>
+                <Typography variant="h6" className="font-bold cursor-pointer">
+                  {creditHistory?.late_payments || "N/A"}
+                </Typography>
+              </div>
+            </div>
+              </div>
+            ) : (
+              <p>Cargando historial crediticio...</p>
+            )}
+            
+
+            <div className="margin-auto ">
+            <Typography  variant="h5"
+                    color="blue-gray"
+                    className="font-normal leading-none opacity-70 text-center">Puntuación del buro</Typography>
+            <div className="flex justify-center">
+            <ScorePieCharts value={creditHistory?.score_llamas} referenceValue={1000}></ScorePieCharts>
+            </div>
             </div>
           </Card>
-
-          <CardDashboard
-            title="Pagos a tiempo"
-            icon={CalendarIcon}
-            iconColor="text-green-500"
-            value={`${creditHistory?.on_time_payments || "N/A"}`}
-          />
-          <CardDashboard
-            title="Pagos retrasados"
-            icon={ClipboardDocumentIcon}
-            iconColor="text-red-500"
-            value={`${creditHistory?.late_payments || "N/A"}`}
-          />
+          
+          
         </div>
 
         <div className="grid grid-cols-1 gap-5">
           {creditHistory ? (
-            <MOPBarChart data={formatMOPData(creditHistory) || {}} />
+            <Card className="flex justify-center p-6"><MOPBarChart data={formatMOPData(creditHistory) || {}} /></Card>
           ) : (
             <p>Cargando datos de MOP...</p>
           )}
@@ -159,9 +172,9 @@ const CreditHistory = ({ borrowerId }) => {
   );
 
   return borrowerId ? (
-    <div className="p-12 mx-12 pt-0">{content}</div>
+    <div className="p-12 mx-12 ">{content}</div>
   ) : (
-    <Card className="p-12 m-12 shadow-xl w-full shadow-blue-gray-900/">
+    <Card className="p-12 mx-12 shadow-xl w-full shadow-blue-gray-900/">
       {content}
     </Card>
   );

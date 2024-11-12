@@ -11,8 +11,10 @@ import {
 } from "@material-tailwind/react";
 import CardDashboard from "./CardDashboard";
 import { RequestsTable } from "./RequestsTable";
-import { CurrencyDollarIcon } from "@heroicons/react/24/solid";
+import { CurrencyDollarIcon, BanknotesIcon, UserGroupIcon, UsersIcon, ArrowUpCircleIcon } from "@heroicons/react/24/solid";
 import { MultiStepLoanForm } from "./CreateLoanForm/MultiStepLoanForm";
+import { AbstractTable } from "./AbstractTable";
+import { apiHost } from "../utils/apiconfig";
 const MoneylenderDashboard = () => {
   const [open, setOpen] = useState(false);
 
@@ -30,27 +32,30 @@ const MoneylenderDashboard = () => {
       </div>
       <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <CardDashboard
-          title="Dinero Prestado"
-          icon={CurrencyDollarIcon}
+          title="Ganancias totales"
+          icon={BanknotesIcon}
           iconColor="text-green-500"
           value="$200"
         />
+
         <CardDashboard
           title="Dinero Prestado"
-          icon={CurrencyDollarIcon}
-          iconColor="text-green-500"
+          icon={UserGroupIcon}
+          iconColor="text-blue-500"
           value="$200"
         />
+
         <CardDashboard
-          title="Dinero Prestado"
-          icon={CurrencyDollarIcon}
-          iconColor="text-green-500"
+          title="Prestamos activos"
+          icon={UsersIcon}
+          iconColor="text-yellow-500"
           value="$200"
         />
+
         <CardDashboard
-          title="Dinero Prestado"
-          icon={CurrencyDollarIcon}
-          iconColor="text-green-500"
+          title="Dinero en deuda"
+          icon={ArrowUpCircleIcon}
+          iconColor="text-red-500"
           value="$200"
         />
       </div>
@@ -60,7 +65,16 @@ const MoneylenderDashboard = () => {
             <RequestsTable />
           </Card>
           <Card className="flex-grow shadow-lg p-4 mt-4">
-            <Typography variant="h5">Componente 2</Typography>
+            <AbstractTable
+              tableHeaders={{
+                "PayPal ID": "paypal_transaction_id",
+                Monto: "amount_paid",
+                "Fecha de Pago": "payment_date",
+                Persona: "person.second_surname",
+              }}
+              apiUrl={apiHost + "/transaction"}
+              title={"Historial de pagos"}
+            ></AbstractTable>
           </Card>
         </div>
 
@@ -69,7 +83,7 @@ const MoneylenderDashboard = () => {
       <div />
 
       <Dialog open={open} handler={handleOpen}>
-        <MultiStepLoanForm  />
+        <MultiStepLoanForm />
       </Dialog>
     </Card>
   );
