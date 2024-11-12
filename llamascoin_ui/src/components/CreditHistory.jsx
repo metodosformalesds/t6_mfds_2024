@@ -59,97 +59,107 @@ const CreditHistory = ({ borrowerId }) => {
           Historial crediticio
         </Typography>
       </div>
-  
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-        <div className="grid grid-cols-1 gap-5">
-          <Card className="shadow-lg p-4 mt-4 col-span-1">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5 ">
+        <div className="grid grid-cols-1 gap-5  ">
+          <Card className="shadow-lg p-6  justify-around overflow-y-auto">
             {creditHistory ? (
-              <ProfileCard entity={entity} />
-            ) : (
-              <p>Cargando historial crediticio...</p>
-            )}
-  
-            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div>
+                <ProfileCard entity={entity} />
+              <div className="grid grid-cols-3 gap-4 mt-4">
+
               <div className="flex flex-col items-center">
-                <Typography color="gray">Pago actual</Typography>
+                <Typography color="gray">LlamasScore</Typography>
                 <Typography variant="h6" className="font-bold cursor-pointer">
-                  {creditHistory?.current_pay_status || "N/A"}
+                  {creditHistory?.score_llamas || "N/A"}
                 </Typography>
               </div>
               <div className="flex flex-col items-center">
-                <Typography color="gray">Historial</Typography>
+                <Typography color="gray">Pagos a tiempo</Typography>
                 <Typography variant="h6" className="font-bold cursor-pointer">
-                  {creditHistory?.pay_history || "N/A"}
+                  {creditHistory?.on_time_payments || "N/A"}
                 </Typography>
               </div>
               <div className="flex flex-col items-center">
-                <Typography color="gray">Lugar de trabajo</Typography>
+                <Typography color="gray">Pagos retrasados</Typography>
                 <Typography variant="h6" className="font-bold cursor-pointer">
-                  {creditHistory?.place_of_work || "N/A"}
+                  {creditHistory?.late_payments || "N/A"}
                 </Typography>
               </div>
             </div>
+              </div>
+            ) : (
+              <p>Cargando historial crediticio...</p>
+            )}
+            
+
+            <div className="margin-auto ">
+            <Typography  variant="h5"
+                    color="blue-gray"
+                    className="font-normal leading-none opacity-70 text-center">Puntuación del buro</Typography>
+            <div className="flex justify-center">
+            <ScorePieCharts value={creditHistory?.score_llamas} referenceValue={1000}></ScorePieCharts>
+            </div>
+            </div>
           </Card>
-  
-          <Card className="shadow-lg p-4 mt-4">
-            <ScorePieCharts code_score={creditHistory?.code_score} />
-          </Card>
+          
+          
         </div>
-  
+
         <div className="grid grid-cols-1 gap-5">
           {creditHistory ? (
-            <MOPBarChart data={formatMOPData(creditHistory) || {}} />
+            <Card className="flex justify-center p-6"><MOPBarChart data={formatMOPData(creditHistory) || {}} /></Card>
           ) : (
             <p>Cargando datos de MOP...</p>
           )}
-  
+
           <Card className="shadow-lg p-4 mt-4">
             <div className="grid grid-cols-3 gap-4 mt-4">
               <div className="flex flex-col items-center">
-                <Typography color="gray">Cuentas abiertas</Typography>
+                <Typography color="gray">Prestamos activos</Typography>
                 <Typography variant="h6" className="font-bold">
-                  {creditHistory?.accounts_open || "N/A"}
+                  {creditHistory?.active_loans || "N/A"}
                 </Typography>
               </div>
               <div className="flex flex-col items-center">
-                <Typography color="gray">Cuentas cerradas</Typography>
+                <Typography color="gray">Prestamos cerrados</Typography>
                 <Typography variant="h6" className="font-bold">
-                  {creditHistory?.accounts_closed || "N/A"}
+                  {creditHistory?.closed_loans || "N/A"}
                 </Typography>
               </div>
               <div className="flex flex-col items-center">
-                <Typography color="gray">Cuentas fijas</Typography>
+                <Typography color="gray">Probabilidad de pago</Typography>
                 <Typography variant="h6" className="font-bold">
-                  {creditHistory?.account_fixed_payment || "N/A"}
+                  {creditHistory?.on_time_payment_probability || "N/A"}%
                 </Typography>
               </div>
             </div>
           </Card>
         </div>
       </div>
-  
+
       <Dialog open={open} handler={handleOpen}>
         <MultiStepLoanForm />
       </Dialog>
-  
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-5">
         <CardDashboard
           title="Saldo pendiente"
           icon={CurrencyDollarIcon}
           iconColor="text-green-500"
-          value={`$${creditHistory?.actual_balance || "N/A"}`}
+          value={`$${creditHistory?.outstanding_balance || "N/A"}`}
         />
         <CardDashboard
-          title="Máximo crédito"
+          title="Límite disponible"
           icon={ClipboardDocumentIcon}
           iconColor="text-blue-500"
-          value={`$${creditHistory?.max_credit || "N/A"}`}
+          value={`$${creditHistory?.available_credit || "N/A"}`}
         />
         <CardDashboard
           title="Límite crédito"
           icon={LockClosedIcon}
           iconColor="text-yellow-500"
-          value={`$${creditHistory?.lim_credit || "N/A"}`}
+          value={`$${creditHistory?.credit_line || "N/A"}`}
         />
         <CardDashboard
           title="Fecha de apertura"
@@ -160,17 +170,14 @@ const CreditHistory = ({ borrowerId }) => {
       </div>
     </>
   );
-  
+
   return borrowerId ? (
-    <div className="p-12 mx-12 pt-0">
-      {content}
-    </div>
+    <div className="p-12 mx-12 ">{content}</div>
   ) : (
-    <Card className="p-12 m-12 shadow-xl w-full shadow-blue-gray-900/">
+    <Card className="p-12 mx-12 shadow-xl w-full shadow-blue-gray-900/">
       {content}
     </Card>
   );
-
 };
 
 export default CreditHistory;

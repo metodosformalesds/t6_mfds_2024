@@ -1,5 +1,6 @@
 from datetime import timedelta
 import os
+from django.shortcuts import get_object_or_404
 import requests
 import time
 from django.utils import timezone
@@ -7,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from services.Correos.send_mail import EmailSender
 from services.paypal.serializers import  PayPalProductSerializer
-from database.models import Payments, Transaction, Loan, Borrower, Moneylender, ActiveLoan
+from database.models import Payments, Request, Transaction, Loan, Borrower, Moneylender, ActiveLoan
 from rest_framework.response import Response
 
 CLIENT_ID_PAYPAL = os.getenv('CLIENT_ID_PAYPAL', 'Default_Secret')
@@ -49,12 +50,13 @@ class CreateCheckout(APIView):
         elif hasattr(request.user, 'borrower'):
             print("User is a Borrower. Attempting to retrieve ActiveLoan.")
             try:
-                active_loan = ActiveLoan.objects.get(id=loan_id)
-                if not active_loan.loan:
+                loan = Loan.objects.get(id=loan_id)
+                active_loan = ActiveLoan.objects.get(loan=loan)
+                if not active_loan:
                     print("Error: ActiveLoan is not linked to any Loan.")
                     return Response({"error": "ActiveLoan is not linked to any Loan"}, status=status.HTTP_400_BAD_REQUEST)
 
-                amount = active_loan.amount  # Obtener la cantidad directamente del ActiveLoan
+                amount = loan.payment_per_term  # Obtener la cantidad directamente del Loan en payment_by_term
                 print("ActiveLoan found. Amount:", amount)
             except ActiveLoan.DoesNotExist:
                 print("Error: ActiveLoan not found for ID:", loan_id)
@@ -113,7 +115,7 @@ class CaptureCheckout(APIView):
         amount = None
         recipient_email = None
         loan = None
-        
+        active_loan = None
         try:
             # Determinar la cantidad y el correo electrónico según el rol del usuario
             if hasattr(request.user, 'moneylender'):
@@ -124,9 +126,10 @@ class CaptureCheckout(APIView):
                 recipient_email = recipient.user.paypal_email  # Correo del Borrower
                 
             elif hasattr(request.user, 'borrower'):
-                # Si el usuario es Borrower, buscar el ActiveLoan
-                loan = ActiveLoan.objects.get(id=loan_id)
-                amount = loan.amount_to_pay  # Obtener la cantidad directamente del ActiveLoan
+                # Si el usuario es Borrower, buscar el Loan
+                loan = Loan.objects.get(id=loan_id)
+                
+                amount = loan.payment_per_term  
                 recipient = Moneylender.objects.get(id=person_id)
                 recipient_email = recipient.user.paypal_email  # Correo del Moneylender
 
@@ -154,7 +157,8 @@ class CaptureCheckout(APIView):
                 
                 # Si el usuario es un Borrower, verificar si tiene pagos pendientes
                 if hasattr(request.user, 'borrower'):
-                    pending_payments = Payments.objects.filter(active_loan=loan, paid=False)
+                    active_loan = ActiveLoan.objects.get(loan=loan)
+                    pending_payments = Payments.objects.filter(active_loan=active_loan, paid=False)
                     if not pending_payments.exists():
                         return Response({"error": "El prestatario no tiene pagos pendientes."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -170,11 +174,16 @@ class CaptureCheckout(APIView):
                                 borrower=recipient,
                                 moneylender=request.user.moneylender,
                                 total_debt_paid=0,
-                                amount_to_pay=loan.amount,
+                                amount_to_pay=loan.total_amount,
                                 start_date=timezone.now()
                             )
+                            #Cambiar el estatus del request
+                            request_obj = Request.objects.get(borrower=recipient, loan=loan)
+                            request_obj.status = 'approved'
+                            request_obj.save()
+                            
                             self.create_payment_schedule(new_active_loan)
-                            self.create_transaction(new_active_loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'))
+                            self.create_transaction(new_active_loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'), "payout")
                             
                             subject = "Solicitud aceptada, el pago se enviará a tu cuenta de PayPal"
                             template_name = "solicitud_aceptada.html"
@@ -186,15 +195,41 @@ class CaptureCheckout(APIView):
                             }
                             
                         elif hasattr(request.user, 'borrower'):
-                            most_recent_payment = Payments.objects.filter(active_loan=loan, paid=False).order_by('date_to_pay').first()
-                            loan.total_debt_paid += amount
-                            loan.amount_to_pay -= amount
-                            loan.save()
+                            # Obtener los pagos recientes no pagados
+                            recent_payments = Payments.objects.filter(active_loan=active_loan, paid=False).order_by('date_to_pay')
+                            
+                            # Actualizar los montos de la deuda y el pago
+                            active_loan.total_debt_paid += amount
+                            active_loan.amount_to_pay -= amount
+                            active_loan.save()
+                            
+                            # Marcar el pago como pagado
+                            most_recent_payment = recent_payments.first()
                             most_recent_payment.paid = True
                             most_recent_payment.paid_on_time = most_recent_payment.date_to_pay >= timezone.now().date()
                             most_recent_payment.save()
-                            self.create_transaction(loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'))
-                            
+
+                            # Realizar la transacción
+                            self.create_transaction(active_loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'), "payment")
+
+                            # Verificar si es el último pago
+                            if recent_payments.count() == 1:  # Si no hay más pagos pendientes
+                                #Cambiar el estatus del request
+                                request_obj = Request.objects.get(moneylender=recipient, loan=loan, borrower = request.user.borrower)
+                                request_obj.status = 'completed'
+                                request_obj.save()    
+                               
+
+                                subject = "¡Felicidades! Has pagado tu préstamo completamente"
+                                template_name = "pagado_completo.html"
+                                context = {
+                                    'nombre_prestatario': request.user.borrower.first_name,
+                                    'nombre_prestamista': recipient.first_name,
+                                    'monto_pagado': amount,
+                                    'fecha_pago': timezone.now(),
+                                }
+                                
+                            # Enviar el correo habitual para el pago recibido
                             subject = "Haz recibido un pago, el pago se enviará a tu cuenta de PayPal"
                             template_name = "pago_recibido.html"
                             context = {
@@ -203,7 +238,6 @@ class CaptureCheckout(APIView):
                                 'monto_pagado': amount,
                                 'fecha_pago': timezone.now(),
                             }
-
                         try:
                             recipient = recipient.user.email
                             # Crea una instancia de EmailSender
@@ -293,14 +327,14 @@ class CaptureCheckout(APIView):
         )
         return response.json() if response.status_code == 201 else {"error": response.json()}
         
-    def create_transaction(self, active_loan, amount, paypal_transaction_id):
+    def create_transaction(self, active_loan, amount, paypal_transaction_id, transaction_type):
         """Crea una transacción relacionada con el ActiveLoan."""
         Transaction.objects.create(
             active_loan=active_loan,  # Relacionar la transacción con el ActiveLoan
             amount_paid=amount,
             paypal_transaction_id=paypal_transaction_id,  # ID de la transacción de PayPal
             status='completed',  # Estado de la transacción
-            transaction_type='payment'  # Tipo de transacción
+            transaction_type=transaction_type  # Tipo de transacción
         )
    
     def create_payment_schedule(self, active_loan):

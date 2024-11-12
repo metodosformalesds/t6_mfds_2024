@@ -62,6 +62,9 @@ export default function Navbar() {
           <a href="/subscription" className="text-sm font-semibold leading-8 text-white">
             ¿Quieres prestar dinero?
           </a>
+          <a href="/calendar" className="text-sm font-semibold leading-8 text-white">
+            Calendario
+          </a>
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           <a href="/login" className="text-sm font-semibold leading-6 text-white">

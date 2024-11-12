@@ -40,12 +40,8 @@ class BorrowerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Borrower
-        fields = [
-            'id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date',
-            'phone_number', 'rfc', 'full_address', 'city', 'neighborhood', 'postal_code', 
-            'state', 'country', 'municipality', 'nationality', 'possibility_of_pay', 
-            'score_llamas', 'credit_history', 'user'
-        ]
+        fields = '__all__'
+
 #Serializer de los detalles de los prestamos
 class ActiveLoansSerializer(serializers.ModelSerializer):
     class Meta:
@@ -70,10 +66,14 @@ class ActiveLoanSerializer(serializers.ModelSerializer):
         
 #Serializer de las solicitudes transaccionadas
 class TransactionSerializer(serializers.ModelSerializer):
+    # Sobrescribir 'payment_date' para mostrar solo la fecha
+    payment_date = serializers.SerializerMethodField()
     class Meta:
-        model = Transaction 
+        model = Transaction
         fields = '__all__'
 
+    def get_payment_date(self, obj):
+        return obj.payment_date.date()  # Esto devuelve solo la fecha (sin hora)
 
 
 class BorrowerMoneylenderSerializer(serializers.ModelSerializer):
@@ -85,7 +85,6 @@ class BorrowerLoanSerializer(serializers.ModelSerializer):
     request_status = serializers.SerializerMethodField()  
     moneylender= BorrowerMoneylenderSerializer(read_only=True) 
     
-
     class Meta:
         model = Loan
         fields = [
@@ -118,7 +117,7 @@ class MoneylenderBorrowerSerializer(serializers.ModelSerializer):
     credit_history = CreditHistorySerializer(many=True, read_only=True) 
     class Meta:
         model = Borrower
-        fields = ['id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date', 'rfc', 'score_llamas','credit_history']
+        fields = ['id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date', 'rfc', 'credit_history']
     
 class MoneylenderRequestsSerializer(serializers.ModelSerializer):
     borrower = MoneylenderBorrowerSerializer(read_only=True)
@@ -195,5 +194,51 @@ class BorrowerActiveLoanSerializer(serializers.ModelSerializer):
             'moneylender',
             'payments',
         ]
+class MoneylenderTransactionSerializer(serializers.ModelSerializer):
+    transactions = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Moneylender
+        fields = ['transactions']
 
+    def get_transactions(self, obj):
+        # Obtener las transacciones asociadas al Moneylender
+        active_loans = ActiveLoan.objects.filter(moneylender=obj)
+        transactions = Transaction.objects.filter(active_loan__in=active_loans)
 
+        # Serializar cada transacción
+        transaction_data = []
+        for transaction in transactions:
+            # Determinar la persona asociada a la transacción
+            if transaction.transaction_type == 'payout':
+                person_data = {
+                    'id': transaction.active_loan.moneylender.id,
+                    'first_name': transaction.active_loan.moneylender.first_name,
+                    'middle_name': transaction.active_loan.moneylender.middle_name,
+                    'first_surname': transaction.active_loan.moneylender.first_surname,
+                    'second_surname': transaction.active_loan.moneylender.second_surname,
+                    'rfc': transaction.active_loan.moneylender.rfc,
+                }
+            elif transaction.transaction_type == 'payment':
+                person_data = {
+                    'id': transaction.active_loan.borrower.id,
+                    'first_name': transaction.active_loan.borrower.first_name,
+                    'middle_name': transaction.active_loan.borrower.middle_name,
+                    'first_surname': transaction.active_loan.borrower.first_surname,
+                    'second_surname': transaction.active_loan.borrower.second_surname,
+                    'rfc': transaction.active_loan.borrower.rfc,
+                }
+            else:
+                person_data = {}
+
+            transaction_data.append({
+                'id': transaction.id,
+                'amount_paid': transaction.amount_paid,
+                'payment_date': transaction.payment_date,
+                'transaction_type': transaction.transaction_type,
+                'status': transaction.status,
+                'paypal_transaction_id': transaction.paypal_transaction_id,
+                'person': person_data  
+            })
+
+        return transaction_data
