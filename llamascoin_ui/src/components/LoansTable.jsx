@@ -40,7 +40,7 @@ const TABLE_HEAD = [
   "Fecha de Publicación",
   "Estado",
 ];
-const TERM_CHOICES = {
+export const TERM_CHOICES = {
   1: "Semanal",
   2: "Quincenal",
   3: "Mensual",
@@ -397,7 +397,7 @@ export function LoansTable() {
                     Monto: "amount_paid",
                     "Fecha de Pago": "payment_date",
                   }}
-                  apiUrl={`${apiHost}/transaction`}
+                  apiUrl={`${apiHost}transaction`}
                 />
               </Card>
             </div>

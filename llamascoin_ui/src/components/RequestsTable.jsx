@@ -19,6 +19,8 @@ import CreditHistory from "./CreditHistory";
 import { PayPalCheckout } from "./PayPalCheckOut";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { TERM_CHOICES } from "./LoansTable";
+
 const TABLE_HEAD = ["Prestatario", "Cantidad", "Plazos", "Acciones"];
 
 export function RequestsTable() {
@@ -170,7 +172,7 @@ export function RequestsTable() {
                       color="blue-gray"
                       className="font-normal"
                     >
-                      {request.loan.amount}
+                      {request.loan.total_amount} MXN
                     </Typography>
                   </td>
                   <td className={classes}>
@@ -179,7 +181,8 @@ export function RequestsTable() {
                       color="blue-gray"
                       className="font-normal"
                     >
-                      {request.loan.term}
+                 
+                      {TERM_CHOICES[request.loan.term] || "Desconocido"}
                     </Typography>
                   </td>
                   <td className={classes}>

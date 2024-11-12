@@ -72,7 +72,7 @@ const MoneylenderDashboard = () => {
                 "Fecha de Pago": "payment_date",
                 Persona: "person.second_surname",
               }}
-              apiUrl={apiHost + "/transaction"}
+              apiUrl={apiHost + "transaction"}
               title={"Historial de pagos"}
             ></AbstractTable>
           </Card>

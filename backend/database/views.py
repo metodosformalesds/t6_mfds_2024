@@ -106,7 +106,7 @@ class LoanViewSet(viewsets.ModelViewSet):
                 term = validated_data['term']
 
                 # Calcular el total a pagar
-                total_amount =  loan_amount * interest_rate
+                total_amount =  loan_amount  + (loan_amount * interest_rate)
                 # Calcular el pago por término
                 payment_per_term = total_amount / number_of_payments
                 # Crear el préstamo
