@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import {
   Card,
   Button,
@@ -11,12 +11,33 @@ import {
 } from "@material-tailwind/react";
 import CardDashboard from "./CardDashboard";
 import { RequestsTable } from "./RequestsTable";
-import { CurrencyDollarIcon, BanknotesIcon, UserGroupIcon, UsersIcon, ArrowUpCircleIcon } from "@heroicons/react/24/solid";
+import {
+  CurrencyDollarIcon,
+  BanknotesIcon,
+  UserGroupIcon,
+  UsersIcon,
+  ArrowUpCircleIcon,
+} from "@heroicons/react/24/solid";
 import { MultiStepLoanForm } from "./CreateLoanForm/MultiStepLoanForm";
 import { AbstractTable } from "./AbstractTable";
 import { apiHost } from "../utils/apiconfig";
+import { useAuth } from "../context/AuthContext";
+import { useFetch } from "../hooks/useFetch";
 const MoneylenderDashboard = () => {
   const [open, setOpen] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState();
+  const { authData } = useAuth();
+  const { status, data } = useFetch(apiHost + `moneylender/`);
+
+  useEffect(() => {
+    if (status === "success" && data) {
+      if (data.stats) {
+        setDashboardStats(data.stats);
+      }
+    } else if (status === "error") {
+      console.error("Error fetching data: ", error);
+    }
+  }, [status, data]);
 
   const handleOpen = () => setOpen(!open);
 
@@ -35,28 +56,30 @@ const MoneylenderDashboard = () => {
           title="Ganancias totales"
           icon={BanknotesIcon}
           iconColor="text-green-500"
-          value="$200"
+          value={`$${dashboardStats ? dashboardStats.total_earnings : 0}`}
         />
 
         <CardDashboard
           title="Dinero Prestado"
           icon={UserGroupIcon}
           iconColor="text-blue-500"
-          value="$200"
+          value={`$${dashboardStats ? dashboardStats.total_loans : 0}`}
         />
 
         <CardDashboard
           title="Prestamos activos"
           icon={UsersIcon}
           iconColor="text-yellow-500"
-          value="$200"
+          value={dashboardStats ? dashboardStats.total_active_loans : 0}
         />
 
         <CardDashboard
           title="Dinero en deuda"
           icon={ArrowUpCircleIcon}
           iconColor="text-red-500"
-          value="$200"
+          value={`$${
+            dashboardStats ? dashboardStats.total_pending_balance : 0
+          }`}
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
@@ -70,7 +93,7 @@ const MoneylenderDashboard = () => {
                 "PayPal ID": "paypal_transaction_id",
                 Monto: "amount_paid",
                 "Fecha de Pago": "payment_date",
-                Persona: "person.second_surname",
+                Persona: "person",
               }}
               apiUrl={apiHost + "transaction"}
               title={"Historial de pagos"}
