@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import ROUND_HALF_UP, Decimal
 import os
 from django.shortcuts import get_object_or_404
 import requests
@@ -44,6 +45,10 @@ class CreateCheckout(APIView):
                     return Response({"error": "ActiveLoan already exists for this Loan"}, status=status.HTTP_400_BAD_REQUEST)
 
                 print("Loan found. Amount:", amount)
+                #Comision de paypal y llamas junta 
+                #0.25 para el payout
+                #4% para paypal y 1% para llamas
+                amount = amount * Decimal(1.05) + Decimal(0.25)
             except Loan.DoesNotExist:
                 print("Error: Loan not found for ID:", loan_id)
                 return Response({"error": "Loan not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -58,6 +63,10 @@ class CreateCheckout(APIView):
 
                 amount = loan.payment_per_term  # Obtener la cantidad directamente del Loan en payment_by_term
                 print("ActiveLoan found. Amount:", amount)
+                #Comision de paypal y 3% de llamascoin
+                #0.25 para el payout
+                #4% para paypal y 1% para llamas
+                amount = amount * Decimal(1.05) + Decimal(0.25) 
             except ActiveLoan.DoesNotExist:
                 print("Error: ActiveLoan not found for ID:", loan_id)
                 return Response({"error": "ActiveLoan not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -65,7 +74,8 @@ class CreateCheckout(APIView):
         if amount is None:
             print("Error: Amount not found.")
             return Response({"error": "Amount not found"}, status=status.HTTP_404_NOT_FOUND)
-
+        # Limitar el resultado a 2 decimales
+        amount = amount.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
         order_data = {
             "intent": "CAPTURE",

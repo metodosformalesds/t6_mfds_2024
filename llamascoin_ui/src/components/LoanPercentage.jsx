@@ -25,12 +25,12 @@ export default function LoanPercentage({ total_debt_paid, total_amount }) {
   // Crear los datos para el gráfico con colores personalizados
   const data = [
     {
-      label: "Pagado",
+      label: "Porcentaje pagado",
       value: percentagePaid,
       color: getColor(percentagePaid),
     },
     {
-      label: "Restante",
+      label: "Porcentaje restante",
       value: 100 - percentagePaid,
       color: "#9e9e9e", // Gris
     },

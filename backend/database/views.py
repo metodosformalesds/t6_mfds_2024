@@ -6,7 +6,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from services.Score.score import calcular_dificultad
 from database.models import CreditHistory, Payments, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
-from database.serializers import BorrowerActiveLoanSerializer, CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer, PaymentSerializer
+from database.serializers import BorrowerActiveLoanSerializer, CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer, PaymentSerializer, MoneylenderDetailSerializer
 from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer, MoneylenderTransactionSerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
@@ -106,7 +106,7 @@ class LoanViewSet(viewsets.ModelViewSet):
                 term = validated_data['term']
 
                 # Calcular el total a pagar
-                total_amount =  loan_amount * interest_rate
+                total_amount =  loan_amount  + (loan_amount * interest_rate)
                 # Calcular el pago por término
                 payment_per_term = total_amount / number_of_payments
                 # Crear el préstamo
@@ -135,7 +135,20 @@ class LoanViewSet(viewsets.ModelViewSet):
 class MoneylenderViewSet(viewsets.ModelViewSet):
     
     queryset = Moneylender.objects.all()
-    serializer_class = MoneylenderSerializer
+
+    def get_serializer_class(self):
+        # Seleccionar el serializer adecuado basado en el tipo de cuenta del usuario
+        if hasattr(self.request.user, 'moneylender'):
+            return MoneylenderDetailSerializer
+        elif hasattr(self.request.user, 'borrower'):
+            return MoneylenderSerializer
+        else:
+            return MoneylenderSerializer  # Usa el serializer general en otros casos
+
+    def list(self, request):
+        instance = get_object_or_404(Moneylender, user_id=request.user.id)
+        serializer = self.get_serializer(instance)
+        return Response({"stats": serializer.data})
 
 #Vista de modelo para credit history
 class CreditHistoryViewSet(viewsets.ModelViewSet):
@@ -151,23 +164,36 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
+    def get_serializer_class(self):
+    # Seleccionar el serializer adecuado basado en el tipo de cuenta
+        if hasattr(self.request.user, 'moneylender'):
+            return MoneylenderSerializer  # Serializer para Moneylender
+        elif hasattr(self.request.user, 'borrower'):
+            return BorrowerSerializer  
+        else:
+            return UserSerializer
+        
     def retrieve(self, request, *args, **kwargs):
         # Obtener el usuario autenticado
         user = request.user
-
-        try:
-            moneylender = Moneylender.objects.get(user=user)
-        except Moneylender.DoesNotExist:
-            return Response({"detail": "Moneylender not found."}, status=HTTP_404_NOT_FOUND)
     
-            # Verificar el estado de suscripción
-        if not moneylender.is_subscribed:
-            return Response({"detail": "Not subscribed."}, status=HTTP_403_FORBIDDEN)
+        try:
+   
+            if hasattr(user, 'moneylender'):
+                person = Moneylender.objects.get(user=user)  
+                serializer = MoneylenderSerializer(person)  
+            elif hasattr(user, 'borrower'):
+                person = Borrower.objects.get(user=user) 
+                serializer = BorrowerSerializer(person)  
+            else:
+                return Response({"detail": "Person not found."}, status=HTTP_404_NOT_FOUND)
 
-        # Retornar el estado de suscripción si está suscrito
-        return Response({"is_subscribed": True}, status=HTTP_200_OK)
+            return Response(serializer.data, status=HTTP_200_OK)
 
+        except (Moneylender.DoesNotExist, Borrower.DoesNotExist):
+            return Response({"detail": "Person not found."}, status=HTTP_404_NOT_FOUND)
+        
+        
 class RequestViewSet(viewsets.ModelViewSet):
     queryset = Request.objects.all()
     

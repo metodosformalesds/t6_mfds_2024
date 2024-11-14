@@ -27,10 +27,10 @@ export function MultiStepLoanForm() {
     getValues,
   } = useForm({
     defaultValues: {
-      amount: "",
-      term: "",
-      interest_rate: "",
-      number_of_payments: "",
+      amount: 0,
+      term: "1",
+      interest_rate: 0,
+      number_of_payments: 0
     },
   });
 
@@ -95,12 +95,11 @@ export function MultiStepLoanForm() {
           <Step1
             register={register}
             errors={errors}
-            loanStatus={loanStatus}
-            setLoanStatus={setLoanStatus}
+
           />
         );
       case 1:
-        return <Step2 register={register} errors={errors} />;
+        return <Step2 register={register} errors={errors} getValues ={getValues} />;
       default:
         return "No hay paso definido";
     }

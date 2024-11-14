@@ -69,9 +69,9 @@ const CreditHistory = ({ borrowerId }) => {
               <div className="grid grid-cols-3 gap-4 mt-4">
 
               <div className="flex flex-col items-center">
-                <Typography color="gray">LlamasScore</Typography>
+                <Typography color="gray">Cuentas de crédito</Typography>
                 <Typography variant="h6" className="font-bold cursor-pointer">
-                  {creditHistory?.score_llamas || "N/A"}
+                  {creditHistory?.accounts_open || "N/A"}
                 </Typography>
               </div>
               <div className="flex flex-col items-center">
@@ -98,7 +98,7 @@ const CreditHistory = ({ borrowerId }) => {
                     color="blue-gray"
                     className="font-normal leading-none opacity-70 text-center">Puntuación del buro</Typography>
             <div className="flex justify-center">
-            <ScorePieCharts value={creditHistory?.score_llamas} referenceValue={1000}></ScorePieCharts>
+            <ScorePieCharts value={creditHistory?.val_score} ></ScorePieCharts>
             </div>
             </div>
           </Card>

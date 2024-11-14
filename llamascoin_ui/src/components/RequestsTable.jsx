@@ -19,6 +19,8 @@ import CreditHistory from "./CreditHistory";
 import { PayPalCheckout } from "./PayPalCheckOut";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { TERM_CHOICES } from "./LoansTable";
+
 const TABLE_HEAD = ["Prestatario", "Cantidad", "Plazos", "Acciones"];
 
 export function RequestsTable() {
@@ -102,8 +104,8 @@ export function RequestsTable() {
         }
       );
       console.log("Solicitud completada para: ", selectedRequest.borrower);
-      navigate(0);
       setPaypalDialogOpen(false);
+      navigate(0);
     } catch (error) {
       console.error("Error completing request: ", error);
     }
@@ -121,7 +123,11 @@ export function RequestsTable() {
         </div>
       </CardHeader>
       <CardBody className="px-0 py-0 max-h-[200px] overflow-y-auto">
-        <table className="w-full min-w-max table-auto text-left">
+        {requestRows.length === 0 ? (
+        <div className="text-center"><Typography color="gray">No hay más registros</Typography></div>
+        ):
+        (
+          <table className="w-full min-w-max table-auto text-left">
           <thead>
             <tr>
               {TABLE_HEAD.map((head) => (
@@ -170,7 +176,7 @@ export function RequestsTable() {
                       color="blue-gray"
                       className="font-normal"
                     >
-                      {request.loan.amount}
+                      {request.loan.total_amount} MXN
                     </Typography>
                   </td>
                   <td className={classes}>
@@ -179,7 +185,8 @@ export function RequestsTable() {
                       color="blue-gray"
                       className="font-normal"
                     >
-                      {request.loan.term}
+                 
+                      {TERM_CHOICES[request.loan.term] || "Desconocido"}
                     </Typography>
                   </td>
                   <td className={classes}>
@@ -225,6 +232,8 @@ export function RequestsTable() {
             })}
           </tbody>
         </table>
+        )}
+
       </CardBody>
       <ConfirmationModal
         open={modalOpen}

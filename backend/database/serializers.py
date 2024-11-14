@@ -4,6 +4,7 @@ from .models import  CreditHistory, Moneylender, Loan, Borrower, ActiveLoan, Inv
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+from django.db.models import Sum
 
 load_dotenv()
 INTEREST_BANK = float(os.getenv('INTEREST_BANK', 28.18))
@@ -118,7 +119,7 @@ class MoneylenderBorrowerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Borrower
         fields = ['id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date', 'rfc', 'credit_history']
-    
+   
 class MoneylenderRequestsSerializer(serializers.ModelSerializer):
     borrower = MoneylenderBorrowerSerializer(read_only=True)
     loan = LoansSerializer(read_only=True) 
@@ -242,3 +243,39 @@ class MoneylenderTransactionSerializer(serializers.ModelSerializer):
             })
 
         return transaction_data
+    
+from django.db.models import Sum
+
+class MoneylenderDetailSerializer(serializers.ModelSerializer):
+    total_loans = serializers.SerializerMethodField()
+    total_earnings = serializers.SerializerMethodField()
+    total_active_loans = serializers.SerializerMethodField()
+    total_pending_balance = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Moneylender
+        fields = [
+            'id',
+            'first_name',
+            'total_loans',            # Monto total prestado
+            'total_earnings',          # Ganancias totales
+            'total_active_loans',      # Número de préstamos activos
+            'total_pending_balance',   # Saldo pendiente
+        ]
+
+    def get_total_loans(self, obj):
+        return ActiveLoan.objects.filter(moneylender=obj).aggregate(total_loans=Sum('loan__amount'))['total_loans'] or 0
+
+    def get_total_earnings(self, obj):
+        # Calcular el interés total generado en cada préstamo activo del prestamista
+        loans = ActiveLoan.objects.filter(moneylender=obj)
+        total_earnings = sum(loan.loan.amount * loan.loan.interest_rate / 100 for loan in loans)
+        return float(total_earnings)  # Asegurarse de que sea un valor serializable en JSON
+
+    def get_total_active_loans(self, obj):
+        # Contar el número de préstamos activos
+        return ActiveLoan.objects.filter(moneylender=obj).count()
+
+    def get_total_pending_balance(self, obj):
+        total_pending = ActiveLoan.objects.filter(moneylender=obj).aggregate(total_pending=Sum('amount_to_pay'))['total_pending'] or 0
+        return float(total_pending)  # Asegurarse de que sea un valor serializable en JSON

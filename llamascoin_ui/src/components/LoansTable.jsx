@@ -31,6 +31,7 @@ import Calendar from "./calendar";
 import LoanPercentage from "./LoanPercentage";
 import { PayPalCheckout } from "./PayPalCheckOut";
 
+
 const TABLE_HEAD = [
   "Prestamista",
   "Cantidad",
@@ -40,7 +41,7 @@ const TABLE_HEAD = [
   "Fecha de Publicación",
   "Estado",
 ];
-const TERM_CHOICES = {
+export const TERM_CHOICES = {
   1: "Semanal",
   2: "Quincenal",
   3: "Mensual",
@@ -57,7 +58,7 @@ export function LoansTable() {
   const [activeLoan, setActiveLoan] = useState();
   const [lastPendingPayment, setLastPendingPayment] = useState();
   const { authData } = useAuth();
-  const { status, data, error } = useFetch(apiHost + "loan/");
+  const { status, data } = useFetch(apiHost + "loan/");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState("");
   const [entityType, setEntityType] = useState("");
@@ -82,7 +83,7 @@ export function LoansTable() {
     } else if (status === "error") {
       console.error("Error fetching data: ", error);
     }
-  }, [status, data, error]);
+  }, [status, data]);
 
   const handleStatusClick = (loan) => {
     setSelectedLoan(loan);
@@ -158,123 +159,129 @@ export function LoansTable() {
             </div>
           </CardHeader>
           <CardBody className="px-0">
-          <table className="w-full min-w-max table-auto text-left">
-          <thead>
-            <tr>
-              {TABLE_HEAD.map((head) => (
-                <th
-                  key={head}
-                  className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
-                >
-                  <Typography
-                    variant="small"
-                    color="blue-gray"
-                    className="font-normal leading-none opacity-70"
+          {loanRows.length === 0 ? (
+            <div className="text-center"><Typography color="gray">No hay más registros</Typography></div>
+          ):
+          (
+            <table className="w-full min-w-max table-auto text-left">
+            <thead>
+              <tr>
+                {TABLE_HEAD.map((head) => (
+                  <th
+                    key={head}
+                    className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4"
                   >
-                    {head}
-                  </Typography>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {loanRows.map((loan, index) => {
-              const isLast = index === loanRows.length - 1;
-              const classes = isLast
-                ? "p-4"
-                : "p-4 border-b border-blue-gray-50";
-
-              let statusColor = "blue";
-
-              if (loan.request_status === "pending") statusColor = "amber";
-              else if (loan.request_status === "rejected") statusColor = "red";
-              else if (loan.request_status === "completed") statusColor = "green";
-              return (
-                <tr key={index}>
-                  <td className={classes}>
-                    <div className="flex items-center gap-3">
+                    <Typography
+                      variant="small"
+                      color="blue-gray"
+                      className="font-normal leading-none opacity-70"
+                    >
+                      {head}
+                    </Typography>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loanRows.map((loan, index) => {
+                const isLast = index === loanRows.length - 1;
+                const classes = isLast
+                  ? "p-4"
+                  : "p-4 border-b border-blue-gray-50";
+  
+                let statusColor = "blue";
+  
+                if (loan.request_status === "pending") statusColor = "amber";
+                else if (loan.request_status === "rejected") statusColor = "red";
+                else if (loan.request_status === "completed") statusColor = "green";
+                return (
+                  <tr key={index}>
+                    <td className={classes}>
+                      <div className="flex items-center gap-3">
+                        <Typography
+                          variant="small"
+                          color="blue-gray"
+                          className="font-bold"
+                        >
+                          {loan.moneylender.first_name +
+                            " " +
+                            loan.moneylender.first_surname}
+                        </Typography>
+                      </div>
+                    </td>
+                    <td className={classes}>
                       <Typography
                         variant="small"
                         color="blue-gray"
-                        className="font-bold"
+                        className="font-normal"
                       >
-                        {loan.moneylender.first_name +
-                          " " +
-                          loan.moneylender.first_surname}
+                        {loan.total_amount} MXN
                       </Typography>
-                    </div>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {loan.total_amount} MXN
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {loan.interest_rate}%
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {TERM_CHOICES[loan.term] || "Unknown Term"}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {loan.number_of_payments}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-normal"
-                    >
-                      {loan.publication_date}
-                    </Typography>
-                  </td>
-                  <td className={classes}>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="filled"
-                        color={statusColor}
-                        size="md"
-                        disabled={loan.request_status === "pending" || loan.request_status==="completed" || loan.request_status==="approved"}
-                        onClick={() => {
-                          if (loan.request_status !== "rejected") {
-                            handleStatusClick(loan);
-                          }
-                        }}
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
                       >
-                        {loan.request_status === ""
-                          ? "Solicitar"
-                          : loan.request_status === "rejected"
-                          ? STATUS_CHOICES["rejected"]
-                          : STATUS_CHOICES[loan.request_status]}
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                        {loan.interest_rate}%
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {TERM_CHOICES[loan.term] || "Unknown Term"}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {loan.number_of_payments}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {loan.publication_date}
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="filled"
+                          color={statusColor}
+                          size="md"
+                          disabled={loan.request_status === "pending" || loan.request_status==="completed" || loan.request_status==="approved"}
+                          onClick={() => {
+                            if (loan.request_status !== "rejected") {
+                              handleStatusClick(loan);
+                            }
+                          }}
+                        >
+                          {loan.request_status === ""
+                            ? "Solicitar"
+                            : loan.request_status === "rejected"
+                            ? STATUS_CHOICES["rejected"]
+                            : STATUS_CHOICES[loan.request_status]}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          )}
+         
         <ConfirmationModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -395,9 +402,9 @@ export function LoansTable() {
                   tableHeaders={{
                     "PayPal ID": "paypal_transaction_id",
                     Monto: "amount_paid",
-                    "Fecha de Pago": "payment_date",
+                    "Fecha de Pago": "payment_date",   
                   }}
-                  apiUrl={`${apiHost}/transaction`}
+                  apiUrl={`${apiHost}transaction`}
                 />
               </Card>
             </div>

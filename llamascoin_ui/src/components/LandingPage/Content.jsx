@@ -5,8 +5,8 @@ import {
   FaMoneyBillWave,
   FaCreditCard,
 } from "react-icons/fa";
-import Stripe from "../../assets/landingpage/stripe.png";
-import Buro from "../../assets/landingpage/buro.png";
+import Paypal from "../../assets/landingpage/paypal_icon.png";
+import Buro from "../../assets/landingpage/moffin.png";
 import ima1 from "../../assets/landingpage/ima1.jpg";
 import ima2 from "../../assets/landingpage/ganar2.png";
 import ima3 from "../../assets/landingpage/Prestardinero.jpg";
@@ -35,7 +35,7 @@ export function ContentDesign() {
         <h2 className="subtext">Algunos de nuestros socios</h2>
         <div className="columns-2 ...">
           <img src={Buro} className="image-paragraph"></img>
-          <img src={Stripe} className="image-paragraph"></img>
+          <img src={Paypal} className="image-paragraph"></img>
         </div>
       </div>
       <div className="sección-cont">
