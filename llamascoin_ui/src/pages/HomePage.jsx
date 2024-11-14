@@ -6,6 +6,7 @@ import MoneylenderDashboard from "../components/MoneylenderDashboard";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import CreditHistory from "../components/CreditHistory";
+import UserAccount from "../components/UserPage";
 
 const HomePage = () => {
   const { authData } = useAuth();
@@ -33,7 +34,7 @@ const HomePage = () => {
       case 'fees':
         return <div>Suscripción</div>; 
       case 'account':
-        return <div>Cuenta</div>; e
+        return <UserAccount/>; e
       default:
         return null;
     }

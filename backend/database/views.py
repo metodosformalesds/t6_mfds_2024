@@ -164,23 +164,36 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
+    def get_serializer_class(self):
+    # Seleccionar el serializer adecuado basado en el tipo de cuenta
+        if hasattr(self.request.user, 'moneylender'):
+            return MoneylenderSerializer  # Serializer para Moneylender
+        elif hasattr(self.request.user, 'borrower'):
+            return BorrowerSerializer  
+        else:
+            return UserSerializer
+        
     def retrieve(self, request, *args, **kwargs):
         # Obtener el usuario autenticado
         user = request.user
-
-        try:
-            moneylender = Moneylender.objects.get(user=user)
-        except Moneylender.DoesNotExist:
-            return Response({"detail": "Moneylender not found."}, status=HTTP_404_NOT_FOUND)
     
-            # Verificar el estado de suscripción
-        if not moneylender.is_subscribed:
-            return Response({"detail": "Not subscribed."}, status=HTTP_403_FORBIDDEN)
+        try:
+   
+            if hasattr(user, 'moneylender'):
+                person = Moneylender.objects.get(user=user)  
+                serializer = MoneylenderSerializer(person)  
+            elif hasattr(user, 'borrower'):
+                person = Borrower.objects.get(user=user) 
+                serializer = BorrowerSerializer(person)  
+            else:
+                return Response({"detail": "Person not found."}, status=HTTP_404_NOT_FOUND)
 
-        # Retornar el estado de suscripción si está suscrito
-        return Response({"is_subscribed": True}, status=HTTP_200_OK)
+            return Response(serializer.data, status=HTTP_200_OK)
 
+        except (Moneylender.DoesNotExist, Borrower.DoesNotExist):
+            return Response({"detail": "Person not found."}, status=HTTP_404_NOT_FOUND)
+        
+        
 class RequestViewSet(viewsets.ModelViewSet):
     queryset = Request.objects.all()
     
