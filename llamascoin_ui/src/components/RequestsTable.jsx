@@ -104,8 +104,8 @@ export function RequestsTable() {
         }
       );
       console.log("Solicitud completada para: ", selectedRequest.borrower);
-      navigate(0);
       setPaypalDialogOpen(false);
+      navigate(0);
     } catch (error) {
       console.error("Error completing request: ", error);
     }
@@ -123,7 +123,11 @@ export function RequestsTable() {
         </div>
       </CardHeader>
       <CardBody className="px-0 py-0 max-h-[200px] overflow-y-auto">
-        <table className="w-full min-w-max table-auto text-left">
+        {requestRows.length === 0 ? (
+        <div className="text-center"><Typography color="gray">No hay más registros</Typography></div>
+        ):
+        (
+          <table className="w-full min-w-max table-auto text-left">
           <thead>
             <tr>
               {TABLE_HEAD.map((head) => (
@@ -228,6 +232,8 @@ export function RequestsTable() {
             })}
           </tbody>
         </table>
+        )}
+
       </CardBody>
       <ConfirmationModal
         open={modalOpen}
