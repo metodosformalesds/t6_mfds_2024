@@ -47,8 +47,8 @@ class CreateCheckout(APIView):
                 print("Loan found. Amount:", amount)
                 #Comision de paypal y llamas junta 
                 #0.25 para el payout
-                #4% para paypal y 6% para llamas
-                amount = amount * Decimal(1.10) + Decimal(0.25)
+                #4% para paypal y 1% para llamas
+                amount = amount * Decimal(1.05) + Decimal(0.25)
             except Loan.DoesNotExist:
                 print("Error: Loan not found for ID:", loan_id)
                 return Response({"error": "Loan not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -65,8 +65,8 @@ class CreateCheckout(APIView):
                 print("ActiveLoan found. Amount:", amount)
                 #Comision de paypal y 3% de llamascoin
                 #0.25 para el payout
-                #4% para paypal y 2% para llamas
-                amount = amount * Decimal(1.06) + Decimal(0.25) 
+                #4% para paypal y 1% para llamas
+                amount = amount * Decimal(1.05) + Decimal(0.25) 
             except ActiveLoan.DoesNotExist:
                 print("Error: ActiveLoan not found for ID:", loan_id)
                 return Response({"error": "ActiveLoan not found"}, status=status.HTTP_404_NOT_FOUND)
