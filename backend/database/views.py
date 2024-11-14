@@ -135,7 +135,6 @@ class LoanViewSet(viewsets.ModelViewSet):
 class MoneylenderViewSet(viewsets.ModelViewSet):
     
     queryset = Moneylender.objects.all()
-    serializer_class = MoneylenderSerializer
 
     def get_serializer_class(self):
         # Seleccionar el serializer adecuado basado en el tipo de cuenta del usuario
@@ -146,10 +145,10 @@ class MoneylenderViewSet(viewsets.ModelViewSet):
         else:
             return MoneylenderSerializer  # Usa el serializer general en otros casos
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
+    def list(self, request):
+        instance = get_object_or_404(Moneylender, user_id=request.user.id)
         serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return Response({"stats": serializer.data})
 
 #Vista de modelo para credit history
 class CreditHistoryViewSet(viewsets.ModelViewSet):
