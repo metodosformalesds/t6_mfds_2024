@@ -7,7 +7,7 @@ const LINKS = [
     items: [
       { text: "Acerca de nosotros", href: "/about" },
 
-      { text: "Precios", href: "/subscription" },
+      { text: "Precios", href: "/fees" },
     ],
   },
   {

@@ -30,7 +30,7 @@ const HomePage = () => {
         return <MoneylenderDashboard />;
       case 'creditHistory':
         return <CreditHistory/>; 
-      case 'subscription':
+      case 'fees':
         return <div>Suscripción</div>; 
       case 'account':
         return <div>Cuenta</div>; e

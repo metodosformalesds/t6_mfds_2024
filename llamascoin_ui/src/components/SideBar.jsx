@@ -50,12 +50,7 @@ export function Sidebar({ onSelect }) {
               </ListItemPrefix>
               Inicio
             </ListItem>
-            <ListItem onClick={() => handleSelect('subscription')}>
-              <ListItemPrefix>
-                <FaClipboardList className="h-5 w-5" />
-              </ListItemPrefix>
-              Suscripción
-            </ListItem>
+
             <ListItem onClick={() => handleSelect('account')}>
               <ListItemPrefix>
                 <FaUserCircle className="h-5 w-5" />
