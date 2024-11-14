@@ -6,7 +6,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from services.Score.score import calcular_dificultad
 from database.models import CreditHistory, Payments, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
-from database.serializers import BorrowerActiveLoanSerializer, CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer, PaymentSerializer
+from database.serializers import BorrowerActiveLoanSerializer, CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer, PaymentSerializer, MoneylenderDetailSerializer
 from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer, MoneylenderTransactionSerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
@@ -136,6 +136,20 @@ class MoneylenderViewSet(viewsets.ModelViewSet):
     
     queryset = Moneylender.objects.all()
     serializer_class = MoneylenderSerializer
+
+    def get_serializer_class(self):
+        # Seleccionar el serializer adecuado basado en el tipo de cuenta del usuario
+        if hasattr(self.request.user, 'moneylender'):
+            return MoneylenderDetailSerializer
+        elif hasattr(self.request.user, 'borrower'):
+            return MoneylenderSerializer
+        else:
+            return MoneylenderSerializer  # Usa el serializer general en otros casos
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 #Vista de modelo para credit history
 class CreditHistoryViewSet(viewsets.ModelViewSet):
