@@ -1,13 +1,12 @@
 import React from "react";
 
 const Stepper = ({ currentStep }) => {
-  const steps = [1, 2, 3]; // Definir el número de pasos
+  const steps = [1, 2]; // Definir el número de pasos
   //Diccionario para mantener agrupado el progreso
   const stepsKeys ={
     "0": 1,
     "1": 2,
-    "2": 3,
-  
+
   }
   return (
     <div className="flex items-center justify-center  w-full">
