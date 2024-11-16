@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from services.Score.score import calcular_dificultad
 from database.models import CreditHistory, Payments, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
 from database.serializers import BorrowerActiveLoanSerializer, CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer, PaymentSerializer, MoneylenderDetailSerializer
-from database.serializers import LoansSerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer, MoneylenderTransactionSerializer
+from database.serializers import LoansSerializer,LoanHistorySerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer, MoneylenderTransactionSerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
@@ -294,7 +294,22 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class ActiveLoanViewSet(viewsets.ModelViewSet):
     queryset = ActiveLoan.objects.all()
     serializer_class = ActiveLoanSerializer
+class LoanHistoryListView(viewsets.ModelViewSet):
+    serializer_class = LoanHistorySerializer
 
+    def get_queryset(self):
+        user = self.request.user  # Usuario autenticado
+
+        # Verifica si el usuario es un Moneylender
+        if hasattr(user, 'moneylender'):
+            return ActiveLoan.objects.filter(moneylender=user.moneylender)
+
+        # Verifica si el usuario es un Borrower
+        if hasattr(user, 'borrower'):
+            return ActiveLoan.objects.filter(borrower=user.borrower)
+
+        # Si no es ninguno, retorna un queryset vacío
+        return ActiveLoan.objects.none()
     
 def register_routers():
     """
@@ -310,7 +325,8 @@ def register_routers():
         ('request', RequestViewSet),
         ('transaction', TransactionViewSet),
         ('active_loan', ActiveLoanViewSet),
-        ('payment', PaymentViewSet)
+        ('payment', PaymentViewSet),
+        ('historial', LoanHistoryListView)
     ]
     routers = {}
     for basename, viewset in viewsets_with_basenames:
@@ -319,3 +335,4 @@ def register_routers():
         routers[basename] = router
         
     return routers
+

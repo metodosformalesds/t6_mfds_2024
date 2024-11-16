@@ -45,9 +45,41 @@ class BorrowerSerializer(serializers.ModelSerializer):
 
 #Serializer de los detalles de los prestamos
 class ActiveLoansSerializer(serializers.ModelSerializer):
+    borrower_name = serializers.SerializerMethodField()
+    payments = serializers.SerializerMethodField()
+    loan_amount = serializers.SerializerMethodField()
     class Meta:
         model = ActiveLoan
-        fields = '__all__'
+        fields = [
+            'id',
+            'borrower_name',       # Nombre del prestatario
+            'loan_amount',        # Monto total del préstamo
+            'total_debt_paid',     # Cantidad total pagada
+            'amount_to_pay',       # Cantidad pendiente
+            'start_date',          # Fecha de inicio del préstamo
+            'payments',            # Lista de pagos
+        ]
+
+    def get_borrower_name(self, obj):
+        # Concatenar el nombre completo del prestatario
+        return f"{obj.borrower.first_name} {obj.borrower.first_surname}"
+
+    def get_payments(self, obj):
+        # Obtener la información de los pagos relacionados
+        payments = obj.payments.all()  # Usar el related_name definido en Payments
+        return [
+            {
+                "number_of_pay": payment.number_of_pay,
+                "date_to_pay": payment.date_to_pay,
+                "paid": payment.paid,
+                "paid_on_time": payment.paid_on_time,
+            }
+            for payment in payments
+        ]
+    
+    def get_loan_amount(self, obj):
+        # Obtener el monto total del préstamo desde el modelo relacionado `Loan`
+        return obj.loan.amount
         
 #Serializer del historial de facturas
 class InvoiceHistorySerializer(serializers.ModelSerializer):
@@ -59,6 +91,7 @@ class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payments
         fields = '__all__'
+        
 #Serializer de los detalles de los prestamos
 class ActiveLoanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -251,6 +284,7 @@ class MoneylenderDetailSerializer(serializers.ModelSerializer):
     total_earnings = serializers.SerializerMethodField()
     total_active_loans = serializers.SerializerMethodField()
     total_pending_balance = serializers.SerializerMethodField()
+    active_loans = serializers.SerializerMethodField()
 
     class Meta:
         model = Moneylender
@@ -261,6 +295,7 @@ class MoneylenderDetailSerializer(serializers.ModelSerializer):
             'total_earnings',          # Ganancias totales
             'total_active_loans',      # Número de préstamos activos
             'total_pending_balance',   # Saldo pendiente
+            'active_loans',            # Lista de préstamos activos
         ]
 
     def get_total_loans(self, obj):
@@ -279,3 +314,67 @@ class MoneylenderDetailSerializer(serializers.ModelSerializer):
     def get_total_pending_balance(self, obj):
         total_pending = ActiveLoan.objects.filter(moneylender=obj).aggregate(total_pending=Sum('amount_to_pay'))['total_pending'] or 0
         return float(total_pending)  # Asegurarse de que sea un valor serializable en JSON
+
+    def get_active_loans(self, obj):
+        # Serializar los préstamos activos relacionados con el Moneylender
+        active_loans = ActiveLoan.objects.filter(moneylender=obj)
+        return ActiveLoansSerializer(active_loans, many=True).data 
+    
+    
+class LoanHistorySerializer(serializers.ModelSerializer):
+    moneylender_name = serializers.SerializerMethodField()
+    borrower_name = serializers.SerializerMethodField()
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2, source='loan.amount')
+    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2, source='loan.total_amount')
+    payment_per_term = serializers.DecimalField(max_digits=10, decimal_places=2, source='loan.payment_per_term')
+    term_type = serializers.SerializerMethodField()
+    interest_rate = serializers.DecimalField(max_digits=5, decimal_places=2, source='loan.interest_rate')
+    number_of_payments = serializers.IntegerField(source='loan.number_of_payments')
+    on_time_payments = serializers.SerializerMethodField()
+    late_payments = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
+    end_date = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ActiveLoan
+        fields = [
+            'id', 'moneylender_name', 'borrower_name', 'amount', 'total_amount', 'payment_per_term', 'term_type',
+            'interest_rate', 'number_of_payments', 'on_time_payments', 'late_payments',
+            'start_date', 'end_date', 'status'
+        ]
+
+    def get_moneylender_name(self, obj):
+        moneylender = obj.moneylender
+        return f"{moneylender.first_name} {moneylender.first_surname}"
+
+    def get_borrower_name(self, obj):
+        borrower = obj.borrower
+        return f"{borrower.first_name} {borrower.first_surname} {borrower.second_surname}"
+
+    def get_term_type(self, obj):
+        term_dict = {1: 'Semanal', 2: 'Quincenal', 3: 'Mensual'}
+        return term_dict.get(obj.loan.term, 'Desconocido')
+
+    def get_on_time_payments(self, obj):
+        return obj.payments.filter(paid=True, paid_on_time=True).count()
+
+    def get_late_payments(self, obj):
+        return obj.payments.filter(paid=True, paid_on_time=False).count()
+
+    def get_start_date(self, obj):
+        # Obtener la fecha del primer pago registrado
+        first_payment = obj.payments.order_by('date_to_pay').first()
+        return first_payment.date_to_pay if first_payment else None
+
+    def get_end_date(self, obj):
+        # Obtener la fecha del último pago registrado
+        last_payment = obj.payments.order_by('date_to_pay').last()
+        return last_payment.date_to_pay if last_payment else None  
+    
+    def get_status(self, obj):
+        # Estado del préstamo basado en 'amount_to_pay' y los pagos
+        if obj.amount_to_pay == 0:
+            return 'Pagado'
+        elif obj.amount_to_pay > 0 :
+            return 'En curso'
