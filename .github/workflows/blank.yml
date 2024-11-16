@@ -1,0 +1,32 @@
+name: Daily AWS Database Fetch
+
+on:
+  schedule:
+    - cron: "0 0 * * *" 
+
+jobs:
+  fetch-data:
+    runs-on: ubuntu-latest
+
+    env:
+      DB_HOST: "HOST"
+      DB_USER: "USER"
+      DB_PASSWORD: "KEY"
+      DB_NAME: "NAME"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pymysql
+
+      - name: Run recordatorios
+        run: python backend/services/Correos/recordatorio.py
