@@ -23,6 +23,101 @@ import { AbstractTable } from "./AbstractTable";
 import { apiHost } from "../utils/apiconfig";
 import { useAuth } from "../context/AuthContext";
 import { useFetch } from "../hooks/useFetch";
+
+const sampleData = {
+  stats: {
+    active_loans: [
+      {
+        id: 1,
+        borrower: {
+          id: 101,
+          first_name: "John Doe",
+          first_surname: "john.doe@example.com",
+          rfc: "https://via.placeholder.com/100",
+        },
+        loan_amount: 1000,
+        total_debt_paid: "500.00",
+        amount_to_pay: "500.00",
+        start_date: "2024-10-16",
+        payments: [
+          {
+            number_of_pay: 1,
+            date_to_pay: "2024-11-16",
+            paid: true,
+            paid_on_time: true,
+          },
+          {
+            number_of_pay: 2,
+            date_to_pay: "2024-12-16",
+            paid: false,
+            paid_on_time: false,
+          },
+          {
+            number_of_pay: 2,
+            date_to_pay: "2024-12-19",
+            paid: false,
+            paid_on_time: false,
+          },
+          {
+            number_of_pay: 2,
+            date_to_pay: "2024-12-22",
+            paid: false,
+            paid_on_time: false,
+          },
+          {
+            number_of_pay: 2,
+            date_to_pay: "2024-12-26",
+            paid: false,
+            paid_on_time: false,
+          },
+          {
+            number_of_pay: 2,
+            date_to_pay: "2024-12-29",
+            paid: false,
+            paid_on_time: false,
+          },
+ 
+        ],
+      },
+      {
+        id: 2,
+        borrower: {
+          id: 102,
+          name: "Jane Smith",
+          email: "jane.smith@example.com",
+          profile_picture: "https://via.placeholder.com/100",
+        },
+        loan_amount: 2000,
+        total_debt_paid: "1500.00",
+        amount_to_pay: "500.00",
+        start_date: "2024-09-10",
+        payments: [
+          {
+            number_of_pay: 1,
+            date_to_pay: "2024-10-10",
+            paid: true,
+            paid_on_time: true,
+          },
+          {
+            number_of_pay: 2,
+            date_to_pay: "2024-11-10",
+            paid: true,
+            paid_on_time: false,
+          },
+          {
+            number_of_pay: 3,
+            date_to_pay: "2024-12-10",
+            paid: false,
+            paid_on_time: false,
+          },
+        ],
+      },
+    ],
+  },
+};
+
+
+
 const MoneylenderDashboard = () => {
   const [open, setOpen] = useState(false);
   const [dashboardStats, setDashboardStats] = useState();
@@ -113,3 +208,5 @@ const MoneylenderDashboard = () => {
 };
 
 export default MoneylenderDashboard;
+
+
