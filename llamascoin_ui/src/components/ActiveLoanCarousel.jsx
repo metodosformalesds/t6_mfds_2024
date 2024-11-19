@@ -61,7 +61,7 @@ const ActiveLoanCarousel = ({ activeLoans }) => {
         activeLoans.map((loan) => (
           <div
             key={loan.id}
-            className="items-center p-4 bg-white rounded-md shadow-md"
+            className="items-center  bg-white rounded-md shadow-md"
           >
             {/* ProfileCard */}
             <ProfileCard entity={loan.borrower} />
@@ -74,7 +74,7 @@ const ActiveLoanCarousel = ({ activeLoans }) => {
                   ${loan.loan_amount}
                 </Typography>
               </Typography>
-              <Typography variant="body1" color="textSecondary">
+              <Typography variant="body1" color="textSecondary" className='b'>
                 Pagado:{' '}
                 <Typography component="span" color="primary.main">
                   ${loan.total_debt_paid}
