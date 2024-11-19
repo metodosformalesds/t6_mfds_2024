@@ -232,13 +232,14 @@ class CaptureCheckout(APIView):
                             else:
                                 incremento = 25
                             
+                            credit_history = CreditHistory.objects.get(borrower = borrower)
+                            credit_history.score_llamas += incremento
+                            credit_history.score_llamas = min(credit_history.score_llamas, 3000)
+                            credit_history.save()
                             
-                            borrower.score_llamas += incremento
-                            borrower.score_llamas = min(self.scorellamas, 3000)
-                            borrower.save()
+                            credit_history.calculate_llamas_history()
                             
-                            #credit_history = CreditHistory.objects.get(borrower=borrower)
-                            #credit_history.calculate_llamas_history()
+                           
                             # Realizar la transacción
                             self.create_transaction(active_loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'), "payment")
 
@@ -387,6 +388,7 @@ class CaptureCheckout(APIView):
 
         
 class CreatePayPalProductView(APIView):  
+    
     serializer_class = PayPalProductSerializer
     def post(self, request, *args, **kwargs):
         serializer = PayPalProductSerializer(data=request.data)

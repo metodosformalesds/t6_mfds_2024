@@ -78,6 +78,7 @@ class LoanViewSet(viewsets.ModelViewSet):
             response_data = {
                 'loans': loans_serializer.data
             }
+            print(response_data)
             return Response(response_data, status=HTTP_200_OK)
 
         return Response({'detail': 'Unauthorized'}, status=HTTP_403_FORBIDDEN)
