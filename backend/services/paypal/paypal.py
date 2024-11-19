@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from services.Correos.send_mail import EmailSender
 from services.paypal.serializers import  PayPalProductSerializer
-from database.models import Payments, Request, Transaction, Loan, Borrower, Moneylender, ActiveLoan
+from database.models import Payments, Request, Transaction, Loan, Borrower, Moneylender, ActiveLoan, CreditHistory
 from rest_framework.response import Response
 
 CLIENT_ID_PAYPAL = os.getenv('CLIENT_ID_PAYPAL', 'Default_Secret')
@@ -218,7 +218,27 @@ class CaptureCheckout(APIView):
                             most_recent_payment.paid = True
                             most_recent_payment.paid_on_time = most_recent_payment.date_to_pay >= timezone.now().date()
                             most_recent_payment.save()
-
+                            
+                            borrower = request.user.borrower
+                            dificultad = active_loan.loan.difficulty
+                            if dificultad < 30:
+                                incremento = 5
+                            elif dificultad < 50:
+                                incremento = 10
+                            elif dificultad < 70:
+                                incremento = 15
+                            elif dificultad < 90:
+                                incremento = 20
+                            else:
+                                incremento = 25
+                            
+                            
+                            borrower.score_llamas += incremento
+                            borrower.score_llamas = min(self.scorellamas, 3000)
+                            borrower.save()
+                            
+                            #credit_history = CreditHistory.objects.get(borrower=borrower)
+                            #credit_history.calculate_llamas_history()
                             # Realizar la transacción
                             self.create_transaction(active_loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'), "payment")
 
