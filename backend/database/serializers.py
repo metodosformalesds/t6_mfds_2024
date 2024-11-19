@@ -42,17 +42,22 @@ class BorrowerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Borrower
         fields = '__all__'
-
+class MoneylenderBorrowerSerializer(serializers.ModelSerializer):
+    credit_history = CreditHistorySerializer(many=True, read_only=True) 
+    class Meta:
+        model = Borrower
+        fields = ['id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date', 'rfc', 'credit_history']
+   
 #Serializer de los detalles de los prestamos
 class ActiveLoansSerializer(serializers.ModelSerializer):
-    borrower_name = serializers.SerializerMethodField()
+    borrower = MoneylenderBorrowerSerializer( read_only=True) 
     payments = serializers.SerializerMethodField()
     loan_amount = serializers.SerializerMethodField()
     class Meta:
         model = ActiveLoan
         fields = [
             'id',
-            'borrower_name',       # Nombre del prestatario
+            'borrower',       # Nombre del prestatario
             'loan_amount',        # Monto total del préstamo
             'total_debt_paid',     # Cantidad total pagada
             'amount_to_pay',       # Cantidad pendiente
@@ -147,12 +152,7 @@ class BorrowerLoanSerializer(serializers.ModelSerializer):
         return ''  
     
 
-class MoneylenderBorrowerSerializer(serializers.ModelSerializer):
-    credit_history = CreditHistorySerializer(many=True, read_only=True) 
-    class Meta:
-        model = Borrower
-        fields = ['id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date', 'rfc', 'credit_history']
-   
+
 class MoneylenderRequestsSerializer(serializers.ModelSerializer):
     borrower = MoneylenderBorrowerSerializer(read_only=True)
     loan = LoansSerializer(read_only=True) 
