@@ -7,7 +7,8 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import CreditHistory from "../components/CreditHistory";
 import UserAccount from "../components/UserPage";
-
+import { LoanHistory } from "../components/LoanHistory";
+import { Card } from "@material-tailwind/react";
 const HomePage = () => {
   const { authData } = useAuth();
   const navigate = useNavigate();
@@ -34,7 +35,17 @@ const HomePage = () => {
       case 'fees':
         return <div>Suscripción</div>; 
       case 'account':
-        return <UserAccount/>; e
+        return <UserAccount/>; 
+      case 'loanHistory':
+          
+
+            return  <Card className="p-12 m-12 shadow-xl w-full shadow-blue-gray-900/">
+               <LoanHistory/>
+            </Card>
+         
+      case 'myLoans':
+        return 
+
       default:
         return null;
     }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Card, Typography, List, ListItem, ListItemPrefix } from "@material-tailwind/react";
-import { FaHome, FaClipboardList, FaUserCircle, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaHome, FaClipboardList, FaUserCircle, FaCog, FaSignOutAlt, FaMoneyBill, FaMoneyBillWave } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 
 export function Sidebar({ onSelect }) {
@@ -34,6 +34,12 @@ export function Sidebar({ onSelect }) {
               </ListItemPrefix>
               Historial Crediticio
             </ListItem>
+            <ListItem onClick={() => handleSelect('loanHistory')}>
+              <ListItemPrefix>
+                <FaMoneyBill className="h-5 w-5" />
+              </ListItemPrefix>
+              Historial de prestamos
+            </ListItem>
             <ListItem onClick={() => handleSelect('account')}>
               <ListItemPrefix>
                 <FaUserCircle className="h-5 w-5" />
@@ -50,7 +56,18 @@ export function Sidebar({ onSelect }) {
               </ListItemPrefix>
               Inicio
             </ListItem>
-
+            <ListItem onClick={() => handleSelect('loanHistory')}>
+              <ListItemPrefix>
+                <FaMoneyBill className="h-5 w-5" />
+              </ListItemPrefix>
+              Historial de prestamos
+            </ListItem>
+            <ListItem onClick={() => handleSelect('myLoans')}>
+              <ListItemPrefix>
+                <FaMoneyBillWave className="h-5 w-5" />
+              </ListItemPrefix>
+              Mis prestamos
+            </ListItem>
             <ListItem onClick={() => handleSelect('account')}>
               <ListItemPrefix>
                 <FaUserCircle className="h-5 w-5" />
