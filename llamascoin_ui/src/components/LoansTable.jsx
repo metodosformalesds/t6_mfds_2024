@@ -81,7 +81,7 @@ export function LoansTable() {
         setLastPendingPayment(pendingPayment);
       }
     } else if (status === "error") {
-      console.error("Error fetching data: ", error);
+      console.error("Error fetching data: ");
     }
   }, [status, data]);
 
