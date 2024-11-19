@@ -12,31 +12,29 @@ sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'llamascoin.settings')
 django.setup()
 
-# Ruta de la base de datos SQLite local
 DB_PATH = '../../db.sqlite3'
 
 def lista_pagos():
     conn = None
     try:
         print("Intentando conectarse a la base de datos...")
-        # Intentar conectarse a la base de datos
         conn = sqlite3.connect(DB_PATH)
         print("Conexión a la base de datos exitosa.")
-        
         cursor = conn.cursor()
-
         # Consulta para obtener los pagos
         print("Ejecutando consulta para obtener pagos...")
         cursor.execute("SELECT DayOfPay, borrower_id FROM database_activeloans WHERE DATE(DayOfPay) = DATE('now', '+5 days')")
         pagos = cursor.fetchall()
-
+        """Obtiene los datos y los almacena en tuplas de forma temporal"""
         if not pagos:
             print("No se encontraron pagos con la fecha solicitada.")
 
         # Convierte los resultados en una lista de diccionarios
-        columns = [desc[0] for desc in cursor.description]
-        resultados = [dict(zip(columns, row)) for row in pagos]
         
+        columns = [desc[0] for desc in cursor.description]
+        """Obtiene los datos que se almacenaron y los devuelve en una lista"""
+        resultados = [dict(zip(columns, row)) for row in pagos]
+        """Obtiene los resultados y los convierte en una lista de diccionario"""
         return resultados
     
     except sqlite3.Error as e:
@@ -53,19 +51,18 @@ def lista_pagos():
 def usuarios_pagos(borrower_id):
     conn = None
     try:
-        print(f"Buscando usuario con borrower_id: {borrower_id}")
-        # Conexión a SQLite
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 
         # Consulta para obtener el usuario por borrower_id
         cursor.execute("SELECT Email_borrower,Name_borrower FROM database_borrower WHERE id_borrower = ?", (borrower_id,))
         usuario = cursor.fetchone()
-
+        """Obtiene la primera fila del resultado y los almacena en una dupla"""
         if usuario:
             print(f"Usuario encontrado: {usuario}")
             columns = [desc[0] for desc in cursor.description]
             return dict(zip(columns, usuario))
+            """retorna un diccionario de los datos en columnas"""
         else:
             print(f"No se encontró usuario con borrower_id {borrower_id}")
         return None
@@ -77,7 +74,7 @@ def usuarios_pagos(borrower_id):
             conn.close()
 
 def check_active_loan_dates():
-    print("Iniciando chequeo de pagos...")
+    print("Iniciando verificación de pagos...")
     pagos = lista_pagos()
 
     if not pagos:
@@ -99,9 +96,10 @@ def check_active_loan_dates():
                 }
             )
             email_sender.send_email()
+            """Envia los datos obtenidos, la plantilla y los daots originales a email_sender para enviar el correo"""
         else:
-            print(f"No se encontró al usuario con ID {pago['borrower_id']} o no tiene correo electrónico registrado.")
+            print(f"No se encontró al usuario con ID {pago['borrower_id']}.")
 
-# Ejemplo de ejecución
+
 if __name__ == "__main__":
     check_active_loan_dates()
