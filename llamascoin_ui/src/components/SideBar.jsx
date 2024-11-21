@@ -7,7 +7,11 @@ export function Sidebar({ onSelect }) {
   const { authData, logout } = useAuth();
   const role = authData?.role;
 
+  const [activeItem, setActiveItem] = useState(role === 'borrower' ? 'loans' : 'dashboard');
+
+
   const handleSelect = (component) => {
+    setActiveItem(component); // Establece el elemento activo
     onSelect(component);
   };
 
@@ -22,25 +26,45 @@ export function Sidebar({ onSelect }) {
       <List>
         {role === 'borrower' && (
           <>
-            <ListItem onClick={() => handleSelect('loans')}>
+            <ListItem
+              className={`cursor-pointer ${
+                activeItem === 'loans' ? 'bg-blue-100' : ''
+              }`}
+              onClick={() => handleSelect('loans')}
+            >
               <ListItemPrefix>
                 <FaHome className="h-5 w-5" />
               </ListItemPrefix>
               Inicio
             </ListItem>
-            <ListItem onClick={() => handleSelect('creditHistory')}>
+            <ListItem
+              className={`cursor-pointer ${
+                activeItem === 'creditHistory' ? 'bg-blue-100' : ''
+              }`}
+              onClick={() => handleSelect('creditHistory')}
+            >
               <ListItemPrefix>
                 <FaClipboardList className="h-5 w-5" />
               </ListItemPrefix>
-              Historial Crediticio
+              Historial crediticio
             </ListItem>
-            <ListItem onClick={() => handleSelect('loanHistory')}>
+            <ListItem
+              className={`cursor-pointer ${
+                activeItem === 'loanHistory' ? 'bg-blue-100' : ''
+              }`}
+              onClick={() => handleSelect('loanHistory')}
+            >
               <ListItemPrefix>
                 <FaMoneyBill className="h-5 w-5" />
               </ListItemPrefix>
-              Historial de prestamos
+              Historial de préstamos
             </ListItem>
-            <ListItem onClick={() => handleSelect('account')}>
+            <ListItem
+              className={`cursor-pointer ${
+                activeItem === 'account' ? 'bg-blue-100' : ''
+              }`}
+              onClick={() => handleSelect('account')}
+            >
               <ListItemPrefix>
                 <FaUserCircle className="h-5 w-5" />
               </ListItemPrefix>
@@ -50,25 +74,45 @@ export function Sidebar({ onSelect }) {
         )}
         {role === 'moneylender' && (
           <>
-            <ListItem onClick={() => handleSelect('dashboard')}>
+            <ListItem
+              className={`cursor-pointer ${
+                activeItem === 'dashboard' ? 'bg-blue-100' : ''
+              }`}
+              onClick={() => handleSelect('dashboard')}
+            >
               <ListItemPrefix>
                 <FaHome className="h-5 w-5" />
               </ListItemPrefix>
               Inicio
             </ListItem>
-            <ListItem onClick={() => handleSelect('loanHistory')}>
+            <ListItem
+              className={`cursor-pointer ${
+                activeItem === 'loanHistory' ? 'bg-blue-100' : ''
+              }`}
+              onClick={() => handleSelect('loanHistory')}
+            >
               <ListItemPrefix>
                 <FaMoneyBill className="h-5 w-5" />
               </ListItemPrefix>
-              Historial de prestamos
+              Historial de préstamos
             </ListItem>
-            <ListItem onClick={() => handleSelect('myLoans')}>
+            <ListItem
+              className={`cursor-pointer ${
+                activeItem === 'myLoans' ? 'bg-blue-100' : ''
+              }`}
+              onClick={() => handleSelect('myLoans')}
+            >
               <ListItemPrefix>
                 <FaMoneyBillWave className="h-5 w-5" />
               </ListItemPrefix>
-              Mis prestamos
+              Mis préstamos
             </ListItem>
-            <ListItem onClick={() => handleSelect('account')}>
+            <ListItem
+              className={`cursor-pointer ${
+                activeItem === 'account' ? 'bg-blue-100' : ''
+              }`}
+              onClick={() => handleSelect('account')}
+            >
               <ListItemPrefix>
                 <FaUserCircle className="h-5 w-5" />
               </ListItemPrefix>

@@ -9,6 +9,8 @@ import CreditHistory from "../components/CreditHistory";
 import UserAccount from "../components/UserPage";
 import { LoanHistory } from "../components/LoanHistory";
 import { Card } from "@material-tailwind/react";
+import { MoneylenderLoans } from "../components/MoneylenderLoans";
+
 const HomePage = () => {
   const { authData } = useAuth();
   const navigate = useNavigate();
@@ -32,19 +34,17 @@ const HomePage = () => {
         return <MoneylenderDashboard />;
       case 'creditHistory':
         return <CreditHistory/>; 
-      case 'fees':
-        return <div>Suscripción</div>; 
       case 'account':
         return <UserAccount/>; 
       case 'loanHistory':
-          
-
-            return  <Card className="p-12 m-12 shadow-xl w-full shadow-blue-gray-900/">
-               <LoanHistory/>
-            </Card>
+        return  <Card className="p-12 m-12 shadow-xl w-full shadow-blue-gray-900/">
+            <LoanHistory/>
+        </Card>
          
       case 'myLoans':
-        return 
+        return <Card className="p-12 m-12 shadow-xl w-full shadow-blue-gray-900/">
+            <MoneylenderLoans/>
+            </Card>
 
       default:
         return null;

@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from services.Score.score import calcular_dificultad
 from database.models import CreditHistory, Payments, Transaction, Moneylender, Borrower, Loan, ActiveLoan, Request
 from database.serializers import BorrowerActiveLoanSerializer, CreditHistorySerializer, MoneylenderSerializer, BorrowerSerializer, MoneylenderLoanSerializer, BorrowerRequestSerializer, PaymentSerializer, MoneylenderDetailSerializer
-from database.serializers import LoansSerializer,LoanHistorySerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer, MoneylenderTransactionSerializer
+from database.serializers import LoansSerializer,LoanHistorySerializer, RequestSerializer, TransactionSerializer, ActiveLoanSerializer, BorrowerLoanSerializer, MoneylenderRequestsSerializer, BorrowerCreditHistorySerializer, MoneylenderTransactionSerializer, MoneylenderLoansSerializer
 from django.contrib.auth.models import User
 from llamascoin.serializers import UserSerializer
 from rest_framework.permissions import AllowAny
@@ -78,10 +78,22 @@ class LoanViewSet(viewsets.ModelViewSet):
             response_data = {
                 'loans': loans_serializer.data
             }
-            print(response_data)
             return Response(response_data, status=HTTP_200_OK)
+        
+        elif hasattr(request.user, 'moneylender'):
+            moneylender = request.user.moneylender
+            loans = Loan.objects.filter(moneylender=moneylender)
+            # Serializar los préstamos
+            serializer = MoneylenderLoansSerializer(loans, many=True)
+            
+            return Response( serializer.data, status=HTTP_200_OK)
+        
+        else:
+            loans = Loan.objects.all()
+            loans_serializer = LoansSerializer(loans, many=True)
+            return Response({'loans': loans_serializer.data}, status=HTTP_200_OK)
+        return Response({'detail': loans_serializer}, status=HTTP_403_FORBIDDEN)
 
-        return Response({'detail': 'Unauthorized'}, status=HTTP_403_FORBIDDEN)
     def create(self, request, *args, **kwargs):
             # Verificar si el usuario es un Moneylender
             if not hasattr(request.user, 'moneylender'):
@@ -132,6 +144,67 @@ class LoanViewSet(viewsets.ModelViewSet):
 
             return Response(moneylender_loan_serializer.errors, status=HTTP_400_BAD_REQUEST)  
 
+    def update(self, request, *args, **kwargs):
+
+        if not hasattr(request.user, 'moneylender'):
+            raise PermissionDenied("No tienes permiso para actualizar un préstamo.")
+
+        moneylender = request.user.moneylender
+        # Obtener el préstamo que se va a actualizar
+        loan_id = kwargs['pk']
+        try:
+            loan = Loan.objects.get(id=loan_id, moneylender=moneylender)  
+        except Loan.DoesNotExist:
+            return Response({"detail": "Préstamo no encontrado o no autorizado"}, status=HTTP_400_BAD_REQUEST)
+
+        # Usar el serializer para validar los datos del préstamo
+        moneylender_loan_serializer = MoneylenderLoanSerializer(loan, data=request.data, partial=True) 
+        if moneylender_loan_serializer.is_valid():
+            # Obtener los datos validados
+            validated_data = moneylender_loan_serializer.validated_data
+
+            # Actualizar los datos del préstamo
+            loan.amount = validated_data.get('amount', loan.amount)
+            loan.term = validated_data.get('term', loan.term)
+            loan.interest_rate = validated_data.get('interest_rate', loan.interest_rate)
+            loan.number_of_payments = validated_data.get('number_of_payments', loan.number_of_payments)
+
+            # Calcular el total a pagar y el pago por término si los valores han cambiado
+            loan_amount = loan.amount
+            interest_rate = loan.interest_rate / 100  # Convertir el interés a porcentaje
+            number_of_payments = loan.number_of_payments
+
+            # Calcular el total a pagar
+            total_amount = loan_amount + (loan_amount * interest_rate)
+
+            # Calcular el pago por término
+            payment_per_term = total_amount / number_of_payments
+
+            # Asignar los valores calculados
+            loan.total_amount = total_amount
+            loan.payment_per_term = payment_per_term
+
+            # Recalcular la dificultad (si corresponde)
+            loan.difficulty = calcular_dificultad(loan)
+
+            # Guardar los cambios
+            loan.save()
+
+            return Response(moneylender_loan_serializer.data, status=HTTP_200_OK)
+
+        return Response(moneylender_loan_serializer.errors, status=HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, *args, **kwargs):
+        
+        loan = self.get_object()
+
+        # Verifica si el usuario autenticado es el propietario del préstamo
+        if loan.moneylender != request.user.moneylender:
+            raise PermissionDenied("No tienes permiso para eliminar este préstamo.")
+
+        loan.delete()
+        return Response({"message": "Préstamo eliminado correctamente."}, status=204)    
+    
 #Vista de modelo para money lender
 class MoneylenderViewSet(viewsets.ModelViewSet):
     

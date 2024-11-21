@@ -11,7 +11,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useFetch } from "../../hooks/useFetch";
 import axios from "axios";
 
-export function MultiStepLoanForm() {
+export function MultiStepLoanForm({loanId}) {
   const { authData } = useAuth();
   const navigate = useNavigate();
 
@@ -54,20 +54,36 @@ export function MultiStepLoanForm() {
       term,
       interest_rate,
       number_of_payments,
+      ...(loanId && { id: loanId })
     };
 
     setLoanStatus("loading");
     try {
-      const response = await axios.post(`${apiHost}loan/`, dataToSubmit, {
-        headers: {
-          Authorization: `Bearer ${authData.accessToken}`, // Si necesitas el token de autorización
-          "Content-Type": "application/json",
-        },
-      });
+      if (!loanId){
+        const response = await axios.post(`${apiHost}loan/`, dataToSubmit, {
+          headers: {
+            Authorization: `Bearer ${authData.accessToken}`, // Si necesitas el token de autorización
+            "Content-Type": "application/json",
+          },
+        });
+  
+        setLoanStatus("success");
+        console.log("Loan exitosa:", response.data);
+        navigate(0);
+      }
+      else{
+        const response = await axios.patch(`${apiHost}loan/${loanId}/`, dataToSubmit, {
+          headers: {
+            Authorization: `Bearer ${authData.accessToken}`, 
+            "Content-Type": "application/json",
+          },
+        });
+  
+        setLoanStatus("success");
+        console.log("Loan exitosa:", response.data);
+        navigate(0);
+      }
 
-      setLoanStatus("success");
-      console.log("Loan exitosa:", response.data);
-      navigate(0);
     } catch (error) {
       console.error(
         "Error en el registro:",

@@ -47,6 +47,30 @@ class MoneylenderBorrowerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Borrower
         fields = ['id', 'first_name', 'middle_name', 'first_surname', 'second_surname', 'birth_date', 'rfc', 'credit_history']
+        
+        
+class MoneylenderLoansSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+    borrower = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Loan
+        fields = [
+            'id', 'amount', 'total_amount', 'difficulty', 'interest_rate', 
+            'number_of_payments', 'term', 'duration_loan', 'payment_per_term', 
+            'publication_date', 'moneylender', 'status', 'borrower'
+        ]
+
+    def get_status(self, obj):
+        has_active_loan = ActiveLoan.objects.filter(loan=obj).exists()
+        return 'En préstamo' if has_active_loan else 'Disponible'
+
+    def get_borrower(self, obj):
+        active_loan = ActiveLoan.objects.filter(loan=obj).first()
+        if active_loan:
+            return MoneylenderBorrowerSerializer(active_loan.borrower).data
+        return None
+
    
 #Serializer de los detalles de los prestamos
 class ActiveLoansSerializer(serializers.ModelSerializer):

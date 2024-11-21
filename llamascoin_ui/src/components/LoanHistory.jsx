@@ -87,14 +87,14 @@ export function LoanHistory() {
           <CardHeader floated={false} shadow={false} className="rounded-none">
             <div className="mb-4 flex flex-col justify-between gap-8 md:flex-row md:items-center">
               <div>
-                <Typography variant="h3" color="blue-gray">
+                <Typography className="mx-0" variant="h3" color="blue-gray">
                   Historial de prestamos
                 </Typography>
               </div>
               
             </div>
           </CardHeader>
-          <CardBody className="px-0">
+          <CardBody className="px-0 overflow-y-auto h-[36em]">
             {loanRows.length === 0 ? (
               <div className="text-center">
                 <Typography color="gray">No hay más registros</Typography>
