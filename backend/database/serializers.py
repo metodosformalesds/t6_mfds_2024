@@ -519,6 +519,14 @@ class LoanHistorySerializer(serializers.ModelSerializer):
     end_date = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
+    class Meta:
+        model = ActiveLoan
+        fields = [
+            'id', 'moneylender_name', 'borrower_name', 'amount', 'total_amount', 'payment_per_term', 'term_type',
+            'interest_rate', 'number_of_payments', 'on_time_payments', 'late_payments',
+            'start_date', 'end_date', 'status'
+        ]
+            
     def get_moneylender_name(self, obj):
         """
         Obtiene el nombre completo del prestamista.

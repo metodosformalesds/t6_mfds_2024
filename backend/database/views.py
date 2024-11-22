@@ -95,9 +95,15 @@ class LoanViewSet(viewsets.ModelViewSet):
             loans = Loan.objects.all()
             loans_serializer = BorrowerLoanSerializer(loans, many=True, context={'borrower_id': borrower.id})
             
+            # Filtrar los préstamos con estado "pending" o vacío
+            filtered_loans = [
+                loan for loan in loans_serializer.data 
+                if loan.get('request_status') in ["pending", ""]
+            ]
+            
             # Construir la respuesta con todos los préstamos
             response_data = {
-                'loans': loans_serializer.data
+                'loans': filtered_loans
             }
             return Response(response_data, status=HTTP_200_OK)
         
