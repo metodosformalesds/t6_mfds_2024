@@ -62,9 +62,15 @@ class MoneylenderLoansSerializer(serializers.ModelSerializer):
         ]
 
     def get_status(self, obj):
-        has_active_loan = ActiveLoan.objects.filter(loan=obj).exists()
-        return 'En préstamo' if has_active_loan else 'Disponible'
-
+        active_loan = ActiveLoan.objects.filter(loan=obj).first()
+        
+        if active_loan:
+            if active_loan.amount_to_pay == 0:
+                return 'Pagado'
+            return 'En préstamo'
+        
+        return 'Disponible'
+    
     def get_borrower(self, obj):
         active_loan = ActiveLoan.objects.filter(loan=obj).first()
         if active_loan:
