@@ -23,16 +23,21 @@ import { AbstractTable } from "./AbstractTable";
 import { apiHost } from "../utils/apiconfig";
 import { useAuth } from "../context/AuthContext";
 import { useFetch } from "../hooks/useFetch";
+import ActiveLoanCarousel from "./ActiveLoanCarousel";
+
+
+
 const MoneylenderDashboard = () => {
   const [open, setOpen] = useState(false);
   const [dashboardStats, setDashboardStats] = useState();
   const { authData } = useAuth();
   const { status, data } = useFetch(apiHost + `moneylender/`);
-
+  const [activeLoans, setActiveLoans] = useState();
   useEffect(() => {
     if (status === "success" && data) {
       if (data.stats) {
         setDashboardStats(data.stats);
+        setActiveLoans(data.stats.active_loans)
       }
     } else if (status === "error") {
       console.error("Error fetching data: ", error);
@@ -101,7 +106,9 @@ const MoneylenderDashboard = () => {
           </Card>
         </div>
 
-        <div className="flex-grow"></div>
+        <Card className="flex-grow p-6">
+          <ActiveLoanCarousel activeLoans={activeLoans}  ></ActiveLoanCarousel>
+        </Card>
       </div>
       <div />
 
@@ -113,3 +120,5 @@ const MoneylenderDashboard = () => {
 };
 
 export default MoneylenderDashboard;
+
+

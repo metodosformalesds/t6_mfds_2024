@@ -9,8 +9,8 @@ from services.paypal.paypal_webhook import PayPalWebhook
 from services.Moffin.Moffin import ObtenerSat
 from services.Moffin.Reporte_BdC import Reporte
 from rest_framework.routers import DefaultRouter
-from services.Correos.views import simple_mail 
-from services.Correos.views import html 
+#from services.Correos.views import simple_mail 
+#from services.Correos.views import html 
 db_routers = register_routers()
 
 filter_router = DefaultRouter()
@@ -33,7 +33,7 @@ urlpatterns = [
     path('request/', include(db_routers['request'].urls)),
     path('active_loan/', include(db_routers['active_loan'].urls)),
     path('payment/', include(db_routers['payment'].urls)),
-
+    path('historial/', include(db_routers['historial'].urls)),
     path('filter/', include(filter_router.urls)),
     
     path('validate_ine/', ImageNameExtractorView.as_view(), name='validate_ine'),
@@ -59,7 +59,7 @@ urlpatterns = [
 
 
     #Endopoints de correos
-    path('correos/',simple_mail, name='simple_mail'),
+    #path('correos/',simple_mail, name='simple_mail'),
 
 ]
 

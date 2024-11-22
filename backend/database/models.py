@@ -114,7 +114,7 @@ class CreditHistory(models.Model):
     
     #Datos generados con el historial del Presstatario en la plataforma
     credit_line = models.DecimalField(max_digits=10, decimal_places=2, default=1000.00) #Linea de cedito otorgada por LLamascoin
-    score_llamas = models.IntegerField(default=0)  # Puntaje de calificación del prestatario dentro de la aplicación
+    score_llamas = models.IntegerField(default=1000)  # Puntaje de calificación del prestatario dentro de la aplicación
     on_time_payments = models.IntegerField(default=0) #Pagos a tiempo
     late_payments = models.IntegerField(default=0)    #Pagos tardios
     late_payments_over_week = models.IntegerField(default=0)  # Pagos atrasados por más de 7 días
@@ -158,6 +158,50 @@ class CreditHistory(models.Model):
         self.late_payments = late_count
         self.late_payments_over_week = late_over_week_count
          
+        self.save()
+        self.adjust_credit_line()
+    
+    def adjust_credit_line(self):
+    
+        if self.score_llamas >= 2750:
+          self.credit_line = 15000
+        elif self.score_llamas >= 2500:
+          self.credit_line = 10000
+        elif self.score_llamas >= 2250:
+            self.credit_line = 7500
+        elif self.score_llamas >= 1750:
+            self.credit_line = 5500
+        elif self.score_llamas >= 1500:
+            self.credit_line = 3500
+        elif self.score_llamas >= 1200:
+            self.credit_line = 1500
+        else:
+           self.credit_line = 1000  # Línea de crédito base por defecto
+
+        self.save()
+        
+    def adjust_llamas_score(self, loan, paid_on_time):
+        if not paid_on_time:
+            return  # No se recompensa el llamascore si el pago no fue a tiempo
+    # Calcular la dificultad del préstamo usando la función existente
+        dificultad = self.difficulty
+    # Establecer un índice de dificultad favorable
+    # Mayor dificultad genera más incremento
+        if dificultad < 30:
+            incremento = 5
+        elif dificultad < 50:
+            incremento = 10
+        elif dificultad < 70:
+            incremento = 15
+        elif dificultad < 90:
+            incremento = 20
+        else:
+            incremento = 25
+    # Incrementar el llamascore
+        self.score_llamas += incremento
+    # Asegurarse de que el llamascore no exceda un límite (por ejemplo, 3000)
+        self.score_llamas = min(self.score_llamas, 3000)
+    # Guardar los cambios en el historial de crédito
         self.save()
     
 #Request model

@@ -9,12 +9,15 @@ from rest_framework.views import APIView
 from rest_framework import status
 from services.Correos.send_mail import EmailSender
 from services.paypal.serializers import  PayPalProductSerializer
-from database.models import Payments, Request, Transaction, Loan, Borrower, Moneylender, ActiveLoan
+from database.models import Payments, Request, Transaction, Loan, Borrower, Moneylender, ActiveLoan, CreditHistory
 from rest_framework.response import Response
 
 CLIENT_ID_PAYPAL = os.getenv('CLIENT_ID_PAYPAL', 'Default_Secret')
 SECRET_PAYPAL = os.getenv('SECRET_PAYPAL', '')
 def get_paypal_access_token():
+    """
+    This function calls the PayPal API and return an access token to manage future api calls
+    """
     client_id = CLIENT_ID_PAYPAL
     secret = SECRET_PAYPAL
     url = "https://api-m.sandbox.paypal.com/v1/oauth2/token"
@@ -26,7 +29,21 @@ def get_paypal_access_token():
     return response.json().get("access_token")
 
 class CreateCheckout(APIView):
+    
     def post(self, request):
+        """
+        Create a PayPal checkout order based on the user role (moneylender or borrower).
+
+        This endpoint processes the creation of a PayPal checkout order depending on the type of user:
+        - If the user is a moneylender, the checkout is created based on the loan amount and commissions.
+        - If the user is a borrower, the checkout is created with the payment per term of the active loan.
+        
+        The PayPal checkout order includes the calculated amount, which includes:
+        - A 4% fee for PayPal.
+        - A 1% fee for llamascoin.
+        - A 0.25  fee for the payout.
+
+        """
         print("Received request data:", request.data)
 
         loan_id = request.data.get("loan_id")  # Obtener el ID del préstamo de la solicitud
@@ -109,6 +126,21 @@ class CreateCheckout(APIView):
             return Response(response.json(), status=response.status_code)
         
 class CaptureCheckout(APIView):
+    """
+    Capture a PayPal checkout payment and process the associated loan.
+
+    This method handles the capture of a PayPal payment for a loan based on the provided order ID.
+    The user's role (either Moneylender or Borrower) is used to determine how the payment is processed.
+    
+    If the user is a moneylender, the payment is captured and sent to the borrower's PayPal account.
+    If the user is a borrower, the payment is applied to the borrower's active loan. If there are pending payments,
+    it updates the loan status and credit history, and sends a notification email to the user and recipient.
+
+    The method supports retrying the payout process up to three times in case of failure. If the payout fails after
+    three attempts, the captured payment is reversed.
+
+
+    """
     def post(self, request):
         order_id = request.data.get("orderID")
         loan_id = request.data.get("loan_id")  
@@ -218,7 +250,28 @@ class CaptureCheckout(APIView):
                             most_recent_payment.paid = True
                             most_recent_payment.paid_on_time = most_recent_payment.date_to_pay >= timezone.now().date()
                             most_recent_payment.save()
-
+                            
+                            borrower = request.user.borrower
+                            dificultad = active_loan.loan.difficulty
+                            if dificultad < 30:
+                                incremento = 5
+                            elif dificultad < 50:
+                                incremento = 10
+                            elif dificultad < 70:
+                                incremento = 15
+                            elif dificultad < 90:
+                                incremento = 20
+                            else:
+                                incremento = 25
+                            
+                            credit_history = CreditHistory.objects.get(borrower = borrower)
+                            credit_history.score_llamas += incremento
+                            credit_history.score_llamas = min(credit_history.score_llamas, 3000)
+                            credit_history.save()
+                            
+                            credit_history.calculate_llamas_history()
+                            
+                           
                             # Realizar la transacción
                             self.create_transaction(active_loan, amount, payout_info.get('batch_header', {}).get('payout_batch_id'), "payment")
 
@@ -284,6 +337,14 @@ class CaptureCheckout(APIView):
 
         
     def send_payout(self, recipient_email, amount, currency, loan, user):
+        """
+        Sends a payout to a recipient's PayPal account.
+
+        This method initiates a PayPal payout to the specified recipient based on the loan details and the amount
+        provided. It customizes the message based on the user's role (Moneylender or Borrower) and uses a unique 
+        batch ID to ensure each payout is tracked.
+
+        """
         access_token = get_paypal_access_token()
         url = "https://api-m.sandbox.paypal.com/v1/payments/payouts"
         headers = {
@@ -326,6 +387,12 @@ class CaptureCheckout(APIView):
             return {"error": response.json()}
         
     def refund_payment(self, order_id):
+        """
+        Refund a PayPal payment by the given order ID.
+
+        This method is used to reverse a captured payment from PayPal in case of transaction failures.
+
+        """
         access_token = get_paypal_access_token()
         refund_url = f"https://api-m.sandbox.paypal.com/v2/payments/captures/{order_id}/refund"
         response = requests.post(
@@ -338,7 +405,13 @@ class CaptureCheckout(APIView):
         return response.json() if response.status_code == 201 else {"error": response.json()}
         
     def create_transaction(self, active_loan, amount, paypal_transaction_id, transaction_type):
-        """Crea una transacción relacionada con el ActiveLoan."""
+        """
+        Creates a transaction record related to an ActiveLoan.
+
+        This method creates a new `Transaction` object in the database that logs the payment or payout made to or 
+        from an active loan.
+
+        """
         Transaction.objects.create(
             active_loan=active_loan,  # Relacionar la transacción con el ActiveLoan
             amount_paid=amount,
@@ -348,6 +421,13 @@ class CaptureCheckout(APIView):
         )
    
     def create_payment_schedule(self, active_loan):
+        """
+        Generates a payment schedule for an active loan.
+
+        This method creates scheduled payment entries based on the loan's term and number of payments. 
+        Each scheduled payment will have a due date based on the loan's start date and payment frequency.
+
+        """
         # Generate scheduled payments based on loan terms
         interval = {
             1: timedelta(weeks=1),  # Weekly
@@ -367,6 +447,10 @@ class CaptureCheckout(APIView):
 
         
 class CreatePayPalProductView(APIView):  
+    """
+    The next view is not longer used, was used to create suscriptions and a plan
+
+    """
     serializer_class = PayPalProductSerializer
     def post(self, request, *args, **kwargs):
         serializer = PayPalProductSerializer(data=request.data)
@@ -391,8 +475,11 @@ class CreatePayPalProductView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    
 class CreatePayPalBillingPlanView(APIView):
+    """
+    The next view is not longer used, was used to create suscriptions and a plan
+
+    """
 
     def post(self, request, *args, **kwargs):
         

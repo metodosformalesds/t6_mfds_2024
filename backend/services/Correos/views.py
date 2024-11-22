@@ -1,30 +1,33 @@
+
+import sys
+import os
 from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.core.mail import EmailMessage,get_connection,send_mass_mail
+from django.core.mail import EmailMessage, get_connection, send_mass_mail
 from django.utils.html import strip_tags
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
 
+from database.models import ActiveLoan, Borrower
 
-def simple_mail(request):
+# Obtener cierta información para los recordatorios
+def lista_pagos(request):
+    pagos = ActiveLoan.objects.values('Amount', 'AmountToPay', 'borrower_id')  # Obtiene los registros de la tabla ActiveLoans
+    return pagos
+
+def usuarios_pagos(borrower_id):
     try:
-        send_mail(
-            subject='Hola desde Django',
-            message='Este es un mensaje de prueba usando Mailtrap.',
-            from_email='u21210757@utp.edu.pe',
-            recipient_list=['u21210757@utp.edu.pe'],
-            fail_silently=False,  # Lanza excepciones si hay un error
-        )
-        return HttpResponse('Mensaje Enviado')
-    except Exception as e:
-        # Manejo de la excepción
-        return HttpResponse(f'Ocurrió un error al enviar el correo: {str(e)}')
+        # Obtiene el objeto Borrower basado en el ID proporcionado
+        borrower = Borrower.objects.get(id=borrower_id)
 
-def html(request):
-    subject='envio'
-    html_message=render_to_string('plantillas/envio.html',{'message':'Ghana'})
-    plain_message=strip_tags(html_message)
-    from_email='u21210757@utp.edu.pe'
-    to='a@gmail.com'
-    send_mail(subject,plain_message,from_email, [to],html_message=html_message)
-    return HttpResponse('Mensaje Enviado')
+        # Recupera los datos 
+        borrower_data = {
+            'Name_borrower': borrower.Name_borrower, 
+            'Email_borrower': borrower.Email_borrower,  
+        }
 
+        return borrower_data
+
+    except Borrower.DoesNotExist:
+        # Si el Borrower no existe, retorna un error
+        return {'error': 'Usuario no encontrado'}
