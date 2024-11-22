@@ -33,10 +33,14 @@ import { PayPalCheckout } from "./PayPalCheckOut";
 
 const TABLE_HEAD = [
   "Persona",
-  "Cantidad Total",
+  "Capital",
+  "Total",
+  "Pagos",
+  "Plazo",
   "Interés",
-  "Tipo de Plazo",
   "Número de Pagos",
+  "Pagos a tiempo",
+  "Pagos tardios",
   "Fecha de Inicio",
   "Estado",
 ];
@@ -153,6 +157,15 @@ export function LoanHistory() {
                             color="blue-gray"
                             className="font-normal"
                           >
+                            {loan.amount} MXN
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
                             {loan.total_amount} MXN
                           </Typography>
                         </td>
@@ -162,7 +175,7 @@ export function LoanHistory() {
                             color="blue-gray"
                             className="font-normal"
                           >
-                            {loan.interest_rate}%
+                            {loan.payment_per_term} MXM
                           </Typography>
                         </td>
                         <td className={classes}>
@@ -180,7 +193,34 @@ export function LoanHistory() {
                             color="blue-gray"
                             className="font-normal"
                           >
+                            {loan.interest_rate} %
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
                             {loan.number_of_payments}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {loan.on_time_payments}
+                          </Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography
+                            variant="small"
+                            color="blue-gray"
+                            className="font-normal"
+                          >
+                            {loan.late_payments}
                           </Typography>
                         </td>
                         <td className={classes}>
