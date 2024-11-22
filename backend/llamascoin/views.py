@@ -23,9 +23,42 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 #Vista para registrar el usuario
 class RegisterView(APIView):
+    """
+    Vista para registrar un usuario provisional en el sistema.
+
+    Esta vista maneja solicitudes POST para registrar nuevos usuarios. La información del usuario es validada
+    a través del `UserRegistrationSerializer`. Si los datos son válidos, se crea un usuario provisional en la 
+    base de datos con la contraseña hasheada.
+
+    Args:
+        APIView: Clase base para vistas basadas en API en Django Rest Framework.
+
+    Atributos:
+        serializer_class (class): Clase de serializador utilizada para validar los datos de entrada.
+        permission_classes (list): Lista de permisos que define quién puede acceder a esta vista.
+
+    Métodos:
+        post(request):
+            Maneja solicitudes POST para registrar un nuevo usuario.
+    """
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
     def post(self, request):
+        """
+        Maneja solicitudes POST para registrar un nuevo usuario provisional.
+
+        Procesa la información enviada por el cliente, la valida y crea un usuario provisional en la base 
+        de datos con los siguientes campos: `email`, `paypal_email`, `curp`, `account_type` y una contraseña 
+        hasheada. Si los datos son inválidos, responde con un error.
+
+        Args:
+            request (HttpRequest): La solicitud HTTP enviada al servidor.
+
+        Returns:
+            Response: 
+                - `HTTP_201_CREATED` si el usuario se registra correctamente.
+                - `HTTP_400_BAD_REQUEST` si los datos enviados son inválidos.
+        """
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             # Extraer los datos validados
@@ -51,9 +84,30 @@ class RegisterView(APIView):
                 {"error": "Datos inválidos", "details": serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
 #Vista para resivir form.procedded.succes y registar los datos del formulario
 @csrf_exempt
 def Formulario(request):
+    """
+    Procesa una solicitud POST para actualizar o crear información de usuario basado en el CURP.
+
+    Esta función permite actualizar o crear registros en los modelos `Moneylender` o `Borrower`, dependiendo
+    del tipo de cuenta del usuario asociado. Los datos son enviados en formato JSON en el cuerpo de la 
+    solicitud POST. La función realiza las siguientes acciones:
+
+    1. Valida que el método de la solicitud sea POST.
+    2. Convierte el cuerpo de la solicitud a un diccionario Python.
+    3. Busca al usuario en la base de datos utilizando el CURP proporcionado.
+    4. Si el usuario no existe, responde con un error.
+    5. Dependiendo del tipo de cuenta (`moneylender` o `borrower`), actualiza o crea registros en los modelos correspondientes.
+    6. Devuelve un estado exitoso o un mensaje de error en caso de fallo.
+
+    Args:
+        request (HttpRequest): La solicitud HTTP enviada al servidor.
+
+    Returns:
+        JsonResponse: Una respuesta JSON que indica el estado del procesamiento.
+    """
     if request.method == 'POST':
         try:
             # Convierte el cuerpo de la solicitud en un diccionario Python
@@ -122,6 +176,23 @@ def Formulario(request):
 #Vista para resivir la validacion de identidad y validar el usuario o eliminarlo
 @csrf_exempt
 def jumioValidation(request):
+    """
+    Valida la identidad de un usuario y actualiza o elimina su información basada en la respuesta de Jumio.
+
+    Esta función recibe una solicitud POST con datos en formato JSON, incluyendo el estado de validación y el CURP
+    del usuario. Dependiendo del estado, realiza las siguientes acciones:
+
+    - Si el estado es 'SUCCESS', marca al usuario como verificado (`is_verified = True`) y lo guarda.
+    - Si el estado es 'FAIL', elimina al usuario de la base de datos.
+    - Si el usuario es del tipo `borrower`, realiza una consulta a una API externa (Moffin) para generar un historial crediticio,
+      el cual se almacena en el modelo `CreditHistory`.
+
+    Args:
+        request (HttpRequest): La solicitud HTTP enviada al servidor.
+
+    Returns:
+        JsonResponse: Una respuesta JSON que indica el estado del procesamiento.
+    """
     if request.method == 'POST':
         try:
             # Convierte el cuerpo de la solicitud en un diccionario Python
@@ -243,10 +314,40 @@ class RequestViewSet(viewsets.ModelViewSet):
 
 
 class LoginView(APIView):
+    """
+    Vista para el inicio de sesión de usuarios.
+
+    Permite a los usuarios autenticarse en el sistema utilizando su correo electrónico y contraseña. 
+    Devuelve un token JWT con información adicional sobre el usuario si la autenticación es exitosa.
+
+    Atributos:
+        serializer_class (Serializer): Clase del serializador utilizada para validar y procesar los datos.
+        permission_classes (list): Lista de permisos necesarios para acceder a esta vista.
+    """
+
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Maneja solicitudes POST para iniciar sesión.
+
+        Este método:
+        - Busca al usuario utilizando el correo electrónico proporcionado en lugar del nombre de usuario.
+        - Verifica la contraseña del usuario.
+        - Comprueba si la cuenta del usuario está verificada.
+        - Si todo es válido, genera un token JWT con información adicional sobre el usuario, como su correo electrónico, rol y ID.
+        - Si la autenticación falla, devuelve un mensaje de error.
+
+        Args:
+            request (Request): Objeto de solicitud HTTP con los datos enviados.
+
+        Returns:
+            Response: Respuesta HTTP con uno de los siguientes estados:
+                - 200 OK: Cuando el inicio de sesión es exitoso, incluye el token JWT y datos del usuario.
+                - 400 Bad Request: Cuando la contraseña es incorrecta.
+                - 401 Unauthorized: Cuando el usuario no está verificado y se elimina su registro.
+        """
         # Buscar el usuario por correo electrónico en lugar de nombre de usuario
         user = get_object_or_404(User, email=request.data['username'])
         
@@ -279,89 +380,6 @@ class LoginView(APIView):
             'user_id': token_data['user_id'],
         }, status=status.HTTP_200_OK)
 
-'''
-class RegisterView(APIView):
-    serializer_class = UserRegistrationSerializer
-    #permission_classes = [IsAuthenticated]
-    def post(self, request):
-        user_serializer = UserRegistrationSerializer(data=request.data)
-
-        if user_serializer.is_valid():
-            validated_data = user_serializer.validated_data
-            
-           # Verificar si el usuario ya existe
-            if User.objects.filter(username=validated_data['username']).exists():
-                return Response({'username': 'Este nombre de usuario ya está en uso.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            if User.objects.filter(email=validated_data['email']).exists():
-                return Response({'email': 'Este correo electrónico ya está registrado.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Crear el objeto User
-            user = User.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                password=validated_data['password']
-            )
-            
-            # Manejar account_type
-            account_type = validated_data['account_type']
-            rfc = None
-            
-            if account_type == 'borrower':
-                borrower_data = request.data.get('borrower')
-                borrower_data['user'] = user.id
-                rfc = borrower_data.get('rfc')
-                borrower_serializer = BorrowerSerializer(data=borrower_data)
-                if borrower_serializer.is_valid():
-                    borrower_serializer.save(user=user)
-                else:
-                    user.delete()  # Eliminar el usuario si falla la creación del borrower
-                    return Response(borrower_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            elif account_type == 'moneylender':
-                moneylender_data = request.data.get('moneylender')
-                moneylender_data['user'] = user.id
-                rfc = moneylender_data.get('rfc') 
-                moneylender_serializer = MoneylenderSerializer(data=moneylender_data)
-                if moneylender_serializer.is_valid():
-                    moneylender_serializer.save(user=user)
-                else:
-                    user.delete()  # Eliminar el usuario si falla la creación del moneylender
-                    return Response(moneylender_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Borrar el usuario que se creó con el RFC en la validación de la INE
-            if rfc:  # Solo intentamos eliminar si se obtuvo un RFC
-                try:
-                    user_to_delete = User.objects.get(username=rfc) 
-                    user_to_delete.delete()
-                except User.DoesNotExist:
-                    pass
-                
-                
-             # Crear el token JWT
-            refresh = RefreshToken.for_user(user)
-
-            # Incluir datos adicionales en el token
-            token_data = {
-                'username': user.username,
-                'role': 'borrower' if account_type == 'borrower' else 'moneylender',
-                'user_id': user.id,
-            }
-                
-            refresh['username'] = token_data['username']
-            refresh['role'] = token_data['role']
-            refresh['user_id'] = token_data['user_id']
-
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'username': token_data['username'],
-                'role': token_data['role'],
-                'user_id': token_data['user_id'],
-            }, status=status.HTTP_201_CREATED)
-            
-
-        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-'''
 from datetime import datetime
 SECRET_API_KEY= "Llamascoin!098"
 
