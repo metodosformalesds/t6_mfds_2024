@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from database.models import Request, User, Moneylender, Borrower, CreditHistory
+from database.models import ActiveLoan, Payments, Request, User, Moneylender, Borrower, CreditHistory
 from services.filters import requestfilter
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
@@ -362,3 +362,94 @@ class RegisterView(APIView):
 
         return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 '''
+from datetime import datetime
+SECRET_API_KEY= "Llamascoin!098"
+
+
+class DailyCheckView(APIView):
+    """
+    View to perform a daily check of pending payments and send email notifications
+    to borrowers with upcoming or overdue payments.
+
+    This endpoint accepts a POST request and performs the following actions:
+    1. Validates the API key provided in the request body.
+    2. Retrieves all pending payments associated with active loans.
+    3. Calculates the number of days remaining until the payment due date for each pending loan.
+    4. Sends an email reminder based on the number of days remaining:
+        - 5, 3, 1, or 0 days before the due date sends a payment reminder.
+        - If the due date has passed (negative days), an overdue payment reminder is sent.
+    5. Returns a JSON response indicating the status of the process and the number of notifications sent.
+
+    Attributes:
+        None
+
+    Methods:
+        post(request, *args, **kwargs):
+            Handles POST requests to perform the payment check and send notifications.
+
+    """
+    def post(self, request, *args, **kwargs):
+        api_key = request.data.get("api_key")
+        if api_key != "your_api_key_here":
+            return JsonResponse({"error": "Invalid API key"}, status=403)
+
+        today = datetime.now().date()
+        notifications = []
+
+        # Optimización: Obtener todos los pagos de una vez
+        payments = Payments.objects.filter(paid=False).select_related('active_loan').order_by('date_to_pay')
+
+        # Iterar solo por préstamos activos
+        for active_loan in ActiveLoan.objects.all():
+            borrower_email = active_loan.borrower.user.email
+
+            # Filtrar pagos asociados al préstamo actual
+            loan_payments = payments.filter(active_loan=active_loan)
+
+            if loan_payments.exists():
+                # Tomamos el primer pago pendiente
+                first_pending_payment = loan_payments.first()
+                days_left = (first_pending_payment.date_to_pay - today).days
+
+                print(f"Processing ActiveLoan ID: {active_loan.id}")
+                print(f"Borrower Email: {borrower_email}")
+                print(f"First Pending Payment ID: {first_pending_payment.id}")
+                print(f"Date to Pay: {first_pending_payment.date_to_pay}, Paid: {first_pending_payment.paid}")
+                print(f"Days left for Payment ID {first_pending_payment.id}: {days_left}")
+
+                # Lógica para notificaciones y asignación de plantilla
+                if days_left in [5, 3, 1, 0]:
+                    # Usamos "recordatorio-pagar.html" para 5, 3, 1 y 0 días
+                    template_name = "recordatorio-pagar.html"
+                elif days_left == -1:
+                    # Usamos "recordatorio-pasado.html" para el caso de días pasados
+                    template_name = "recordatorio-pasado.html"
+                else:
+                    continue  # Si no es un día relevante, no se envía nada
+
+                # Añadir la notificación con los detalles correspondientes
+                notifications.append({
+                    "borrower_email": borrower_email,
+                    "days_left": days_left,
+                    "template": template_name,
+                    "context": {
+                        'nombre_prestamista': active_loan.borrower.name,
+                        'fecha_pago': first_pending_payment.date_to_pay,
+                    }
+                })
+
+        # Enviar notificaciones
+        for notification in notifications:
+            try:
+                email_sender = EmailSender(
+                    recipient=notification["borrower_email"],
+                    subject="Recordatorio de pago",
+                    template_name=notification["template"],
+                    context=notification["context"]
+                )
+                email_sender.send_email()
+                print(f"Email sent to {notification['borrower_email']} for {notification['days_left']} days left.")
+            except Exception as e:
+                print(f"Error sending email to {notification['borrower_email']}: {e}")
+
+        return JsonResponse({"status": "Daily check completed", "notifications_sent": len(notifications)})
