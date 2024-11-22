@@ -136,7 +136,7 @@ export function LoansTable() {
              
             </div>
           </CardHeader>
-          <CardBody className="px-0">
+          <CardBody className="px-0 overflow-y-auto h-[36em]">
           {loanRows.length === 0 ? (
             <div className="text-center"><Typography color="gray">No hay más registros</Typography></div>
           ):
