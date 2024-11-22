@@ -390,8 +390,8 @@ class DailyCheckView(APIView):
     """
     permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
-        api_key = request.data.get("api_key")
-        if api_key != "your_api_key_here":
+        api_key = request.data.get("key")
+        if api_key != SECRET_API_KEY:
             return JsonResponse({"error": "Invalid API key"}, status=403)
 
         today = datetime.now().date()
