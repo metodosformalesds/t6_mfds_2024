@@ -466,7 +466,7 @@ class MoneylenderDetailSerializer(serializers.ModelSerializer):
             int: El número total de préstamos activos.
         """
         # Contar el número de préstamos activos
-        return ActiveLoan.objects.filter(moneylender=obj).count()
+        return ActiveLoan.objects.filter(moneylender=obj).exclude(amount_to_pay=0).count()
 
     def get_total_pending_balance(self, obj):
         """
@@ -501,7 +501,7 @@ class MoneylenderDetailSerializer(serializers.ModelSerializer):
             list: Una lista de datos serializados de los préstamos activos.
         """
         # Serializar los préstamos activos relacionados con el Moneylender
-        active_loans = ActiveLoan.objects.filter(moneylender=obj)
+        active_loans = ActiveLoan.objects.filter(moneylender=obj).exclude(amount_to_pay=0)
         return ActiveLoansSerializer(active_loans, many=True).data 
     
     
