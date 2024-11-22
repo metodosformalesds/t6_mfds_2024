@@ -34,8 +34,10 @@ import { PayPalCheckout } from "./PayPalCheckOut";
 
 const TABLE_HEAD = [
   "Prestamista",
-  "Cantidad",
-  "Interés",
+  "Capital",
+  "Total a pagar",
+  "Pagos",
+  "Taza Interés",
   "Plazos",
   "Número de Pagos",
   "Fecha de Publicación",
@@ -191,7 +193,25 @@ export function LoansTable() {
                         color="blue-gray"
                         className="font-normal"
                       >
+                        {loan.amount} MXN
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
                         {loan.total_amount} MXN
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {loan.payment_per_term} MXN
                       </Typography>
                     </td>
                     <td className={classes}>

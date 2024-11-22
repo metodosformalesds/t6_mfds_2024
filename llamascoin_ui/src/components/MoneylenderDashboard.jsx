@@ -96,7 +96,7 @@ const MoneylenderDashboard = () => {
             <AbstractTable
               tableHeaders={{
                 "PayPal ID": "paypal_transaction_id",
-                Monto: "amount_paid",
+                "Monto sin comision" : "amount_paid",
                 "Fecha de Pago": "payment_date",
                 Persona: "person",
               }}

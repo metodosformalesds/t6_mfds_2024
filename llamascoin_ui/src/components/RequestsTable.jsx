@@ -21,7 +21,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { TERM_CHOICES } from "./LoansTable";
 
-const TABLE_HEAD = ["Prestatario", "Cantidad", "Plazos", "Acciones"];
+const TABLE_HEAD = ["Prestatario", "Capital + Interes", "Plazos", "Acciones"];
 
 export function RequestsTable() {
   const [requestRows, setRequestRows] = useState([]);

@@ -6,6 +6,26 @@ from django.contrib.auth.base_user import AbstractBaseUser
 
 #Modelo de usuario personalizado
 class User(AbstractBaseUser):
+    """
+    Modelo personalizado de usuario que extiende `AbstractBaseUser` para incluir campos específicos
+    como correo electrónico, CURP, tipo de cuenta, y estado de verificación.
+
+    Este modelo utiliza el correo electrónico como identificador único (`USERNAME_FIELD`) en lugar
+    del nombre de usuario estándar. Incluye un conjunto de campos requeridos que deben proporcionarse
+    al crear un usuario.
+
+    Campos:
+        email (EmailField): Dirección de correo electrónico única utilizada como identificador principal.
+        paypal_email (EmailField): Correo electrónico asociado a PayPal (opcional).
+        curp (CharField): Clave Única de Registro de Población (CURP), única por usuario.
+        account_type (CharField): Tipo de cuenta del usuario (por ejemplo, prestatario o prestamista).
+        is_verified (BooleanField): Indica si el usuario ha sido verificado en el sistema.
+
+    Atributos adicionales:
+        USERNAME_FIELD (str): Campo utilizado para la autenticación. En este caso, es "email".
+        REQUIRED_FIELDS (list): Lista de campos adicionales requeridos al crear un usuario
+                                (excluyendo el campo `USERNAME_FIELD` y la contraseña).
+    """
     email = models.EmailField(("Direccion de correo"), max_length=254,unique=True)
     paypal_email = models.EmailField(blank=True)
     curp = models.CharField(max_length=20, unique=True)
@@ -92,6 +112,55 @@ class InvoiceHistory(models.Model):
 
 
 class CreditHistory(models.Model):
+    """
+    Modelo que representa el historial crediticio de un prestatario, combinando datos obtenidos
+    del buró de crédito con información generada en la plataforma.
+
+    Este modelo guarda información clave sobre el comportamiento de pagos del prestatario,
+    estadísticas de sus préstamos y pagos, y métricas calculadas como el crédito disponible
+    y la probabilidad de pago a tiempo.
+
+    Campos:
+        id (AutoField): Clave primaria única.
+        borrower (ForeignKey): Relación con el prestatario asociado.
+        date_account_open (DateField): Fecha de apertura de la cuenta del prestatario.
+        
+        # Datos del buró de crédito
+        accounts_open (IntegerField): Total de cuentas abiertas registradas en el buró.
+        accounts_closed (IntegerField): Total de cuentas cerradas.
+        negative_accounts (IntegerField): Número de cuentas con comportamiento negativo.
+        num_mopX (IntegerField): Número de cuentas por tipo de retraso (donde X = 1, 2, ..., 99).
+        code_score (IntegerField): Código del modelo estadístico del buró.
+        val_score (IntegerField): Valor del score calculado por el buró.
+        check_date (DateField): Fecha de consulta al buró.
+
+        # Datos generados en la plataforma
+        credit_line (DecimalField): Línea de crédito asignada por la plataforma.
+        score_llamas (IntegerField): Puntaje crediticio asignado dentro de la plataforma.
+        on_time_payments (IntegerField): Cantidad de pagos realizados a tiempo.
+        late_payments (IntegerField): Cantidad de pagos realizados fuera de tiempo.
+        late_payments_over_week (IntegerField): Cantidad de pagos atrasados más de 7 días.
+        on_time_payment_probability (DecimalField): Probabilidad estimada de pagar a tiempo.
+        closed_loans (IntegerField): Cantidad de préstamos cerrados.
+        active_loans (IntegerField): Cantidad de préstamos activos.
+        available_credit (DecimalField): Crédito disponible para el prestatario.
+        outstanding_balance (DecimalField): Saldo total pendiente de los préstamos activos.
+
+    Métodos:
+        calculate_llamas_history:
+            Calcula y actualiza las estadísticas del historial de crédito, incluyendo:
+            - Pagos a tiempo y tardíos.
+            - Probabilidad de pago a tiempo.
+            - Créditos cerrados y activos.
+            - Línea de crédito disponible y saldo pendiente.
+
+        adjust_credit_line:
+            Ajusta la línea de crédito del prestatario en función de su `score_llamas`.
+
+        adjust_llamas_score:
+            Incrementa el `score_llamas` del prestatario basado en la dificultad del préstamo
+            y si el pago fue realizado a tiempo.
+    """
     id = models.AutoField(primary_key=True)  # Clave única 
     borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE,related_name='credit_history' )  # Relación con el prestatario
     date_account_open = models.DateField()  # Fecha de apertura de la cuenta
@@ -127,6 +196,13 @@ class CreditHistory(models.Model):
     outstanding_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0.0) #Saldo pendiente de pagar 
     
     def calculate_llamas_history(self):
+        """
+            Calcula y actualiza las estadísticas del historial de crédito, incluyendo:
+            - Pagos a tiempo y tardíos.
+            - Probabilidad de pago a tiempo.
+            - Créditos cerrados y activos.
+            - Línea de crédito disponible y saldo pendiente.
+        """
         payments = Payments.objects.filter(active_loan__borrower=self.borrower)
         on_time_count = payments.filter(paid=True, paid_on_time=True).count()
         late_count = payments.filter(paid=True, paid_on_time=False).count()
@@ -162,7 +238,9 @@ class CreditHistory(models.Model):
         self.adjust_credit_line()
     
     def adjust_credit_line(self):
-    
+        """
+        Ajusta la línea de crédito del prestatario según su `score_llamas`.
+        """
         if self.score_llamas >= 2750:
           self.credit_line = 15000
         elif self.score_llamas >= 2500:
@@ -181,6 +259,13 @@ class CreditHistory(models.Model):
         self.save()
         
     def adjust_llamas_score(self, loan, paid_on_time):
+        """
+        Ajusta el `score_llamas` del prestatario en función de la dificultad del préstamo y si el pago fue a tiempo.
+
+        Parámetros:
+            loan (Loan): Préstamo asociado al pago.
+            paid_on_time (bool): Indica si el pago fue realizado a tiempo.
+        """
         if not paid_on_time:
             return  # No se recompensa el llamascore si el pago no fue a tiempo
     # Calcular la dificultad del préstamo usando la función existente
@@ -220,6 +305,22 @@ class Request(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  # Fecha de creación del registro
 
 class ActiveLoan(models.Model):
+    """
+    Modelo que representa un préstamo activo dentro del sistema.
+
+    Este registro se genera automáticamente cuando un prestamista aprueba 
+    una solicitud de préstamo (Request). Contiene la información necesaria 
+    para rastrear el estado y el progreso del préstamo, incluyendo al prestatario, 
+    el prestamista, y los montos relacionados con la deuda.
+    Atributos:
+        id (int): ID único del préstamo activo.
+        loan (ForeignKey): Relación con el modelo `Loan` que representa el préstamo aprobado.
+        borrower (ForeignKey): Relación con el prestatario (`Borrower`) que recibe el préstamo.
+        moneylender (ForeignKey): Relación con el prestamista (`Moneylender`) que otorga el préstamo.
+        total_debt_paid (DecimalField): Cantidad total que el prestatario ha pagado hasta la fecha.
+        amount_to_pay (DecimalField): Cantidad pendiente de pago por parte del prestatario.
+        start_date (DateField): Fecha de inicio del préstamo, que indica cuándo el préstamo se activó.
+    """
     id = models.AutoField(primary_key=True)  # ID único del préstamo activo
     loan = models.ForeignKey(Loan, on_delete=models.CASCADE)  # Relación con el modelo Loans
     borrower = models.ForeignKey(Borrower, on_delete=models.CASCADE)  # Relación con el modelo Borrower (quien recibe el dinero)
@@ -227,9 +328,23 @@ class ActiveLoan(models.Model):
     total_debt_paid = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad pagada por el prestatario
     amount_to_pay = models.DecimalField(max_digits=10, decimal_places=2)  # Cantidad pendiente de pagar
     start_date = models.DateField(null=True) #Fecha de inicio del prestamo 
-    #payment_by_term = models.DecimalField(max_digits=10, decimal_places=2) #Monto que se pagara por mes
 
 class Payments(models.Model):
+    """
+    Modelo que representa los pagos asociados a un préstamo activo.
+
+    Este modelo almacena la información sobre cada pago programado para un préstamo activo. 
+    Incluye detalles como la fecha límite de pago, el estado del pago, y si el pago fue realizado 
+    dentro del plazo establecido.
+
+    Atributos:
+        id (int): ID único del pago.
+        active_loan (ForeignKey): Relación con el modelo `ActiveLoan` al que pertenece el pago.
+        number_of_pay (int): Número que identifica el orden del pago dentro del calendario de pagos del préstamo.
+        date_to_pay (DateField): Fecha límite en la que debe realizarse el pago.
+        paid (BooleanField): Indica si el pago ya ha sido realizado (`True`) o no (`False`). Puede ser `null` si no se ha actualizado.
+        paid_on_time (BooleanField): Indica si el pago fue realizado dentro de la fecha límite (`True`) o fuera de ella (`False`). Puede ser `null` si no se ha actualizado.
+    """
     id = models.AutoField(primary_key=True)
     active_loan = models.ForeignKey(ActiveLoan, on_delete=models.CASCADE, related_name='payments')
     number_of_pay = models.IntegerField() #Numero que identifica el numero de pago
