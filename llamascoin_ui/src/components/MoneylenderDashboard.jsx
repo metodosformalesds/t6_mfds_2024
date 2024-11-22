@@ -65,7 +65,7 @@ const MoneylenderDashboard = () => {
         />
 
         <CardDashboard
-          title="Dinero Prestado"
+          title="Dinero Prestado acomulado"
           icon={UserGroupIcon}
           iconColor="text-blue-500"
           value={`$${dashboardStats ? dashboardStats.total_loans : 0}`}
