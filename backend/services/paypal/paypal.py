@@ -298,7 +298,7 @@ class CaptureCheckout(APIView):
                             context = {
                                 'nombre_prestatario': request.user.borrower.first_name,
                                 'nombre_prestamista': recipient.first_name,
-                                'monto_pagado': amount,
+                                'monto_pago': amount,
                                 'fecha_pago': timezone.now(),
                             }
                         try:
