@@ -390,8 +390,8 @@ class DailyCheckView(APIView):
     """
     def post(self, request, *args, **kwargs):
         api_key = request.data.get("api_key")
-        # if api_key != "your_api_key_here":
-        #     return JsonResponse({"error": "Invalid API key"}, status=403)
+        if api_key != "your_api_key_here":
+            return JsonResponse({"error": "Invalid API key"}, status=403)
 
         today = datetime.now().date()
         notifications = []
