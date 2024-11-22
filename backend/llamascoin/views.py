@@ -388,6 +388,7 @@ class DailyCheckView(APIView):
             Handles POST requests to perform the payment check and send notifications.
 
     """
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         api_key = request.data.get("api_key")
         if api_key != "your_api_key_here":
