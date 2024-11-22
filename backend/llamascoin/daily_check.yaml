@@ -1,0 +1,19 @@
+name: Daily API Call
+
+on:
+  schedule:
+    # Runs daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Allows manual triggering via the GitHub UI
+
+jobs:
+  api-call-job:
+    runs-on: ubuntu-latest  # Runs on the latest Ubuntu environment
+
+    steps:
+    - name: Make API Call
+      run: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -d '{"key": "Llamascoin!098"}' \
+          https://llamascoin-api.xyz/daily_check  # Your API endpoint

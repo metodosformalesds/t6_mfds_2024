@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
-from llamascoin.views import RegisterView, LoginView, Formulario, jumioValidation
+from llamascoin.views import RegisterView, LoginView, Formulario, jumioValidation, DailyCheckView
 from database.views import register_routers, RequestViewSet
 from services.validation import ImageNameExtractorView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -57,6 +57,7 @@ urlpatterns = [
     path('Moffin/SAT/', ObtenerSat.as_view(), name='obtener-SAT'),
     path('Moffin/Reporte/', Reporte.as_view(), name='Reporte_BdC' ),
 
+    path('daily_check/', DailyCheckView.as_view(), name='daily_check' )
 
     #Endopoints de correos
     #path('correos/',simple_mail, name='simple_mail'),
