@@ -452,7 +452,7 @@ class DailyCheckView(APIView):
                     "days_left": days_left,
                     "template": template_name,
                     "context": {
-                        'nombre_prestamista': active_loan.borrower.name,
+                        'nombre_prestamista': active_loan.borrower.first_name,
                         'fecha_pago': first_pending_payment.date_to_pay,
                     }
                 })

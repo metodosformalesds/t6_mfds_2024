@@ -127,8 +127,8 @@ export function MoneylenderLoans() {
 
                 let statusColor = "blue";
                 if (loan.status === "En préstamo") statusColor = "amber";
-                else if (loan.status === "Rechazado") statusColor = "red";
-                else if (loan.status === "Disponible") statusColor = "green";
+                else if (loan.status === "Pagado") statusColor = "green";
+                else if (loan.status === "Disponible") statusColor = "blue";
 
                 return (
                   <tr key={loan.id}>
