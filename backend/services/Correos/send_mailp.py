@@ -1,7 +1,20 @@
 import os
 import django
 import sys
+"""
+Envia datos de envío mediante consola para realizar pruebas
+        Parámetros:
+            recipien: Recibe el correo que recibirá el mensaje
+            Subject:  Recibe el asunto del mensaje
+            Template_name: Recibe la plantilla que se va a utilizar
+            Context: Brinda los parametros adicioanles que se usarán en la plantilla
 
+        Proceso:
+            - Se ejecuta mediante consola para realizar pruebas de plantillas, 
+               este recibe el correo del destinatario, el asunto, el template y el nombre del usuario para utilizarlo en la plantilla de bienvenida.
+        Retorna:    
+            Un mensaje en consola de que el mensaje se envió de forma exitosa.
+"""
 # Obtén la ruta absoluta del directorio raíz del proyecto
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(BASE_DIR)

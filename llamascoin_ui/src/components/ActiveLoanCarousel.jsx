@@ -74,7 +74,7 @@ const ActiveLoanCarousel = ({ activeLoans }) => {
               {/* Loan Info */}
               <div className="mt-4 text-center">
                 <Typography variant="h6" component="p" color="textPrimary">
-                  Monto total:{' '}
+                  Capital :{' '}
                   <Typography component="span" color="success.main">
                     ${loan.loan_amount}
                   </Typography>

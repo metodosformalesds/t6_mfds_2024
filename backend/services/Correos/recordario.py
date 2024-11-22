@@ -4,6 +4,20 @@ from send_mail import EmailSender
 import os
 import sys
 import django
+"""
+Envia recordatorios de pago 5 días antes a los usuarios que aun no hayan realizado el pago de su prestamo
+        Parámetros:
+            recipien: Recibe el correo que recibirá el mensaje
+            Subject:  Recibe el asunto del mensaje
+            Template_name: Recibe la plantilla que se va a utilizar
+            Context: Brinda los parametros adicioanles que se usarán en la plantilla
+
+        Proceso:
+            - Se ejecuta mediante github actions o consola para realizar pruebas, esre recibe la fecha de pago y despues si esta es iguala  5 dias antes de pago
+              envía busca el correo y nombre del usuario. Despues, envia la plantilla de recordatorio de pago
+        Retorna:    
+            Un mensaje en consola de que el mensaje se envió de forma exitosa.
+"""
 # Obtén la ruta absoluta del directorio raíz del proyecto
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(BASE_DIR)

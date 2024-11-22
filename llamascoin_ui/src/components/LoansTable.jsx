@@ -34,8 +34,10 @@ import { PayPalCheckout } from "./PayPalCheckOut";
 
 const TABLE_HEAD = [
   "Prestamista",
-  "Cantidad",
-  "Interés",
+  "Capital",
+  "Total a pagar",
+  "Pagos",
+  "Taza Interés",
   "Plazos",
   "Número de Pagos",
   "Fecha de Publicación",
@@ -134,7 +136,7 @@ export function LoansTable() {
              
             </div>
           </CardHeader>
-          <CardBody className="px-0">
+          <CardBody className="px-0 overflow-y-auto h-[36em]">
           {loanRows.length === 0 ? (
             <div className="text-center"><Typography color="gray">No hay más registros</Typography></div>
           ):
@@ -191,7 +193,25 @@ export function LoansTable() {
                         color="blue-gray"
                         className="font-normal"
                       >
+                        {loan.amount} MXN
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
                         {loan.total_amount} MXN
+                      </Typography>
+                    </td>
+                    <td className={classes}>
+                      <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                      >
+                        {loan.payment_per_term} MXN
                       </Typography>
                     </td>
                     <td className={classes}>

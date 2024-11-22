@@ -95,9 +95,15 @@ class LoanViewSet(viewsets.ModelViewSet):
             loans = Loan.objects.all()
             loans_serializer = BorrowerLoanSerializer(loans, many=True, context={'borrower_id': borrower.id})
             
+            # Filtrar los préstamos con estado "pending" o vacío
+            filtered_loans = [
+                loan for loan in loans_serializer.data 
+                if loan.get('request_status') in ["pending", ""]
+            ]
+            
             # Construir la respuesta con todos los préstamos
             response_data = {
-                'loans': loans_serializer.data
+                'loans': filtered_loans
             }
             return Response(response_data, status=HTTP_200_OK)
         
@@ -490,9 +496,30 @@ class ActiveLoanViewSet(viewsets.ModelViewSet):
     serializer_class = ActiveLoanSerializer
     
 class LoanHistoryListView(viewsets.ModelViewSet):
+    """
+    Viewset para listar el historial de préstamos activos según el rol del usuario autenticado.
+
+    Este ViewSet permite recuperar los préstamos activos asociados a un usuario
+    basado en su rol dentro del sistema. Si el usuario es un `Moneylender`, se
+    devolverán los préstamos creados por él. Si el usuario es un `Borrower`, se
+    devolverán los préstamos donde él es el prestatario. En caso de que el usuario
+    no tenga ninguno de estos roles, el resultado será un queryset vacío.
+    """
     serializer_class = LoanHistorySerializer
 
     def get_queryset(self):
+        """
+        Obtiene el queryset basado en el rol del usuario autenticado.
+
+        Returns:
+            QuerySet: 
+                - Si el usuario es un `Moneylender`, devuelve los préstamos activos creados por él.
+                - Si el usuario es un `Borrower`, devuelve los préstamos activos donde es el prestatario.
+                - Si el usuario no tiene rol asociado, devuelve un queryset vacío.
+
+        Raises:
+            AttributeError: Si el modelo asociado no tiene las relaciones esperadas con el usuario.
+        """
         user = self.request.user  # Usuario autenticado
 
         # Verifica si el usuario es un Moneylender
