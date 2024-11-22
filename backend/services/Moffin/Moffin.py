@@ -6,6 +6,23 @@ from services.Moffin.validation import UploadScore
 from database.models import Borrower
 from rest_framework.response import Response
 
+"""
+Recibe datos mediante el metodo post, los valida mediante el serializaer 
+"upload score" y realiza la soliciutd externa para recibir la inf del ususario.
+        Parámetros:
+            se envian los datos al cuerpo del post, y se validan con el serializer
+            'upload score'. Del msimo modo, 'autorization' recibe el token de autenticación
+            y 'Content-Tpe' envía los datos en formato JSON.
+        Proceso:
+            -Validación de datos
+            -Preparación de la solicitud
+            -Solicitud al API externa
+            -Devuelve los datos a la vista
+            -Respuesta en caso de error
+
+"""
+
+
 # Obtén el token
 api_token = os.getenv("ACCESS_TOKEN_MOFFIN")
 
@@ -17,10 +34,10 @@ class ObtenerSat(APIView):
         serializer = UploadScore(data=request.data)
         # Verificar si los datos son válidos
         if serializer.is_valid():
-            # Obtener los datos validados
+            # Obtiene los datos validados
             data = serializer.validated_data
             
-            # Preparar la solicitud a la API externa
+            # Prepara la solicitud a la API externa
             url = "https://sandbox.moffin.mx/api/v1/query/prospector_pf"
             headers = {
                 'Authorization': f'Bearer {api_token}',  
@@ -28,11 +45,11 @@ class ObtenerSat(APIView):
             }
 
             try:
-                # Realizar la solicitud POST a la API externa
+                # Realiza la solicitud POST a la API externa
                 api_response = requests.post(url, json=data, headers=headers)
                 api_response.raise_for_status()  # Lanza un error si la respuesta fue un error HTTP
 
-                # Devolver la respuesta de la API externa como respuesta en la vista
+                # Devuelve la respuesta de la API externa como respuesta en la vista
                 return Response(api_response.json(), status=status.HTTP_200_OK)
 
             except requests.exceptions.RequestException as e:
